@@ -1,7 +1,7 @@
 #include "cubic_spline/cubic_spline.h"
-#include "spdlog/spdlog.h"
-#include "spdlog/fmt/ranges.h"
 #include "spdlog/fmt/ostr.h"
+#include "spdlog/fmt/ranges.h"
+#include "spdlog/spdlog.h"
 
 namespace Algorithm {
 
@@ -37,7 +37,7 @@ int CubicSplineOperator::setSamplePoints(const std::vector<double> &val_x,
   return 0;
 }
 
-int CubicSplineOperator::cubicSplineNatural(){
+int CubicSplineOperator::cubicSplineNatural() {
   int n = input_points_.size();
   a_ = cv::Mat::zeros(n - 1, 1, CV_32FC1);
   b_ = cv::Mat::zeros(n - 1, 1, CV_32FC1);
@@ -60,7 +60,7 @@ int CubicSplineOperator::cubicSplineNatural(){
   H.at<float>(0, 0) = 1;
   H.at<float>(n - 1, n - 1) = 1;
 
-  for (int i = 1; i <= n - 2; i++){
+  for (int i = 1; i <= n - 2; i++) {
     H.at<float>(i, i - 1) = dx.at<float>(i - 1, 0);
     H.at<float>(i, i) = 2 * (dx.at<float>(i - 1, 0) + dx.at<float>(i, 0));
     H.at<float>(i, i + 1) = dx.at<float>(i, 0);
@@ -138,7 +138,7 @@ int CubicSplineOperator::cubicSplineFit(const std::vector<double> &vals,
     predicated_vals[i] = yn;
   }
 
-  spdlog::debug("predicated vals: {}",predicated_vals);
+  spdlog::debug("predicated vals: {}", predicated_vals);
   return 0;
 }
 
