@@ -23,6 +23,9 @@ public:
   int solve();
 
 private:
+  void estimate(const cv::Mat &project_mat, Eigen::Matrix3d &k_mat,
+                Eigen::Matrix3d &r_mat, Eigen::MatrixXd &t_mat);
+
   std::vector<cv::Point3d> world_points_;
 
   std::vector<cv::Point2d> image_points_;

@@ -1,7 +1,5 @@
 #include "cubic_spline/cubic_spline.h"
-#include "spdlog/fmt/ostr.h"
-#include "spdlog/fmt/ranges.h"
-#include "spdlog/spdlog.h"
+#include <glog/logging.h>
 
 namespace Algorithm {
 
@@ -16,13 +14,13 @@ int CubicSplineOperator::setSamplePoints(const std::vector<double> &val_x,
                                          const std::vector<double> &val_y) {
   input_points_.clear();
   if (val_x.size() != val_y.size()) {
-    spdlog::error("failed to sizes aligned");
+    LOG(ERROR) << "failed to sizes aligned";
     return -1;
   }
 
   input_points_.resize(val_x.size());
   if (val_x.size() <= 3) {
-    spdlog::error("failed to set points, need more than 3 points");
+    LOG(ERROR) << "failed to set points, need more than 3 points";
     return -1;
   }
 
@@ -102,7 +100,7 @@ void CubicSplineOperator::estimateCoefMatrix(const cv::Mat &H, const cv::Mat &D,
         (m.at<float>(i + 1, 0) - m.at<float>(i, 0)) / (6 * dx.at<float>(i, 0));
   }
 
-  spdlog::debug("estimate coefficient finish");
+  DLOG(INFO) << "estimate coefficient finish";
 }
 
 int CubicSplineOperator::cubicSplineFit(const std::vector<double> &vals,
@@ -136,9 +134,9 @@ int CubicSplineOperator::cubicSplineFit(const std::vector<double> &vals,
                    (vals[i] - input_points_[index].x);
 
     predicated_vals[i] = yn;
+    LOG(INFO) << "predicated vals: " << predicated_vals[i];
   }
 
-  spdlog::debug("predicated vals: {}", predicated_vals);
   return 0;
 }
 

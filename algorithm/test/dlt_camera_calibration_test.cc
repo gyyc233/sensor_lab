@@ -1,12 +1,10 @@
 #include "dlt_camera_calibration/dlt_camera_calibration.h"
-#include "spdlog/spdlog.h"
+#include <glog/logging.h>
 #include <memory>
 
 using namespace Algorithm;
 
 int main() {
-  spdlog::set_level(spdlog::level::debug);
-
   std::vector<cv::Point3d> points_3d;
   std::vector<cv::Point2d> points_2d = {
       {140, 285},   {908, 338},   {1655, 391},  {2450, 431},  {3223, 465},
