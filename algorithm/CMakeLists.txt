@@ -16,8 +16,11 @@ target_link_libraries(algorithm ${OpenCV_LIBS} glog::glog)
 
 add_executable(cubic_spline_test test/cubic_spline_test.cc)
 add_executable(dlt_camera_calibration_test test/dlt_camera_calibration_test.cc)
+add_executable(moving_lest_squares_test test/moving_lest_squares_test.cc)
+
 target_link_libraries(cubic_spline_test algorithm glog::glog)
 target_link_libraries(dlt_camera_calibration_test algorithm glog::glog)
+target_link_libraries(moving_lest_squares_test algorithm glog::glog)
 
 # INSTALL
 install(

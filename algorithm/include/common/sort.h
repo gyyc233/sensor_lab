@@ -27,4 +27,3 @@ void quick_sort_recursive(unsigned int arr[], int start, int end) {
 void quick_sort(unsigned int *arr, int len) {
   quick_sort_recursive(arr, 0, len - 1);
 }
-
