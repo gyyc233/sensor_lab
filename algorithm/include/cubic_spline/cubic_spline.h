@@ -8,7 +8,7 @@ class CubicSplineOperator {
 public:
   CubicSplineOperator();
 
-  ~CubicSplineOperator();
+  virtual ~CubicSplineOperator();
 
   /// @brief set sample x vals and y vals
   /// @param val_x sample x vals

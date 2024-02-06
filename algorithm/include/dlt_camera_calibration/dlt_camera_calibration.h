@@ -12,7 +12,7 @@ class DltCameraCalibrationOperator {
 public:
   DltCameraCalibrationOperator();
 
-  ~DltCameraCalibrationOperator();
+  virtual ~DltCameraCalibrationOperator();
 
   void setWorldPoints(const std::vector<cv::Point3d> &world_points);
 
