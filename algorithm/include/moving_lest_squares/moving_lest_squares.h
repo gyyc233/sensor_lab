@@ -14,102 +14,81 @@ namespace Algorithm {
 
 class MLS {
 public:
-  MLS() = default;
+  MLS();
+
+  virtual ~MLS();
+
+  /// @brief MLS fit
+  /// @param x input value
+  /// @return fitted value
   virtual double fit(Eigen::VectorXd x);
 
-protected:
-  // default [1, x, x^2]
-  virtual Eigen::VectorXd basis(const Eigen::VectorXd xi) {
-    Eigen::VectorXd bx(m);
-    bx(0) = 1;
-    bx(1) = xi(0);
-    bx(2) = xi(0) * xi(0);
-    return bx;
-  }
+  /// @brief built basis
+  /// @param xi basis p(x)=[1,x,x*x]
+  /// @return basis
+  virtual Eigen::VectorXd basis(const Eigen::VectorXd xi);
 
-  // 权函数
-  virtual double wf(double d, double h) {
-    // Gaussian
-    static double h2 = 1.0 / (h * h);
-    return std::exp(-d * d * h2);
-
-    // Wendland
-    // static double inv_h = 1.0 / h;
-    // return std::pow(1 - d * inv_h, 4) * (4.0 * d * inv_h + 1);
-
-    // return 1.0 / (d * d + 0.0001);
-  }
+  /// @brief calculate gaussian kernel weight function, expected value: 0,
+  /// variance value: h
+  /// @param d x value
+  /// @param h variance
+  /// @return weight function value
+  virtual double weightFunction(double d, double h);
 
 public:
-  std::vector<Eigen::VectorXd> X;
-  Eigen::VectorXd Y;
+  std::vector<Eigen::VectorXd> X_;
+  Eigen::VectorXd Y_;
 
 public:
   // h is a spacing parameter which can be used to smooth out
   // small features in the data, see[Levin 2003; Alexa et al. 2003].
-  double h = 0.1;
+  // h 是一个间距参数，可用于平滑数据中的小特征
+  double h_ = 0.1;
 
-  // d spatial dimensions
-  int d = 1;
+  // d spatial dimensions 空间尺寸,一维是1,二维是2,三维3
+  int d_ = 1;
 
   // The number of terms in a polynomial
   // In paper <<An As-Short-As-Possible Introduction to the Least Squares,
   // Weighted Least Squaresand Moving Least Squares Methods for Scattered Data
   // Approximationand Interpolation>> m represents total degree
-  int m = 3;
+  // 基函数多项式的项数
+  int m_ = 3;
 };
 
 //--------------------------------------------------------------------------------------------------
 //
-// Wrapper of MLS
+// Wrapper of MLS 包装器
 //
 //--------------------------------------------------------------------------------------------------
+
+/// @brief 曲面MLS拟合
 class MLSCurvedSurface : public MLS {
 public:
-  MLSCurvedSurface() : MLS() {
-    d = 2;
-    m = 6;
-  }
+  MLSCurvedSurface();
 
-protected:
-  Eigen::VectorXd basis(const Eigen::VectorXd xi) override {
-    Eigen::VectorXd bx(m);
-    bx(0) = 1;
-    bx(1) = xi(0);
-    bx(2) = xi(1);
-    bx(3) = xi(0) * xi(0);
-    bx(4) = xi(0) * xi(1);
-    bx(5) = xi(1) * xi(1);
-    return bx;
-  }
+  ~MLSCurvedSurface();
+
+  /// @brief built basis
+  /// @param xi basis p(x)=[1,x,y,xy,x*x,y*y]
+  /// @return basis
+  Eigen::VectorXd basis(const Eigen::VectorXd xi) override;
 };
 
+/// @brief 曲线MSL拟合
 class MLSCurvedLine : public MLS {
 public:
-  void SetX(std::vector<double> data_x) {
-    X = std::vector<Eigen::VectorXd>(data_x.size(), Eigen::VectorXd{});
-    for (int i = 0; i < data_x.size(); i++) {
-      Eigen::VectorXd x(1);
-      x(0) = data_x[i];
-      X[i] = x;
-      std::cout << i << " x points:\n" << X[i] << std::endl;
-    }
-  }
+  MLSCurvedLine();
 
-  void SetY(std::vector<double> data_y) {
-    Y = Eigen::VectorXd(data_y.size());
-    for (int i = 0; i < data_y.size(); i++) {
-      Y(i) = data_y[i];
-    }
+  ~MLSCurvedLine();
 
-    std::cout << "y points:\n" << Y << std::endl;
-  }
+  /// @brief
+  /// @param data_x
+  void setX(std::vector<double> data_x);
 
-  double fit(double _x) {
-    Eigen::VectorXd x(1);
-    x(0) = _x;
-    return MLS::fit(x);
-  }
+  void setY(std::vector<double> data_y);
+
+  double fit(double input_value);
 };
 
 void TestFitSurface();

@@ -12,12 +12,12 @@ int main() {
 
   std::shared_ptr<MLSCurvedLine> mls_line_ptr =
       std::make_shared<MLSCurvedLine>();
-  mls_line_ptr->SetX(x_points);
-  mls_line_ptr->SetY(y_points);
+  mls_line_ptr->setX(x_points);
+  mls_line_ptr->setY(y_points);
 
+  std::cout << "type x value..." << std::endl;
   std::string nums;
   std::cin >> nums;
-
   std::cout << mls_line_ptr->fit(std::stod(nums)) << std::endl;
 
   return 0;
