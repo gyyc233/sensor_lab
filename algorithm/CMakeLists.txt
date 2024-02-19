@@ -14,17 +14,52 @@ add_library(algorithm STATIC ${srcs})
 target_include_directories(algorithm PUBLIC include)
 target_link_libraries(algorithm ${OpenCV_LIBS} glog::glog)
 
+
+# ================================================================
+# add matplotlib-cpp
+add_library(matplotlib_cpp INTERFACE)
+target_include_directories(matplotlib_cpp INTERFACE include/common)
+target_compile_features(matplotlib_cpp INTERFACE
+  cxx_std_11
+)
+# TODO: Use `Development.Embed` component when requiring cmake >= 3.18
+find_package(Python3 COMPONENTS Interpreter Development REQUIRED)
+target_link_libraries(matplotlib_cpp INTERFACE
+  Python3::Python
+  Python3::Module
+)
+find_package(Python3 COMPONENTS NumPy)
+if(Python3_NumPy_FOUND)
+  target_link_libraries(matplotlib_cpp INTERFACE
+    Python3::NumPy
+  )
+else()
+  target_compile_definitions(matplotlib_cpp INTERFACE WITHOUT_NUMPY)
+endif()
+install(
+  TARGETS matplotlib_cpp
+  EXPORT install_targets
+)
+# ================================================================
+
+
 add_executable(cubic_spline_test test/cubic_spline_test.cc)
 add_executable(dlt_camera_calibration_test test/dlt_camera_calibration_test.cc)
 add_executable(moving_lest_squares_test test/moving_lest_squares_test.cc)
 
 target_link_libraries(cubic_spline_test algorithm glog::glog)
 target_link_libraries(dlt_camera_calibration_test algorithm glog::glog)
-target_link_libraries(moving_lest_squares_test algorithm glog::glog)
+target_link_libraries(moving_lest_squares_test algorithm glog::glog matplotlib_cpp)
 
 # INSTALL
 install(
-  TARGETS cubic_spline_test dlt_camera_calibration_test algorithm
+  TARGETS cubic_spline_test dlt_camera_calibration_test moving_lest_squares_test algorithm
   RUNTIME DESTINATION ${PROJECT_SOURCE_DIR}/build/install
   LIBRARY DESTINATION ${PROJECT_SOURCE_DIR}/build/install
   ARCHIVE DESTINATION ${PROJECT_SOURCE_DIR}/build/install)
+
+# Install headers
+install(FILES
+  "${PROJECT_SOURCE_DIR}/algorithm/include/common/matplotlibcpp.h"
+  DESTINATION ${PROJECT_SOURCE_DIR}/build/install)
+  

@@ -1,8 +1,11 @@
+#include "matplotlibcpp.h"
 #include "moving_lest_squares/moving_lest_squares.h"
 #include <glog/logging.h>
 #include <memory>
 
 using namespace Algorithm;
+
+namespace plt = matplotlibcpp;
 
 int main() {
 
@@ -15,10 +18,16 @@ int main() {
   mls_line_ptr->setX(x_points);
   mls_line_ptr->setY(y_points);
 
-  std::cout << "type x value..." << std::endl;
-  std::string nums;
-  std::cin >> nums;
-  std::cout << mls_line_ptr->fit(std::stod(nums)) << std::endl;
+  std::vector<double> test_x;
+  std::vector<double> test_y;
+
+  for (double i = 0; i <= 1.0; i += 0.01) {
+    test_x.push_back(i);
+    test_y.push_back(mls_line_ptr->fit(i));
+  }
+
+  plt::plot(test_x, test_y);
+  plt::show();
 
   return 0;
 }
