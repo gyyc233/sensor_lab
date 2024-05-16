@@ -15,3 +15,8 @@ add_subdirectory(algorithm)
 # add_subdirectory(camera_calibration_dlt)
 # add_subdirectory(backlight_adjustment)
 # add_subdirectory(correctuion_2d_deformation)
+
+# copy floder to install path
+set(build_data_include ${CMAKE_CURRENT_SOURCE_DIR}/build)
+execute_process( COMMAND ${CMAKE_COMMAND} -E copy_directory  ${CMAKE_CURRENT_SOURCE_DIR}/data ${build_data_include}/data)
+execute_process( COMMAND ${CMAKE_COMMAND} -E copy_directory  ${CMAKE_CURRENT_SOURCE_DIR}/algorithm/include/common ${build_data_include}/algorithm/include/common)

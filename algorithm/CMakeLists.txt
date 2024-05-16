@@ -46,10 +46,12 @@ install(
 add_executable(cubic_spline_test test/cubic_spline_test.cc)
 add_executable(dlt_camera_calibration_test test/dlt_camera_calibration_test.cc)
 add_executable(moving_lest_squares_test test/moving_lest_squares_test.cc)
+add_executable(undistortion test/undistortion_test.cc)
 
 target_link_libraries(cubic_spline_test algorithm glog::glog)
 target_link_libraries(dlt_camera_calibration_test algorithm glog::glog)
 target_link_libraries(moving_lest_squares_test algorithm glog::glog matplotlib_cpp)
+target_link_libraries(undistortion algorithm glog::glog matplotlib_cpp)
 
 # INSTALL
 install(
@@ -58,7 +60,7 @@ install(
   LIBRARY DESTINATION ${PROJECT_SOURCE_DIR}/build/install
   ARCHIVE DESTINATION ${PROJECT_SOURCE_DIR}/build/install)
 
-# Install headers
+# copy headers files to install path
 install(FILES
   "${PROJECT_SOURCE_DIR}/algorithm/include/common/matplotlibcpp.h"
   DESTINATION ${PROJECT_SOURCE_DIR}/build/install)
