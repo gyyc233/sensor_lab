@@ -10,23 +10,6 @@
 
 using namespace Algorithm;
 int main() {
-  // inicpp::IniManager ini_handle("./data/Config.ini");
-  // int NvDistCenterLatOffsetMax =
-  //     ini_handle["CheckTolerance"].toInt("NvDistCenterLatOffsetMax");
-  // int NvDistCenterLatOffsetMin =
-  //     ini_handle["CheckTolerance"].toInt("NvDistCenterLatOffsetMin");
-  // std::cout << NvDistCenterLatOffsetMax << ", " << NvDistCenterLatOffsetMin
-  //           << std::endl;
-
-  // rapidcsv::Document doc("./data/ResDistCorrect.csv",
-  //                        rapidcsv::LabelParams(-1, -1));
-
-  // std::vector<std::vector<float>> points_xy;
-  // for (int i = 3; i <= 11; i++) {
-  //   std::vector<float> points = doc.GetRow<float>(i);
-  //   points_xy.push_back(points);
-  // }
-
   std::string origin_image_path = "./data/origin.jpg";
   std::string demo_image_path = "./data/demo.jpg";
   std::shared_ptr<Undistortion> undistortion_ptr =
