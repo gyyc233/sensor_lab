@@ -36,6 +36,7 @@ public:
   int process(std::vector<int> &source_x, std::vector<int> &source_y,
               int ref_x = 160, int ref_y = 96);
 
-  int reshapeOriginPoints(std::vector<int> &source_x, std::vector<int> &source_y);
+  int reshapeOriginPoints(std::vector<int> &source_x,
+                          std::vector<int> &source_y);
 };
 } // namespace Algorithm

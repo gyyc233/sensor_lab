@@ -3,9 +3,9 @@
 
 namespace Algorithm {
 Undistortion::Undistortion() {
-  normalization_ref_x_=80;
-  normalization_ref_y_=48;
-  ref_distance_=32;
+  normalization_ref_x_ = 80;
+  normalization_ref_y_ = 48;
+  ref_distance_ = 32;
 }
 
 Undistortion::~Undistortion() {}
@@ -131,7 +131,7 @@ int Undistortion::normalization(std::vector<int> &source_x,
   for (int i = 0; i < source_x.size(); i++) {
     normal_x.push_back(source_x[i] - x_avg);
     normal_y.push_back(source_y[i] - y_avg);
-    std::cout<<normal_x.back()<<", "<<normal_y.back()<<std::endl;
+    std::cout << normal_x.back() << ", " << normal_y.back() << std::endl;
   }
 
   double max_distance_x = -1;
@@ -143,18 +143,18 @@ int Undistortion::normalization(std::vector<int> &source_x,
         max_distance_y > abs(normal_y[i]) ? max_distance_y : abs(normal_y[i]);
   }
 
-  normalization_ref_x_=max_distance_x;
-  normalization_ref_y_=max_distance_y;
+  normalization_ref_x_ = max_distance_x;
+  normalization_ref_y_ = max_distance_y;
   std::cout << "normalization_ref_x_: " << ++normalization_ref_x_
-            << ", normalization_ref_y_: " << ++normalization_ref_y_ << std::endl;
+            << ", normalization_ref_y_: " << ++normalization_ref_y_
+            << std::endl;
 
-  normalized_x_=std::move(normal_x);
-  normalized_y_=std::move(normal_y);
+  normalized_x_ = std::move(normal_x);
+  normalized_y_ = std::move(normal_y);
   return 0;
 }
 
-int Undistortion::reshapeOriginPoints(std::vector<int> &source_x, std::vector<int> &source_y){
-  
-}
+int Undistortion::reshapeOriginPoints(std::vector<int> &source_x,
+                                      std::vector<int> &source_y) {}
 
 }; // namespace Algorithm
