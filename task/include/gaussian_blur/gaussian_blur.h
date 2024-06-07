@@ -22,9 +22,12 @@ public:
   std::vector<std::vector<double>> builtGaussianKernel(int ksize,
                                                        double sigma) const;
 
-  void convolution(const cv::Mat &myImage, cv::Mat &Result,
+  std::vector<std::vector<double>> builtMeanKernel(int ksize) const;
+
+  void convolution(const cv::Mat &my_image, cv::Mat &result,
                    const std::vector<std::vector<double>> &kernel,
                    int ksize) const;
 
 private:
+  void printKernel(const std::vector<std::vector<double>> &kernel) const;
 };
