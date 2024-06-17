@@ -10,22 +10,22 @@ void GaussianBlur::gaussianBlur(const cv::Mat &srcImage, cv::Mat &dstImage,
 void GaussianBlur::convolution(const cv::Mat &my_image, cv::Mat &result,
                                const std::vector<std::vector<double>> &kernel,
                                int ksize) const {
-  const int channels = my_image.channels();
+  if (my_image.channels() != 1) {
+    std::cout << "only accept single channel mat" << std::endl;
+    return;
+  }
   int center = static_cast<int>(ksize / 2);
 
   // expand image boundary
-  cv::Mat expand_image = cv::Mat::zeros(my_image.rows + center * 2,
-                                        my_image.cols + center * 2, CV_8UC1);
-
-  for (int i = 0; i < my_image.rows; i++) {
-    for (int j = 0; j < my_image.cols; j++) {
-      expand_image.at<uchar>(i + center, j + center) = my_image.at<uchar>(i, j);
-    }
-  }
+  cv::Mat expand_image;
+  expandImageBoundary(my_image, expand_image, center);
 
   // convolution
+  cv::Mat convolution_result_image =
+      cv::Mat::zeros(expand_image.rows, expand_image.cols, CV_8UC1);
   for (int row = center; row < expand_image.rows - center; row++) {
     for (int col = center; col < expand_image.cols - center; col++) {
+      // estimate kernel sum
       double tmp_convolution = 0;
       for (int i = 0; i < ksize; i++) {
         for (int j = 0; j < ksize; j++) {
@@ -40,15 +40,34 @@ void GaussianBlur::convolution(const cv::Mat &my_image, cv::Mat &result,
       std::cout << std::endl;
       std::cout << "index(row,col): " << row << ", " << col
                 << ", tmp_convolution: " << tmp_convolution << std::endl;
-      expand_image.at<uchar>(row, col) = tmp_convolution;
+      convolution_result_image.at<uchar>(row, col) = tmp_convolution;
     }
   }
 
   // crop image, remove extra boundary
-  result = cv::Mat::zeros(my_image.size(), CV_8UC1);
-  for (int i = center; i < expand_image.rows - center; i++) {
-    for (int j = center; j < expand_image.cols - center; j++) {
-      result.at<uchar>(i - center, j - center) = expand_image.at<uchar>(i, j);
+  cropImageBoundary(convolution_result_image, result, center);
+}
+
+void GaussianBlur::expandImageBoundary(const cv::Mat &input, cv::Mat &output,
+                                       size_t radius) const {
+  assert(radius > 0);
+  output =
+      cv::Mat::zeros(input.rows + radius * 2, input.cols + radius * 2, CV_8UC1);
+  for (int i = 0; i < input.rows; i++) {
+    for (int j = 0; j < input.cols; j++) {
+      output.at<uchar>(i + radius, j + radius) = input.at<uchar>(i, j);
+    }
+  }
+}
+
+void GaussianBlur::cropImageBoundary(const cv::Mat &input, cv::Mat &output,
+                                     size_t radius) const {
+  assert((input.rows - radius * 2) > 0 && (input.cols - radius * 2) > 0);
+  output =
+      cv::Mat::zeros(input.rows - radius * 2, input.cols - radius * 2, CV_8UC1);
+  for (int i = radius; i < input.rows - radius; i++) {
+    for (int j = radius; j < input.cols - radius; j++) {
+      output.at<uchar>(i - radius, j - radius) = input.at<uchar>(i, j);
     }
   }
 }

@@ -29,5 +29,11 @@ public:
                    int ksize) const;
 
 private:
+  void expandImageBoundary(const cv::Mat &input, cv::Mat &output,
+                           size_t radius) const;
+
+  void cropImageBoundary(const cv::Mat &input, cv::Mat &output,
+                         size_t radius) const;
+
   void printKernel(const std::vector<std::vector<double>> &kernel) const;
 };
