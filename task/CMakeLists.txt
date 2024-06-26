@@ -23,10 +23,12 @@ target_link_libraries(task ${OpenCV_LIBS} glog::glog)
 add_executable(my_gaussian_blur test/my_gaussian_blur.cc)
 add_executable(use_sophus test/use_sophus.cc)
 add_executable(my_transform test/my_transform.cc)
+add_executable(eigen_base_test test/eigen_base_test.cc)
 
 target_link_libraries(my_gaussian_blur task glog::glog)
 target_link_libraries(use_sophus task glog::glog ${Sophus_LIBRARIES})
 target_link_libraries(my_transform task glog::glog)
+target_link_libraries(eigen_base_test glog::glog)
 
 # INSTALL
 install(
