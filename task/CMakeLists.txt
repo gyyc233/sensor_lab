@@ -21,17 +21,19 @@ include_directories(${PROJECT_SOURCE_DIR}/io)
 add_library(task STATIC ${srcs})
 
 target_include_directories(task PUBLIC include)
-target_link_libraries(task ${OpenCV_LIBS} glog::glog)
+target_link_libraries(task ${OpenCV_LIBS})
 
 add_executable(my_gaussian_blur test/my_gaussian_blur.cc)
 add_executable(use_sophus test/use_sophus.cc)
 add_executable(my_transform test/my_transform.cc)
 add_executable(eigen_base_test test/eigen_base_test.cc)
+add_executable(mat_base test/mat_base.cc)
 
 target_link_libraries(my_gaussian_blur task glog::glog)
 target_link_libraries(use_sophus task glog::glog ${Sophus_LIBRARIES})
 target_link_libraries(my_transform task glog::glog)
 target_link_libraries(eigen_base_test glog::glog)
+target_link_libraries(mat_base task glog::glog)
 
 # INSTALL
 install(
