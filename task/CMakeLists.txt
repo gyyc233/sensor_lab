@@ -6,8 +6,11 @@ find_package(Eigen3 REQUIRED)
 find_package(OpenCV REQUIRED)
 
 set(Sophus_DIR /home/V01/uids0025/src/Sophus/build) # 改为自己的安装路径
-find_package( Sophus REQUIRED )
+set(Pangolin_DIR /home/V01/uids0025/src/Pangolin/build)
+find_package(Sophus REQUIRED)
+find_package(Pangolin REQUIRED)
 include_directories(${Sophus_INCLUDE_DIRS})
+include_directories(${Pangolin_INCLUDE_DIRS})
 
 include_directories(${EIGEN3_INCLUDE_DIRS})
 include_directories(${OpenCV_INCLUDE_DIRS})
