@@ -30,5 +30,13 @@ int main() {
       << getUnbiasedStandardDeviation<double, std::vector<double>::iterator>(
              vec.begin(), vec.end())
       << std::endl;
+
+  std::vector<std::vector<double>> data{
+      {1.2, 2.5, 5.6, -2.5}, {-3.6, 9.2, 0.5, 7.2}, {4.3, 1.3f, 9.4, -3.4}};
+
+  std::vector<std::vector<double>> covariance;
+  std::vector<double> mean;
+  calculateCovariance<double>(data, covariance, mean);
+
   return 0;
 }

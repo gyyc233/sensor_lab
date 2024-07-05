@@ -71,6 +71,44 @@ template <typename T>
 void calculateCovariance(const std::vector<std::vector<T>> &mat,
                          const std::vector<std::vector<T>> &cov,
                          std::vector<T> &mean, bool scale = false) {
-  const int rows = mat.size();
-  const int cols = mat[0].size();
+  const size_t rows = mat.size();
+  const size_t cols = mat[0].size();
+
+  mean.resize(cols, (T)0);
+  for (size_t c = 0; c < cols; c++) {
+    for (size_t r = 0; r < rows; r++) {
+      mean[c] += mat[r][c];
+    }
+  }
+
+  for (auto &it : mean) {
+    it = it / rows;
+    std::cout << "it: " << it << std::endl;
+  }
+
+  // data centerization
+  std::vector<std::vector<T>> center_mat = mat;
+  for (size_t r = 0; r < rows; r++) {
+    for (size_t c = 0; c < cols; c++) {
+      center_mat[r][c] = center_mat[r][c] - mean[c];
+      std::cout << "center_mat[r][c]: " << center_mat[r][c] << std::endl;
+    }
+  }
+
+  // mat transpose
+  std::vector<std::vector<T>> mat_transpose(cols, std::vector<T>(rows));
+  for (size_t r = 0; r < rows; r++) {
+    for (size_t c = 0; c < cols; c++) {
+      mat_transpose[c][r] = mat[r][c];
+      std::cout << "mat_transpose[c][r]: " << c << ", " << r << " "
+                << mat_transpose[c][r] << std::endl;
+    }
+  }
+
+  // estimate covariance
+  for (size_t m = 0; m < cols; m++) {
+    for (size_t n = 0; n < rows; n++) {
+      // TODO:
+    }
+  }
 }
