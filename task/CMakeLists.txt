@@ -17,6 +17,7 @@ include_directories(${OpenCV_INCLUDE_DIRS})
 
 # add io/ path to compiler search
 include_directories(${PROJECT_SOURCE_DIR}/io)
+include_directories(${PROJECT_SOURCE_DIR}/common)
 
 add_library(task STATIC ${srcs})
 
@@ -28,12 +29,14 @@ add_executable(use_sophus test/use_sophus.cc)
 add_executable(my_transform test/my_transform.cc)
 add_executable(eigen_base_test test/eigen_base_test.cc)
 add_executable(mat_base test/mat_base.cc)
+add_executable(covariance_test test/covariance_test.cc)
 
 target_link_libraries(my_gaussian_blur task glog::glog)
 target_link_libraries(use_sophus task glog::glog ${Sophus_LIBRARIES})
 target_link_libraries(my_transform task glog::glog)
 target_link_libraries(eigen_base_test glog::glog)
 target_link_libraries(mat_base task glog::glog)
+target_link_libraries(covariance_test task glog::glog)
 
 # INSTALL
 install(
