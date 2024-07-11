@@ -14,6 +14,8 @@ add_library(algorithm STATIC ${srcs})
 target_include_directories(algorithm PUBLIC include)
 target_link_libraries(algorithm ${OpenCV_LIBS} glog::glog)
 
+include_directories(${PROJECT_SOURCE_DIR}/common)
+include_directories(${PROJECT_SOURCE_DIR}/io)
 
 # ================================================================
 # add matplotlib-cpp
