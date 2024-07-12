@@ -14,6 +14,7 @@ add_subdirectory(algorithm)
 add_subdirectory(task)
 add_subdirectory(cpp_test)
 add_subdirectory(pcl_test)
+add_subdirectory(cere_test)
 
 # copy floder to install path
 set(build_data_include ${CMAKE_CURRENT_SOURCE_DIR}/build)
