@@ -31,6 +31,8 @@ include_directories(${PROJECT_SOURCE_DIR}/common)
 
 add_executable(cere_linear_test test/cere_linear_test.cc)
 add_executable(powell test/powell.cc)
+add_executable(curve_fitting test/curve_fitting.cc)
 
 target_link_libraries(cere_linear_test ${OpenCV_LIBS} Ceres::ceres glog::glog)
 target_link_libraries(powell Ceres::ceres glog::glog gflags)
+target_link_libraries(curve_fitting Ceres::ceres glog::glog gflags)
