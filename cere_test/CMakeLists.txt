@@ -1,6 +1,7 @@
 file(GLOB_RECURSE srcs CONFIGURE_DEPENDS src/*.cc include/*.h)
 
 find_package(glog 0.6.0 REQUIRED)
+find_package(gflags REQUIRED)
 
 find_package(Eigen3 REQUIRED)
 find_package(OpenCV REQUIRED)
@@ -17,6 +18,7 @@ include_directories(${Pangolin_INCLUDE_DIRS})
 
 include_directories(${EIGEN3_INCLUDE_DIRS})
 include_directories(${OpenCV_INCLUDE_DIRS})
+include_directories (${gflags_INCLUDE_DIR})
 
 # add io/ path to compiler search
 include_directories(${PROJECT_SOURCE_DIR}/io)
@@ -28,4 +30,7 @@ include_directories(${PROJECT_SOURCE_DIR}/common)
 # target_link_libraries(my_cere ${OpenCV_LIBS} Ceres::ceres glog::glog)
 
 add_executable(cere_linear_test test/cere_linear_test.cc)
+add_executable(powell test/powell.cc)
+
 target_link_libraries(cere_linear_test ${OpenCV_LIBS} Ceres::ceres glog::glog)
+target_link_libraries(powell Ceres::ceres glog::glog gflags)
