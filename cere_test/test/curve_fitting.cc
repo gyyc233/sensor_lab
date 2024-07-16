@@ -61,10 +61,18 @@ int main(int argc, char **argv) {
 
   ceres::Problem problem;
   for (int i = 0; i < kNumObservations; i++) {
+    // problem.AddResidualBlock(
+    //     new ceres::AutoDiffCostFunction<ExponentialResidual, 1, 1, 1>(
+    //         new ExponentialResidual(data[2 * i], data[2 * i + 1])),
+    //     nullptr, &m, &c);
+
+    // 使用 LossFunction 减少高残差项（通常是outliers）对总体残差的影响
+    // CauchyLoss 是 Ceres Solver 附带的损失函数之一。参数 0.5
+    // 指定损失函数的尺度
     problem.AddResidualBlock(
         new ceres::AutoDiffCostFunction<ExponentialResidual, 1, 1, 1>(
             new ExponentialResidual(data[2 * i], data[2 * i + 1])),
-        nullptr, &m, &c);
+        new ceres::CauchyLoss(0.5), &m, &c);
   }
 
   ceres::Solver::Options options;
