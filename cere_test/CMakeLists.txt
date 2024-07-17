@@ -24,10 +24,10 @@ include_directories (${gflags_INCLUDE_DIR})
 include_directories(${PROJECT_SOURCE_DIR}/io)
 include_directories(${PROJECT_SOURCE_DIR}/common)
 
-# add_library(my_cere STATIC ${srcs})
+add_library(my_cere STATIC ${srcs})
 
-# target_include_directories(my_cere PUBLIC include)
-# target_link_libraries(my_cere ${OpenCV_LIBS} Ceres::ceres glog::glog)
+target_include_directories(my_cere PUBLIC include)
+target_link_libraries(my_cere ${OpenCV_LIBS} Ceres::ceres glog::glog gflags)
 
 add_executable(cere_linear_test test/cere_linear_test.cc)
 add_executable(powell test/powell.cc)

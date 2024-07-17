@@ -170,9 +170,9 @@ int main(int argc, char **argv) {
   }
 
   ceres::Solver::Options options;
-  options.linear_solver_type = ceres::DENSE_SCHUR; // 对于BA问题，SCHUR 求解器速度会快一点
+  options.linear_solver_type =
+      ceres::DENSE_SCHUR; // 对于BA问题，SCHUR 求解器速度会快一点
   options.minimizer_progress_to_stdout = true;
-
 
   ceres::Solver::Summary summary;
   ceres::Solve(options, &problem, &summary);
