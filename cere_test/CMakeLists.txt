@@ -8,7 +8,7 @@ find_package(OpenCV REQUIRED)
 
 set(Sophus_DIR /home/V01/uids0025/src/Sophus/build)
 set(Pangolin_DIR /home/V01/uids0025/src/Pangolin/build)
-set(Ceres_DIR /home/V01/uids0025/src/ceres-solver-2.2.0/build)
+# set(Ceres_DIR /home/V01/uids0025/src/ceres-solver-2.2.0/build)
 
 find_package(Sophus REQUIRED)
 find_package(Pangolin REQUIRED)

@@ -22,7 +22,7 @@ make
 Sophus/sophus/so2.cpp:32:26: error: lvalue required as left operand of assignment
    32 |   unit_complex_.real() = 1.;
       |                          ^~
-/home/V01/uids0025/src/Sophus/sophus/so2.cpp:33:26: error: lvalue required as left operand of assignment
+Sophus/sophus/so2.cpp:33:26: error: lvalue required as left operand of assignment
    33 |   unit_complex_.imag() = 0.;
 
 ```
