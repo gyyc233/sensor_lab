@@ -52,7 +52,8 @@ public:
 
   /// @brief write result to .ply file
   /// @param filename
-  void WriteToPLYFile(const std::string &filename) const;
+  void WriteToPLYFile(const std::string &filename, int r = 255, int g = 255,
+                      int b = 255) const;
 
   // Move the "center" of the reconstruction to the origin, where the
   // center is determined by computing the marginal median of the
@@ -78,7 +79,7 @@ public:
   int num_points()             const { return num_points_;               }
   int num_observations()       const { return num_observations_;         }
 
-  // 参数总数
+  // 参数总数(包含9 dimension camera data and 3 dimension point data)
   int num_parameters()         const { return num_parameters_;           }
   const int* point_index()     const { return point_index_;              }
   const int* camera_index()    const { return camera_index_;             }
@@ -88,6 +89,7 @@ public:
   double* mutable_cameras()          { return parameters_;               }
   // clang-format on
   double *mutable_points() {
+    // points data is behind camera data, so add addr
     return parameters_ + camera_block_size() * num_cameras_;
   }
 
@@ -107,8 +109,9 @@ private:
                                   const double *center, double *camera) const;
   int num_cameras_;
   int num_points_;
-  int num_observations_;
-  int num_parameters_; // num_parameters_
+  int num_observations_; // 观测点数量
+  int num_parameters_; // size of 9 dimension camera data and 3 dimension point
+                       // data
   bool use_quaternions_;
 
   int *point_index_;

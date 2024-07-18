@@ -34,6 +34,7 @@
 #include <cstdio>
 #include <fstream>
 #include <functional>
+#include <iostream>
 #include <random>
 #include <string>
 #include <vector>
@@ -55,6 +56,9 @@ void FscanfOrDie(FILE *fptr, const char *format, T *value) {
   }
 }
 
+/// @brief 为点数据添加扰动
+/// @param dist 扰动
+/// @param point 点数据
 void PerturbPoint3(std::function<double()> dist, double *point) {
   for (int i = 0; i < 3; ++i) {
     point[i] += dist();
@@ -80,12 +84,17 @@ BALProblem::BALProblem(const std::string &filename, bool use_quaternions) {
   FscanfOrDie(fptr, "%d", &num_cameras_);
   FscanfOrDie(fptr, "%d", &num_points_);
   FscanfOrDie(fptr, "%d", &num_observations_);
+  printf("num_cameras_: %d \n", num_cameras_);
+  printf("num_points_: %d \n", num_points_);
+  printf("num_observations_: %d \n", num_observations_);
 
-  VLOG(1) << "Header: " << num_cameras_ << " " << num_points_ << " "
-          << num_observations_;
-
+  LOG(INFO) << "Header: " << num_cameras_ << " " << num_points_ << " "
+            << num_observations_;
   point_index_ = new int[num_observations_];
   camera_index_ = new int[num_observations_];
+  // Observations is 2*num_observations long array observations =
+  // [u_1, u_2, ... , u_n], where each u_i is two dimensional, the x
+  // and y positions of the observation.
   observations_ = new double[2 * num_observations_];
 
   // 相机参数个数9 + 世界坐标[x,y,z]个数3
@@ -185,7 +194,8 @@ void BALProblem::WriteToFile(const std::string &filename) const {
 
 // Write the problem to a PLY file for inspection(检测) in Meshlab or
 // CloudCompare.
-void BALProblem::WriteToPLYFile(const std::string &filename) const {
+void BALProblem::WriteToPLYFile(const std::string &filename, int r, int g,
+                                int b) const {
   std::ofstream of(filename.c_str());
 
   of << "ply" << '\n'
@@ -202,6 +212,7 @@ void BALProblem::WriteToPLYFile(const std::string &filename) const {
   // Export extrinsic data (i.e. camera centers) as green points.
   double angle_axis[3];
   double center[3];
+  std::cout << "num_cameras(): " << num_cameras() << std::endl;
   for (int i = 0; i < num_cameras(); ++i) {
     const double *camera = cameras() + camera_block_size() * i;
     CameraToAngleAxisAndCenter(camera, angle_axis, center);
@@ -211,12 +222,14 @@ void BALProblem::WriteToPLYFile(const std::string &filename) const {
 
   // Export the structure (i.e. 3D Points) as white points.
   const double *points = parameters_ + camera_block_size() * num_cameras_;
+  std::cout << "num_points(): " << num_points() << std::endl;
   for (int i = 0; i < num_points(); ++i) {
     const double *point = points + i * point_block_size();
     for (int j = 0; j < point_block_size(); ++j) {
       of << point[j] << ' ';
     }
-    of << "255 255 255\n";
+    of << ' ' << r << ' ' << g << ' ' << b << "\n";
+    // of << "255 255 255\n";
   }
   of.close();
 }

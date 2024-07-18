@@ -52,6 +52,8 @@ struct SnavelyReprojectionError {
   SnavelyReprojectionError(double observed_x, double observed_y)
       : observed_x(observed_x), observed_y(observed_y) {}
 
+  // camera: [r1,r2,r3,x,y,z,f,k1,k2]
+  // point: [x,y,z]
   template <typename T>
   bool operator()(const T *const camera, const T *const point,
                   T *residuals) const {
@@ -126,7 +128,7 @@ struct SnavelyReprojectionErrorWithQuaternions {
     // bundle adjuster is to let Ceres optimize all 4 quaternion
     // parameters without using a Quaternion manifold.
     T p[3];
-    QuaternionRotatePoint(camera, point, p);
+    ceres::QuaternionRotatePoint(camera, point, p);
 
     p[0] += camera[4];
     p[1] += camera[5];
