@@ -220,7 +220,7 @@ void BALProblem::WriteToPLYFile(const std::string &filename, int r, int g,
        << '\n';
   }
 
-  // Export the structure (i.e. 3D Points) as white points.
+  // Export the structure (i.e. 3D Points) as color points.
   const double *points = parameters_ + camera_block_size() * num_cameras_;
   std::cout << "num_points(): " << num_points() << std::endl;
   for (int i = 0; i < num_points(); ++i) {

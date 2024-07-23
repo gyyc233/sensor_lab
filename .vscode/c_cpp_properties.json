@@ -9,6 +9,7 @@
                 "/usr/local/include/gflags",
                 "/usr/local/include/pcl-1.14",
                 "/usr/local/include/ceres",
+                "/usr/local/include/g2o",
                 "/usr/include",
                 "/usr/include/opencv4",
                 "/usr/include/eigen3"

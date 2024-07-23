@@ -14,6 +14,8 @@
 #include "glog/logging.h"
 #include "snavely_reprojection_error.h"
 
+// 最小化重投影误差，获取最优的机器人位姿估计
+
 // clang-format makes the gflags definitions too verbose
 // clang-format off
 
@@ -21,7 +23,7 @@ DEFINE_string(input, "", "Input File name");
 DEFINE_string(initial_ply, "output_source.ply", "Export the BAL file data as a PLY file.");
 
 // solver option params
-DEFINE_int32(num_iterations, 5, "Number of ceres solver max iterations.");
+DEFINE_int32(num_iterations, 20, "Number of ceres solver max iterations.");
 DEFINE_int32(num_threads, -1, "Number of threads. -1 = std::thread::hardware_concurrency.");
 DEFINE_double(eta, 1e-2, "Default value for eta. Eta determines the "
               "accuracy of each linear solve of the truncated newton step. "
@@ -75,6 +77,7 @@ void buildProblem(MyCeres::BALProblem *bal_problem, ceres::Problem *problem) {
 void SetMinimizerOptions(ceres::Solver::Options *options) {
   options->max_num_iterations = FLAGS_num_iterations;
   options->minimizer_progress_to_stdout = true;
+  options->linear_solver_type = ceres::DENSE_SCHUR;
 
   if (CERES_GET_FLAG(FLAGS_num_threads) == -1) {
     // get number of concurrency threads supported by the implementation
