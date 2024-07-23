@@ -36,6 +36,42 @@ public:
   virtual bool write(std::ostream &out) const { return true; }
 };
 
+/// 定义一元边，模板参数：观测值维度，类型，连接顶点类型
+class CurveFittingEdge
+    : public g2o::BaseUnaryEdge<1, double, CurveFittingVertex> {
+public:
+  EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+  CurveFittingEdge(double x) : _x(x) {}
+  ~CurveFittingEdge() {}
+
+  // 计算曲线模型误差，使用当前顶点值计算的测量值与真实测量值之间的误差
+  virtual void computeError() {
+    const CurveFittingVertex *v =
+        static_cast<const CurveFittingVertex *>(_vertices[0]);
+    const Eigen::Vector3d abc = v->estimate();
+    _error(0, 0) = _measurement -
+                   std::exp(abc(0, 0) * _x * _x + abc(1, 0) * _x + abc(2, 0));
+  }
+
+  /// 计算各个待优化变量的偏导数
+  virtual void linearizeOplus() override {
+    const CurveFittingVertex *v =
+        static_cast<const CurveFittingVertex *>(_vertices[0]);
+    const Eigen::Vector3d abc = v->estimate();
+    double y = exp(abc[0] * _x * _x + abc[1] * _x + abc[2]);
+    _jacobianOplusXi[0] = -_x * _x * y;
+    _jacobianOplusXi[1] = -_x * y;
+    _jacobianOplusXi[2] = -y;
+  }
+
+  virtual bool read(std::istream &in) {}
+
+  virtual bool write(std::ostream &out) const {}
+
+public:
+  double _x; // x值， y值为 _estimate
+};
+
 int main(int argc, char **argv) {
   double ar = 1.0, br = 2.0, cr = 1.0;  // 真实参数值
   double ae = 2.0, be = -1.0, ce = 5.0; // 估计参数值
@@ -86,5 +122,34 @@ int main(int argc, char **argv) {
   vertex->setEstimate(Eigen::Vector3d(ae, be, ce)); // 设置初始值
   vertex->setId(0);
   optimizer.addVertex(vertex);
+
+  std::cout << Eigen::Matrix<double, 1, 1>::Identity() * 1 / (w_sigma * w_sigma)
+            << std::endl;
+
+  // 7. 往图中添加边
+  for (int i = 0; i < N; i++) {
+    CurveFittingEdge *edge = new CurveFittingEdge(x_data[i]);
+    edge->setId(i); // 定义边的编号（决定了在H矩阵中的位置）
+    edge->setVertex(0, vertex);      // 设置连接的顶点
+    edge->setMeasurement(y_data[i]); // 观测值
+    edge->setInformation(Eigen::Matrix<double, 1, 1>::Identity() * 1 /
+                         (w_sigma * w_sigma)); // 信息矩阵：协方差矩阵的逆
+    // setInformation 通常会用 Eigen::Matrix<>::Identity()
+    optimizer.addEdge(edge);
+  }
+
+  // 8. 执行优化
+  std::chrono::steady_clock::time_point t1 = std::chrono::steady_clock::now();
+  optimizer.initializeOptimization();
+  optimizer.optimize(10);
+  std::chrono::steady_clock::time_point t2 = std::chrono::steady_clock::now();
+  std::chrono::duration<double> time_used =
+      std::chrono::duration_cast<std::chrono::duration<double>>(t2 - t1);
+  std::cout << "solve time cost = " << time_used.count() << " seconds. "
+            << std::endl;
+
+  // 输出优化值
+  Eigen::Vector3d abc_estimate = vertex->estimate();
+  std::cout << "estimated model: " << abc_estimate.transpose() << std::endl;
   return 0;
 }
