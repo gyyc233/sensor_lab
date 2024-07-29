@@ -1,3 +1,6 @@
+#ifndef __MY_TIME_H__
+#define __MY_TIME_H__
+
 #include <chrono>
 #include <iostream>
 
@@ -44,3 +47,5 @@ struct CostMicrosecond {
     std::cout << "cost(micro second): " << cost_micro << std::endl;
   }
 };
+
+#endif

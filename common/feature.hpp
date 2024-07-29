@@ -1,3 +1,6 @@
+#ifndef __FEATURE_HPP__
+#define __FEATURE_HPP__
+
 #include "my_time.h"
 #include <cassert>
 #include <cmath>
@@ -184,3 +187,5 @@ void calculateCovariance(const std::vector<std::vector<T>> &mat,
   std::vector<std::vector<T>> covariance_mat =
       matrixDot(mat_transpose, center_mat);
 }
+
+#endif

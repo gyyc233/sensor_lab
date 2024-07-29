@@ -1,3 +1,6 @@
+#ifndef __SORT_H__
+#define __SORT_H__
+
 #include <stdio.h>
 
 void swap(unsigned short *x, unsigned short *y) {
@@ -29,3 +32,5 @@ void quick_sort_recursive(unsigned short arr[], int start, int end) {
 void quick_sort(unsigned short *arr, int len) {
   quick_sort_recursive(arr, 0, len - 1);
 }
+
+#endif
