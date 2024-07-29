@@ -18,7 +18,7 @@ target_link_libraries(feature_detect ${OpenCV_LIBS} ${PCL_LIBRARIES})
 
 add_executable(orb_cv_test test/orb_cv_test.cc)
 
-target_link_libraries(orb_cv_test ${PCL_LIBRARIES} ${OpenCV_LIBS})
+target_link_libraries(orb_cv_test feature_detect)
 
 # INSTALL
 install(
