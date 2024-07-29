@@ -1,3 +1,4 @@
+#include "my_time.h"
 #include <iostream>
 
 namespace SensorLab {
@@ -10,5 +11,8 @@ public:
 
   virtual void initialization() = 0;
   virtual void run() = 0;
+
+private:
+  CostMillisecond cost_;
 };
 } // namespace SensorLab

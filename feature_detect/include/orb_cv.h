@@ -28,6 +28,5 @@ private:
   cv::Ptr<cv::DescriptorExtractor> orb_descriptor_;
   cv::Ptr<cv::DescriptorMatcher> matcher_;
   std::vector<cv::DMatch> good_matches_;
-  CostMillisecond cost_;
 };
 } // namespace SensorLab
