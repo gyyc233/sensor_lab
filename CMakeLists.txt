@@ -17,6 +17,7 @@ add_subdirectory(pcl_test)
 add_subdirectory(cere_test)
 add_subdirectory(g2o_test)
 add_subdirectory(feature_detect)
+add_subdirectory(pose_estimation)
 
 # copy floder to install path
 set(build_data_include ${CMAKE_CURRENT_SOURCE_DIR}/build)
