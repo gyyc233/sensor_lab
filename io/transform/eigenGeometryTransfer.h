@@ -1,3 +1,6 @@
+#ifndef __EIGEN_GEOMETRY_TRANSFER_H__
+#define __EIGEN_GEOMETRY_TRANSFER_H__
+
 #include <Eigen/Core>
 #include <Eigen/Geometry>
 #include <iostream>
@@ -221,3 +224,5 @@ Eigen::Vector3d rotationMatrix2euler(Eigen::Matrix3d R) {
   std::cout << "z(deg) = " << euler[0] / M_PI * 180.0 << std::endl;
   return euler;
 }
+
+#endif
