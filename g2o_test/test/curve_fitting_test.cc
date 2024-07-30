@@ -64,9 +64,9 @@ public:
     _jacobianOplusXi[2] = -y;
   }
 
-  virtual bool read(std::istream &in) {}
+  virtual bool read(std::istream &in) { return false; }
 
-  virtual bool write(std::ostream &out) const {}
+  virtual bool write(std::ostream &out) const { return false; }
 
 public:
   double _x; // x值， y值为 _estimate
@@ -77,8 +77,7 @@ int main(int argc, char **argv) {
   double ae = 2.0, be = -1.0, ce = 5.0; // 估计参数值
   int N = 100;                          // 数据点
   double w_sigma = 1.0;                 // 噪声Sigma值
-  double inv_sigma = 1.0 / w_sigma;
-  cv::RNG rng; // OpenCV随机数产生器
+  cv::RNG rng;                          // OpenCV随机数产生器
 
   std::vector<double> x_data, y_data; // 数据
   for (int i = 0; i < N; i++) {
