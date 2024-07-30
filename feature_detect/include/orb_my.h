@@ -18,9 +18,17 @@ public:
 
   void run() override;
 
+  /// @brief compute descriptor of orb key points
+  /// @param img input image
+  /// @param key_points detected fast key points
+  /// @param descriptors descriptors
   void computeORB(const cv::Mat &img, std::vector<cv::KeyPoint> &key_points,
                   std::vector<DescType> &descriptors);
 
+  /// @brief brute-force match two sets of descriptors
+  /// @param desc1 the first descriptor
+  /// @param desc2 the second descriptor
+  /// @param matches matches of two images
   void BfMatch(const std::vector<DescType> &desc1,
                const std::vector<DescType> &desc2,
                std::vector<cv::DMatch> &matches);
