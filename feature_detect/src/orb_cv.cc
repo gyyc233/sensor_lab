@@ -3,9 +3,9 @@
 
 using namespace SensorLab;
 
-ORB_CV::ORB_CV() {}
+ORB_CV::ORB_CV() { std::cout << "construct ORB_CV" << std::endl; }
 
-ORB_CV::~ORB_CV() {}
+ORB_CV::~ORB_CV() { std::cout << "destruct ORB_CV" << std::endl; }
 
 void ORB_CV::initialization() {
   detector_ = cv::ORB::create();
@@ -18,6 +18,8 @@ void ORB_CV::run() {
   std::vector<cv::KeyPoint> key_points_img_l, key_points_img_r;
   detector_->detect(img_l_, key_points_img_l);
   detector_->detect(img_r_, key_points_img_r);
+  key_points_img_l_ = key_points_img_l;
+  key_points_img_r_ = key_points_img_r;
 
   // 2. based on FAST corners compute BRIEF descriptors
   cv::Mat descriptors_l, descriptors_r;
@@ -77,4 +79,18 @@ void ORB_CV::inputParams(const char *left_img, const char *right_img) {
   img_r_ = cv::imread(right_img, cv::IMREAD_COLOR);
 
   assert(img_l_.data != nullptr && img_r_.data != nullptr);
+}
+
+bool ORB_CV::output(std::vector<cv::DMatch> &match_result,
+                    std::vector<cv::KeyPoint> &key_points_img_l,
+                    std::vector<cv::KeyPoint> &key_points_img_r) {
+  match_result = std::move(good_matches_);
+  key_points_img_l = std::move(key_points_img_l_);
+  key_points_img_r = std::move(key_points_img_r_);
+
+  if (match_result.empty() || key_points_img_l.empty() ||
+      key_points_img_r.empty())
+    return false;
+
+  return true;
 }

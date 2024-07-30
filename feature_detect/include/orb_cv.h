@@ -16,6 +16,10 @@ public:
 
   void inputParams(const char *left_img, const char *right_img);
 
+  bool output(std::vector<cv::DMatch> &match_result,
+              std::vector<cv::KeyPoint> &key_points_img_l,
+              std::vector<cv::KeyPoint> &key_points_img_r);
+
   void initialization() override;
 
   void run() override;
@@ -27,6 +31,8 @@ private:
   cv::Ptr<cv::FeatureDetector> detector_;
   cv::Ptr<cv::DescriptorExtractor> orb_descriptor_;
   cv::Ptr<cv::DescriptorMatcher> matcher_;
+  std::vector<cv::KeyPoint> key_points_img_l_;
+  std::vector<cv::KeyPoint> key_points_img_r_;
   std::vector<cv::DMatch> good_matches_;
 };
 } // namespace SensorLab
