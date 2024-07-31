@@ -58,28 +58,26 @@ void EpipolarConstraint::pose_estimation_2d2d(
   cv::Mat fundamental_matrix;
   fundamental_matrix =
       cv::findFundamentalMat(points_l, points_r, cv::FM_8POINT);
-  std::cout << "fundamental_matrix is: " << fundamental_matrix << std::endl;
+  std::cout << "fundamental_matrix is: \n" << fundamental_matrix << std::endl;
 
   // 2. 计算本质矩阵
   cv::Mat essential_matrix;
   essential_matrix =
       cv::findEssentialMat(points_l, points_r, focal_, principal_point_);
-  std::cout << "essential_matrix is " << std::endl
-            << essential_matrix << std::endl;
+  std::cout << "essential_matrix is \n" << essential_matrix << std::endl;
 
   // 3. 计算单应矩阵
   //-- 但是本例中场景不是平面，单应矩阵意义不大
   cv::Mat homography_matrix;
   homography_matrix = cv::findHomography(points_l, points_r, cv::RANSAC, 3);
-  std::cout << "homography_matrix is " << std::endl
-            << homography_matrix << std::endl;
+  std::cout << "homography_matrix is \n" << homography_matrix << std::endl;
 
   // 4. 从本质矩阵中恢复旋转和平移信息
   cv::recoverPose(essential_matrix, points_l, points_r, rotation_, translate_,
                   focal_, principal_point_);
 
-  std::cout << "rotation is " << std::endl << rotation_ << std::endl;
-  std::cout << "translate is " << std::endl << translate_ << std::endl;
+  std::cout << "rotation is \n" << rotation_ << std::endl;
+  std::cout << "translate is \n " << translate_ << std::endl;
 }
 
 void EpipolarConstraint::run() {
