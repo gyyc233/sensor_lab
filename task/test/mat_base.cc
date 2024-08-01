@@ -126,14 +126,16 @@ int main() {
 
   // 2. cv::Mat::Mat(Size size,int type ) size::Size(cols,rows)
   Mat src2(Size(3, 4), CV_32FC3);
-  cout << "1. src1.rows=" << src1.rows << " src1.cols=" << src1.cols << endl;
+  cout << "1. src1.rows=" << src1.rows << " src1.cols=" << src1.cols
+       << ", CV_32FC3 type: " << src1.type() << endl;
   cout << "2. src2.rows=" << src2.rows << " src2.cols=" << src2.cols << endl;
   cout << "src1.size=" << src1.size() << endl
        << "src2.size=" << src2.size() << endl;
 
   // 3. cv::Mat::Mat(int ndims,const int *  sizes,int type,const Scalar& s)
   Mat src3(300, 400, CV_8UC3, Scalar(255, 255, 255));
-  cout << "3. src3.rows=" << src3.rows << " src3.cols=" << src3.cols << endl;
+  cout << "3. src3.rows=" << src3.rows << " src3.cols=" << src3.cols
+       << ", CV_8UC3 type: " << src3.type() << endl;
 
   // 4. cv::Mat::Mat(const Mat & m)
   Mat src4(src3);
@@ -147,7 +149,7 @@ int main() {
   // Mat(Size size, int type, void* data, size_t step=AUTO_STEP)
   Mat lena = imread("../data/lena.png", cv::IMREAD_GRAYSCALE);
   Mat src6(mat_a.rows, mat_a.cols, CV_64FC1, mat_a.data, 0);
-  cout << "6. src6: \n" << src6 << endl;
+  cout << "6. src6: \n" << src6 << ", CV_64FC1 type: " << src6.type() << endl;
 
   // 7. Mat(const Mat& m, const Range& rowRange, const Range& colRange)
   // Range::all()

@@ -1,5 +1,6 @@
 #include "epipolar_constraint.h"
-#include "transform/eigenGeometryTransfer.h"
+#include "transform/cv_eigen_convert.hpp"
+#include "transform/eigenGeometryTransfer.hpp"
 
 using namespace SensorLab;
 
@@ -47,7 +48,7 @@ void EpipolarConstraint::pose_estimation_2d2d(
     cv::Mat &R, cv::Mat &t) {
   std::vector<cv::Point2f> points_l;
   std::vector<cv::Point2f> points_r;
-  for (int i = 0; i < matches.size(); i++) {
+  for (size_t i = 0; i < matches.size(); i++) {
     points_l.push_back(
         key_points_l[matches[i].queryIdx].pt); // queryIdx -- first input image
     points_r.push_back(
@@ -86,4 +87,17 @@ void EpipolarConstraint::run() {
 }
 
 void EpipolarConstraint::output(std::vector<double> &quaternion,
-                                std::vector<double> &translation) {}
+                                std::vector<double> &translation) {
+  auto rotation_mat_xd = cv_mat_convert_to_eigen<double>(rotation_);
+  Eigen::Matrix3d rotation_mat;
+  rotation_mat << rotation_mat_xd(0, 0), rotation_mat_xd(0, 1),
+      rotation_mat_xd(0, 2), rotation_mat_xd(1, 0), rotation_mat_xd(1, 1),
+      rotation_mat_xd(1, 2), rotation_mat_xd(2, 0), rotation_mat_xd(2, 1),
+      rotation_mat_xd(2, 2);
+
+  auto quat = rotationMatrix2Quaternion(rotation_mat);
+  quaternion = {quat.w(), quat.x(), quat.y(), quat.z()};
+
+  auto translate_vec = cv_mat_convert_to_vector_2d<double>(translate_);
+  translation = {translate_vec[0][0], translate_vec[1][0], translate_vec[2][0]};
+}

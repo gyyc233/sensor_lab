@@ -15,5 +15,7 @@ int main(int argc, char **argv) {
   epipolar_ptr->inputPrincipalPoints(325.1, 249.7);
   epipolar_ptr->run();
 
+  std::vector<double> quaternion, translate;
+  epipolar_ptr->output(quaternion, translate);
   return 0;
 }
