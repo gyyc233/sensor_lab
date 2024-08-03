@@ -25,6 +25,14 @@ public:
 
   void run() override;
 
+  void getMatchResult(std::vector<cv::KeyPoint> &points_l,
+                      std::vector<cv::KeyPoint> &points_r,
+                      std::vector<cv::DMatch> &match);
+
+  void getTransformation(cv::Mat &rot, cv::Mat &translation);
+
+  void gateData(std::vector<cv::Mat> &data);
+
   void output(std::vector<double> &quaternion,
               std::vector<double> &translation);
 

@@ -1,3 +1,6 @@
+#ifndef __SENSORLAB_POSE_ESTIMATION_H__
+#define __SENSORLAB_POSE_ESTIMATION_H__
+
 #include "my_time.h"
 #include <iostream>
 
@@ -16,3 +19,5 @@ private:
   CostMillisecond cost_;
 };
 } // namespace SensorLab
+
+#endif

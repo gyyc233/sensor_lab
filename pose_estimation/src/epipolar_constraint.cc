@@ -26,7 +26,7 @@ void EpipolarConstraint::inputParams(const char *left_img,
                               key_points_img_r_);
 }
 
-void EpipolarConstraint::initialization() {}
+void EpipolarConstraint::initialization() { std::cout << "todo" << std::endl; }
 
 void EpipolarConstraint::inputCameraIntrinsics(
     const std::vector<double> &intrinsics, double focal) {
@@ -100,4 +100,21 @@ void EpipolarConstraint::output(std::vector<double> &quaternion,
 
   auto translate_vec = cv_mat_convert_to_vector_2d<double>(translate_);
   translation = {translate_vec[0][0], translate_vec[1][0], translate_vec[2][0]};
+}
+
+void EpipolarConstraint::getMatchResult(std::vector<cv::KeyPoint> &points_l,
+                                        std::vector<cv::KeyPoint> &points_r,
+                                        std::vector<cv::DMatch> &match) {
+  points_l = key_points_img_l_;
+  points_r = key_points_img_r_;
+  match = orb_match_result_;
+}
+
+void EpipolarConstraint::getTransformation(cv::Mat &rot, cv::Mat &translation) {
+  rot = rotation_;
+  translation = translate_;
+}
+
+void EpipolarConstraint::gateData(std::vector<cv::Mat> &data) {
+  feature_detect_ptr_->getData(data);
 }

@@ -1,4 +1,5 @@
 #include "epipolar_constraint.h"
+#include "triansgulation.h"
 #include <iostream>
 #include <memory>
 #include <vector>
@@ -17,5 +18,25 @@ int main(int argc, char **argv) {
 
   std::vector<double> quaternion, translate;
   epipolar_ptr->output(quaternion, translate);
+
+  // get epipolar result
+  std::vector<cv::DMatch> orb_match_result;
+  std::vector<cv::KeyPoint> key_points_img_l;
+  std::vector<cv::KeyPoint> key_points_img_r;
+  epipolar_ptr->getMatchResult(key_points_img_l, key_points_img_r,
+                               orb_match_result);
+
+  cv::Mat rot_mat, translate_mat;
+  epipolar_ptr->getTransformation(rot_mat, translate_mat);
+  std::vector<cv::Mat> data;
+  epipolar_ptr->gateData(data);
+
+  std::unique_ptr<Triansgulation> triansgulation_ptr(new Triansgulation());
+  triansgulation_ptr->inputCameraIntrinsics(camera_intrinsics);
+  std::vector<cv::Point3d> points;
+  triansgulation_ptr->triangulation(key_points_img_l, key_points_img_r,
+                                    orb_match_result, rot_mat, translate_mat,
+                                    points);
+
   return 0;
 }

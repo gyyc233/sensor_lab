@@ -1,3 +1,6 @@
+#ifndef __SENSORLAB_ORB_CV_H__
+#define __SENSORLAB_ORB_CV_H__
+
 #include "feature_detect.h"
 #include "my_time.h"
 #include <Eigen/Dense>
@@ -24,6 +27,8 @@ public:
 
   void run() override;
 
+  void getData(std::vector<cv::Mat> &data);
+
 private:
   cv::Mat img_l_;
   cv::Mat img_r_;
@@ -36,3 +41,5 @@ private:
   std::vector<cv::DMatch> good_matches_;
 };
 } // namespace SensorLab
+
+#endif

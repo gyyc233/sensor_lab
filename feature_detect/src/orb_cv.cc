@@ -94,3 +94,5 @@ bool ORB_CV::output(std::vector<cv::DMatch> &match_result,
 
   return true;
 }
+
+void ORB_CV::getData(std::vector<cv::Mat> &data) { data = {img_l_, img_r_}; }
