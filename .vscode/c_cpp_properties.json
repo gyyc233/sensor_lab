@@ -7,6 +7,7 @@
                 "/usr/local/include",
                 "/usr/local/include/glog",
                 "/usr/local/include/gflags",
+                "/usr/local/include/sophus",
                 "/usr/local/include/pcl-1.14",
                 "/usr/local/include/ceres",
                 "/usr/local/include/g2o",
