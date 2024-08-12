@@ -11,13 +11,13 @@ set(CMAKE_CXX_FLAGS_RELEASE "$ENV{CXXFLAGS} -O3 -Wall")
 project(sensor_lab LANGUAGES CXX)
 
 add_subdirectory(algorithm)
-add_subdirectory(task)
+add_subdirectory(feature_detect)
+add_subdirectory(pose_estimation)
 add_subdirectory(cpp_test)
 add_subdirectory(pcl_test)
 add_subdirectory(cere_test)
 add_subdirectory(g2o_test)
-add_subdirectory(feature_detect)
-add_subdirectory(pose_estimation)
+add_subdirectory(task)
 
 # copy floder to install path
 set(build_data_include ${CMAKE_CURRENT_SOURCE_DIR}/build)
