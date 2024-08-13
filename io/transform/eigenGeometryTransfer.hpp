@@ -1,5 +1,5 @@
-#ifndef __EIGEN_GEOMETRY_TRANSFER_H__
-#define __EIGEN_GEOMETRY_TRANSFER_H__
+#ifndef __EIGEN_GEOMETRY_TRANSFER_HPP__
+#define __EIGEN_GEOMETRY_TRANSFER_HPP__
 
 #include <Eigen/Core>
 #include <Eigen/Geometry>

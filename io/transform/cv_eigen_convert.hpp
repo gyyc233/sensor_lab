@@ -1,5 +1,5 @@
-#ifndef __CV_EIGEN_CONVERT_H__
-#define __CV_EIGEN_CONVERT_H__
+#ifndef __CV_EIGEN_CONVERT_HPP__
+#define __CV_EIGEN_CONVERT_HPP__
 
 #include <Eigen/Core>
 #include <Eigen/Dense>
