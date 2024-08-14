@@ -18,13 +18,11 @@ include_directories(${OpenCV_INCLUDE_DIRS})
 # add io/ path to compiler search
 include_directories(${PROJECT_SOURCE_DIR}/io)
 include_directories(${PROJECT_SOURCE_DIR}/common)
-include_directories(${PROJECT_SOURCE_DIR}/feature_detect) # orb detect
-include_directories(${PROJECT_SOURCE_DIR}/pose_estimation)
 
 add_library(task STATIC ${srcs})
 
 target_include_directories(task PUBLIC include)
-target_link_libraries(task ${OpenCV_LIBS} feature_detect pose_estimation)
+target_link_libraries(task ${OpenCV_LIBS})
 
 add_executable(my_gaussian_blur test/my_gaussian_blur.cc)
 add_executable(use_sophus test/use_sophus.cc)
