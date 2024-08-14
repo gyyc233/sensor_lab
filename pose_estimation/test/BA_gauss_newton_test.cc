@@ -15,6 +15,7 @@ int main(int argc, char **argv) {
 
   std::vector<double> camera_intrinsics = {520.9, 521.0, 325.1, 249.7};
   ba_gauss_newton->inputCameraIntrinsics(camera_intrinsics);
+  ba_gauss_newton->setIteration(50);
   ba_gauss_newton->run();
   return 0;
 }

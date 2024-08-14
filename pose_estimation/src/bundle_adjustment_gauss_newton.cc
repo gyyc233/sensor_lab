@@ -38,15 +38,15 @@ void BA_GaussNewton::inputParams(const char *left_img, const char *right_img,
 void BA_GaussNewton::initialization() {}
 
 void BA_GaussNewton::bundleAdjustmentGaussNewton(
-    const std::vector<Eigen::Vector3d> &points_3d,
-    const std::vector<Eigen::Vector2d> &points_2d, const cv::Mat &K,
-    Sophus::SE3 &pose) {
+    const std::vector<Eigen::Vector3d,
+                      Eigen::aligned_allocator<Eigen::Vector3d>> &points_3d,
+    const std::vector<Eigen::Vector2d,
+                      Eigen::aligned_allocator<Eigen::Vector2d>> &points_2d,
+    const cv::Mat &K, Sophus::SE3 &pose) {
   double fx = K.at<double>(0, 0);
   double fy = K.at<double>(1, 1);
-  double cx = K.at<double>(0, 2);
-  double cy = K.at<double>(1, 2);
 
-  double cost = 0, lastCost = 0;
+  double cost = 0, last_cast = 0;
 
   for (int iter = 0; iter < iteration_time_; iter++) {
     Eigen::Matrix<double, 6, 6> H =
@@ -61,13 +61,15 @@ void BA_GaussNewton::bundleAdjustmentGaussNewton(
       Eigen::Vector2d world_point_project_pixel(pixel_p.x, pixel_p.y);
 
       // 这里是 观测值 - 预测值，jacobian矩阵符号
+      // e (2*1)
       Eigen::Vector2d e = points_2d[i] - world_point_project_pixel;
 
       // update cost
-      cost += e.squaredNorm(); // 取两个点之间的距离
+      cost += e.squaredNorm(); // 取两个点之间的距离的平方
+
       double inv_z = 1.0 / pc[2];
       double inv_z2 = inv_z * inv_z;
-      Eigen::Matrix<double, 2, 6> jacobian_mat;
+      Eigen::Matrix<double, 2, 6> jacobian_mat; // jacobian_mat (2*6)
       // clang-format off
       jacobian_mat << 
       fx * inv_z,
@@ -86,10 +88,42 @@ void BA_GaussNewton::bundleAdjustmentGaussNewton(
 
       jacobian_mat = -1 * jacobian_mat;
 
-      H += jacobian_mat.transpose() * jacobian_mat;
-      b += -1 * jacobian_mat.transpose() * e;
+      H += jacobian_mat.transpose() * jacobian_mat; // (6*2) * (2*6)
+      b += -1 * jacobian_mat.transpose() * e;       // (6*2) * (2*1)
+    }
+
+    // [H*Δx = b] solve Δx, Δx(6*1)
+    Eigen::Matrix<double, 6, 1> delta_x;
+    delta_x = H.ldlt().solve(b);
+
+    if (isnan(delta_x[0])) {
+      std::cout << "result is nan!" << std::endl;
+      break;
+    }
+
+    if (iter > 0 && cost >= last_cast) {
+      // cost increase, update is not good
+      std::cout << "cost: " << cost << ", last cost: " << last_cast
+                << std::endl;
+      break;
+    }
+
+    // update estimation pose
+    // 李代数位姿se(3)通过指数映射为李群SE(3)
+    pose = Sophus::SE3::exp(delta_x) * pose;
+    last_cast = cost;
+
+    std::cout << "iteration " << iter << " cost=" << std::setprecision(12)
+              << cost << ", delta x: " << delta_x.norm()
+              << std::endl; // setprecision 指定浮点数字的小数点后要显示的位数
+    // Δx 达到收敛标准
+    if (delta_x.norm() < 1e-6) {
+      // converge 收敛
+      break;
     }
   }
+
+  std::cout << "pose by BA gauss-newton: \n" << pose.matrix() << std::endl;
 }
 
 void BA_GaussNewton::run() {
@@ -117,6 +151,10 @@ void BA_GaussNewton::run() {
     camera_2d_points_.push_back(
         Eigen::Vector2d(camera_frame_points_[i].x, camera_frame_points_[i].y));
   }
+
+  Sophus::SE3 se3_pose;
+  bundleAdjustmentGaussNewton(world_3d_points_, camera_2d_points_,
+                              camera_intrinsics_mat_, se3_pose);
 }
 
 void BA_GaussNewton::getWorldFramePointsAnd2DPoints() {

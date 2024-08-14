@@ -27,10 +27,12 @@ public:
 private:
   void getWorldFramePointsAnd2DPoints();
 
-  void
-  bundleAdjustmentGaussNewton(const std::vector<Eigen::Vector3d> &points_3d,
-                              const std::vector<Eigen::Vector2d> &points_2d,
-                              const cv::Mat &K, Sophus::SE3 &pose);
+  void bundleAdjustmentGaussNewton(
+      const std::vector<Eigen::Vector3d,
+                        Eigen::aligned_allocator<Eigen::Vector3d>> &points_3d,
+      const std::vector<Eigen::Vector2d,
+                        Eigen::aligned_allocator<Eigen::Vector2d>> &points_2d,
+      const cv::Mat &K, Sophus::SE3 &pose);
 
   cv::Mat camera_intrinsics_mat_;
   cv::Point2d principal_point_;
