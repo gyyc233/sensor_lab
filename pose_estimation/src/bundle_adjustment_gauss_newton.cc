@@ -10,9 +10,12 @@ BA_GaussNewton::BA_GaussNewton() {
   feature_detect_ptr_->initialization();
 
   iteration_time_ = 10;
+  std::cout << "construction BA_GaussNewton" << std::endl;
 }
 
-BA_GaussNewton::~BA_GaussNewton() {}
+BA_GaussNewton::~BA_GaussNewton() {
+  std::cout << "destruction BA_GaussNewton" << std::endl;
+}
 
 void BA_GaussNewton::setIteration(int iteration_time) {
   iteration_time_ = iteration_time;

@@ -1,3 +1,6 @@
+#ifndef __H_BUNDLE_ADJUSTMENT_GAUSS_NEWTON_H__
+#define __H_BUNDLE_ADJUSTMENT_GAUSS_NEWTON_H__
+
 #include "include/orb_cv.h"
 #include "pose_estimate.h"
 #include "sophus/se3.h"
@@ -34,10 +37,6 @@ private:
                         Eigen::aligned_allocator<Eigen::Vector2d>> &points_2d,
       const cv::Mat &K, Sophus::SE3 &pose);
 
-  cv::Mat camera_intrinsics_mat_;
-  cv::Point2d principal_point_;
-  double focal_;
-
   std::unique_ptr<ORB_CV> feature_detect_ptr_;
 
   std::vector<cv::DMatch> orb_match_result_;
@@ -50,12 +49,15 @@ private:
   std::vector<cv::Point3f> world_frame_points_;
   std::vector<cv::Point2f> camera_frame_points_;
 
+protected:
+  cv::Mat camera_intrinsics_mat_;
   std::vector<Eigen::Vector3d, Eigen::aligned_allocator<Eigen::Vector3d>>
       world_3d_points_;
   std::vector<Eigen::Vector2d, Eigen::aligned_allocator<Eigen::Vector2d>>
       camera_2d_points_;
-  // Eigen管理内存和C++11中的方法是不一样的，所以需要单独强调元素的内存分配和管理
+  // Eigen管理内存和C++11中的方法不一样，需要单独强调元素的内存分配和管理
 
   int iteration_time_;
 };
 } // namespace SensorLab
+#endif
