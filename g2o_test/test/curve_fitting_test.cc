@@ -14,13 +14,12 @@
 #include <opencv2/core/core.hpp>
 #include <vector>
 
-// 定义顶点，模板参数：优化变量维度和数据类型
+// 定义顶点，模板参数：待优化变量维度和它的数据类型
 class CurveFittingVertex : public g2o::BaseVertex<3, Eigen::Vector3d> {
 public:
-  EIGEN_MAKE_ALIGNED_OPERATOR_NEW // eigen 内存对齐
+  EIGEN_MAKE_ALIGNED_OPERATOR_NEW; // eigen 内存对齐
 
-      virtual void
-      setToOriginImpl() // 重置，设定被优化变量的原始值
+  virtual void setToOriginImpl() // 重置，设定被优化变量的原始值
   {
     _estimate << 0, 0, 0;
   }
@@ -112,7 +111,7 @@ int main(int argc, char **argv) {
   // 4. create sparse optimizer
   g2o::SparseOptimizer optimizer;
   optimizer.setAlgorithm(solver);
-  optimizer.setVerbose(true);
+  optimizer.setVerbose(true); // 打开调试输出
 
   // 5. 定义模型顶点
 

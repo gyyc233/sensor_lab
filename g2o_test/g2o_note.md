@@ -29,7 +29,7 @@
 4. SparseOptimizer包含一个优化算法部分OptimizationAlgorithm，它是通过OptimizationWithHessian 来实现的。其中迭代策略可以从Gauss-Newton（高斯牛顿法，简称GN）、 Levernberg-Marquardt（简称LM法）,、Powell's dogleg 三者中间选择一个（常用的是GN和LM）。
 5. 对优化算法部分进行求解的时求解器solver，它实际由BlockSolver组成
    1. BlockSolver由两部分组成：一个是SparseBlockMatrix，它由于求解稀疏矩阵(雅克比和海塞)
-   2. 另一个部分是LinearSolver，它用来求解线性方程的带球增量，它可以从PCG/CSparse/Choldmod选择求解方法
+   2. 另一个部分是LinearSolver，它用来求解线性方程的待求增量，它可以从PCG/CSparse/Choldmod选择求解方法
 
 ## usage
 

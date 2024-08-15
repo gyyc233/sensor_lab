@@ -35,12 +35,13 @@ target_link_libraries(pose_estimation ${OpenCV_LIBS} ${PCL_LIBRARIES} ${G2O_CORE
 
 add_executable(epipolar_constraint_test test/epipolar_constraint_test.cc)
 add_executable(BA_gauss_newton_test test/BA_gauss_newton_test.cc)
+add_executable(BA_g2o_test test/BA_g2o_test.cc)
 
 target_link_libraries(epipolar_constraint_test pose_estimation)
-
 target_link_libraries(BA_gauss_newton_test pose_estimation)
+target_link_libraries(BA_g2o_test pose_estimation)
 
 # INSTALL
 install(
-  TARGETS epipolar_constraint_test BA_gauss_newton_test pose_estimation feature_detect
+  TARGETS epipolar_constraint_test BA_gauss_newton_test BA_g2o_test pose_estimation feature_detect
   ARCHIVE DESTINATION ${PROJECT_SOURCE_DIR}/build/install)
