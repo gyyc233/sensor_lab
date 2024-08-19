@@ -1,5 +1,4 @@
 #include "bundle_adjustment_gauss_newton.h"
-#include "triansgulation.h"
 #include <iostream>
 #include <memory>
 #include <vector>

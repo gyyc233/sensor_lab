@@ -27,12 +27,23 @@ public:
   void getPointsData(std::vector<cv::Point3f> &source_points,
                      std::vector<cv::Point3f> &target_points);
 
+  /// @brief ICP for 3D points pair
+  /// @note target_points = R * source_points + T
+  /// @param points_source
+  /// @param points_target
+  /// @param rotation rotation matrix
+  /// @param translation translate
   void icpPoseEstimation_3D3D(const std::vector<cv::Point3f> &points_source,
                               const std::vector<cv::Point3f> &points_target,
-                              cv::Mat &rotation, cv::Mat &translation);
+                              cv::Mat &R, cv::Mat &t);
+
+  void run();
+
+  void output(cv::Mat &rotation, cv::Mat &translation);
 
 private:
-  void normalization(std::vector<cv::Point3f> &points);
+  void normalization(std::vector<cv::Point3f> &points,
+                     cv::Point3f &center_point);
 
   std::unique_ptr<ORB_CV> feature_detect_ptr_;
   std::vector<cv::DMatch> orb_match_result_;
@@ -48,6 +59,9 @@ private:
 
   cv::Mat camera_intrinsics_mat_;
   double depth_scale_;
+
+  cv::Mat rotation_;
+  cv::Mat translation_;
 };
 } // namespace SensorLab
 
