@@ -3,6 +3,13 @@
 - [2D光流](#2d光流)
 - [灰度不变假设](#灰度不变假设)
 - [Lucas-Kanade 光流](#lucas-kanade-光流)
+- [Horn-Schunck算法](#horn-schunck算法)
+- [光流金字塔](#光流金字塔)
+
+主要参考
+
+- [光流基本原理和经典算法](https://blog.csdn.net/plateros/article/details/102931138)
+- [optical-flow](https://github.com/xingdi-eric-yuan/optical-flow)
 
 ## 特征点法
 
@@ -59,7 +66,9 @@ vslam中的应用
 
 ## Lucas-Kanade 光流
 
-引入空间一致性假设．假设同一平面上邻近的点具有相似的运动，具体来说就是选取一个mxn的窗口，在此窗口内假定光流值相同，所以这种算法也被称为constant flow．假设我们选取5x5的窗口，如果在此窗口内光流相同，我们就可以得到25个公式
+LK光流目前用于稀疏光流,引入空间一致性假设．
+
+假设同一平面上邻近的点具有相似的运动，具体来说就是选取一个mxn的窗口，在此窗口内假定光流值相同，所以这种算法也被称为constant flow．假设我们选取5x5的窗口，如果在此窗口内光流相同，我们就可以得到25个公式
 
 ![](./img/vslam_feature_flow_direct/img4.png)
 
@@ -70,3 +79,22 @@ LK算法最初用于求稠密光流，但是由于其对角点有较多要求，
 - 窗口越小，越容易出现孔径问题， 窗口越大，越无法保证窗口内光流的一致性。
 
 ![](./img/vslam_feature_flow_direct/img6.png)
+
+## Horn-Schunck算法
+
+Horn-Schunck算法引入了另一种假设 - 平滑性。与LK的光流一致性不同，他认为相邻像素的运动是相近的，平滑的
+
+与LK算法相同，HS算法同样建立在光强一致性假设上,但是HS是一种全局约束算法，也就是说，对每一个像素来说，都需要满足寻找最优的光流值u,v 使得下式的模最小
+
+
+![](./img/vslam_feature_flow_direct/img7.png)
+
+## 光流金字塔
+
+无论是Lucas-kanade还是Horn-schunck算法，均有小运动的假设。然而在实际场景的下，无法保证这个假设。
+
+光流金字塔算法可以改善小运假设带来的弊端
+
+![](./img/vslam_feature_flow_direct/img8.png)
+
+
