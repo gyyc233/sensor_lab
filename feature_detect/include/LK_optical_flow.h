@@ -17,7 +17,7 @@ public:
 
   void inputParams(const char *pre_img_path, const char *cur_img_path);
 
-  /// @brief 计算图片光流
+  /// @brief LK光流计算
   /// @param pre_img
   /// @param cur_img
   /// @param u x方向光流
@@ -30,17 +30,17 @@ public:
   void draw_optical_flow(cv::Mat &img);
 
 private:
-  cv::Mat get_fx(cv::Mat &src1, cv::Mat &src2);
+  cv::Mat getFx(cv::Mat &src1, cv::Mat &src2);
 
-  cv::Mat get_fy(cv::Mat &src1, cv::Mat &src2);
+  cv::Mat getFy(cv::Mat &src1, cv::Mat &src2);
 
-  cv::Mat get_ft(cv::Mat &src1, cv::Mat &src2);
+  cv::Mat getFt(cv::Mat &src1, cv::Mat &src2);
 
-  bool is_inside_image(int y, int x, cv::Mat &m);
+  bool isInsideImage(int y, int x, cv::Mat &m);
 
-  double get_sum_9(cv::Mat &m, int y, int x);
+  double getSum9(cv::Mat &m, int y, int x);
 
-  cv::Mat get_sum9_mat(cv::Mat &m);
+  cv::Mat getSum9Mat(cv::Mat &m);
 
   void saveMat(cv::Mat &M, std::string s);
 

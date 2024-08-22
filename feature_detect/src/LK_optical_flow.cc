@@ -28,9 +28,9 @@ void LKOpticalFlow::inputParams(const char *pre_img_path,
 void LKOpticalFlow::getLucasKanadeLKOpticalFlow(cv::Mat &pre_img,
                                                 cv::Mat &cur_img, cv::Mat &u,
                                                 cv::Mat &v) {
-  cv::Mat fx = get_fx(pre_img, cur_img);
-  cv::Mat fy = get_fy(pre_img, cur_img);
-  cv::Mat ft = get_ft(pre_img, cur_img);
+  cv::Mat fx = getFx(pre_img, cur_img);
+  cv::Mat fy = getFy(pre_img, cur_img);
+  cv::Mat ft = getFt(pre_img, cur_img);
 
   cv::Mat fx2 = fx.mul(fx);
   cv::Mat fy2 = fy.mul(fy);
@@ -38,11 +38,11 @@ void LKOpticalFlow::getLucasKanadeLKOpticalFlow(cv::Mat &pre_img,
   cv::Mat fx_ft = fx.mul(ft);
   cv::Mat fy_ft = fy.mul(ft);
 
-  cv::Mat sum_fx2 = get_sum9_mat(fx2);
-  cv::Mat sum_fy2 = get_sum9_mat(fy2);
-  cv::Mat sum_fx_ft = get_sum9_mat(fx_ft);
-  cv::Mat sum_fx_fy = get_sum9_mat(fx_fy);
-  cv::Mat sum_fy_ft = get_sum9_mat(fy_ft);
+  cv::Mat sum_fx2 = getSum9Mat(fx2);
+  cv::Mat sum_fy2 = getSum9Mat(fy2);
+  cv::Mat sum_fx_ft = getSum9Mat(fx_ft);
+  cv::Mat sum_fx_fy = getSum9Mat(fx_fy);
+  cv::Mat sum_fy_ft = getSum9Mat(fy_ft);
 
   // TODO: 这里 u v 的计算方法不太明白，还是直接使用CV的光流接口吧
   cv::Mat det =
@@ -60,7 +60,7 @@ void LKOpticalFlow::getLucasKanadeLKOpticalFlow(cv::Mat &pre_img,
   v_ = v;
 }
 
-cv::Mat LKOpticalFlow::get_fx(cv::Mat &src1, cv::Mat &src2) {
+cv::Mat LKOpticalFlow::getFx(cv::Mat &src1, cv::Mat &src2) {
   // 两张图的梯度再相加，是不是不相加也可以？
   cv::Mat fx;
   cv::Mat kernel = cv::Mat::ones(2, 2, CV_64FC1);
@@ -75,7 +75,7 @@ cv::Mat LKOpticalFlow::get_fx(cv::Mat &src1, cv::Mat &src2) {
   return fx;
 }
 
-cv::Mat LKOpticalFlow::get_fy(cv::Mat &src1, cv::Mat &src2) {
+cv::Mat LKOpticalFlow::getFy(cv::Mat &src1, cv::Mat &src2) {
   cv::Mat fy;
   cv::Mat kernel = cv::Mat::ones(2, 2, CV_64FC1);
   kernel.at<double>(0, 0) = -1.0;
@@ -89,7 +89,7 @@ cv::Mat LKOpticalFlow::get_fy(cv::Mat &src1, cv::Mat &src2) {
   return fy;
 }
 
-cv::Mat LKOpticalFlow::get_ft(cv::Mat &src1, cv::Mat &src2) {
+cv::Mat LKOpticalFlow::getFt(cv::Mat &src1, cv::Mat &src2) {
   cv::Mat ft;
   cv::Mat kernel = cv::Mat::ones(2, 2, CV_64FC1);
   kernel = kernel.mul(-1);
@@ -103,14 +103,14 @@ cv::Mat LKOpticalFlow::get_ft(cv::Mat &src1, cv::Mat &src2) {
   return ft;
 }
 
-bool LKOpticalFlow::is_inside_image(int y, int x, cv::Mat &m) {
+bool LKOpticalFlow::isInsideImage(int y, int x, cv::Mat &m) {
   if (x >= 0 && x < m.cols && y >= 0 && y < m.rows)
     return true;
   else
     return false;
 }
 
-double LKOpticalFlow::get_sum_9(cv::Mat &m, int y, int x) {
+double LKOpticalFlow::getSum9(cv::Mat &m, int y, int x) {
   if (x < 0 || x >= m.cols)
     return 0;
   if (y < 0 || y >= m.rows)
@@ -120,7 +120,7 @@ double LKOpticalFlow::get_sum_9(cv::Mat &m, int y, int x) {
   int tmp = 0;
   for (int i = -1; i <= 1; i++) {
     for (int j = -1; j <= 1; j++) {
-      if (is_inside_image(y + i, x + j, m)) {
+      if (isInsideImage(y + i, x + j, m)) {
         ++tmp;
         val += m.at<double>(y + i, x + j);
       }
@@ -132,11 +132,11 @@ double LKOpticalFlow::get_sum_9(cv::Mat &m, int y, int x) {
     return m.at<double>(y, x) * 9;
 }
 
-cv::Mat LKOpticalFlow::get_sum9_mat(cv::Mat &m) {
+cv::Mat LKOpticalFlow::getSum9Mat(cv::Mat &m) {
   cv::Mat res = cv::Mat::zeros(m.rows, m.cols, CV_64FC1);
   for (int i = 1; i < m.rows - 1; i++) {
     for (int j = 1; j < m.cols - 1; j++) {
-      res.at<double>(i, j) = get_sum_9(m, i, j);
+      res.at<double>(i, j) = getSum9(m, i, j);
     }
   }
 
