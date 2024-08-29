@@ -60,6 +60,7 @@ private:
 
   void saveMat(cv::Mat &M, std::string s);
 
+  int max_layer_;
   cv::Mat u_;
   cv::Mat v_;
 };

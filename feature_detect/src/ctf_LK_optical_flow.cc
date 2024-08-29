@@ -3,7 +3,7 @@
 
 using namespace SensorLab;
 
-CtfLKOpticalFlow::CtfLKOpticalFlow() {}
+CtfLKOpticalFlow::CtfLKOpticalFlow() { max_layer_ = -1; }
 
 CtfLKOpticalFlow::~CtfLKOpticalFlow() {}
 
@@ -15,8 +15,29 @@ void CtfLKOpticalFlow::inputParams(const char *pre_img_path,
   cv::Mat pre_frame = pre_img(cv::Rect(0, 0, 640, 480));
   cv::Mat cur_frame = cur_img(cv::Rect(0, 0, 640, 480));
 
-  int maxLayer = getMaxLayer(pre_frame);
-  std::cout<<pre_frame.rows<<", "<<pre_frame.cols<<", Max layer = "<<maxLayer<<std::endl;
+  max_layer_ = getMaxLayer(pre_frame);
+  std::cout << pre_frame.rows << ", " << pre_frame.cols
+            << ", Max layer = " << max_layer_ << std::endl;
+
+  pre_frame.convertTo(pre_frame, CV_64FC1, 1.0 / 255, 0);
+  cur_frame.convertTo(cur_frame, CV_64FC1, 1.0 / 255, 0);
+
+  cv::Mat u = cv::Mat::zeros(pre_frame.rows, pre_frame.cols, CV_64FC1);
+  cv::Mat v = cv::Mat::zeros(pre_frame.rows, pre_frame.cols, CV_64FC1);
+  cv::Mat u2 = cv::Mat::zeros(pre_frame.rows, pre_frame.cols, CV_64FC1);
+  cv::Mat v2 = cv::Mat::zeros(pre_frame.rows, pre_frame.cols, CV_64FC1);
+
+  if (max_layer_ >= 1) {
+    coarseToFineEstimation(pre_frame, cur_frame, u, v, max_layer_);
+    saveMat(u, "U");
+    saveMat(v, "V");
+  }
+  u_ = u;
+  v_ = v;
+
+  getLucasKanadeOpticalFlow(pre_frame, cur_frame, u2, v2);
+  saveMat(u2, "U2");
+  saveMat(v2, "V2");
 }
 
 void CtfLKOpticalFlow::getLucasKanadeOpticalFlow(cv::Mat &pre_img,
@@ -38,7 +59,6 @@ void CtfLKOpticalFlow::getLucasKanadeOpticalFlow(cv::Mat &pre_img,
   cv::Mat sum_fx_fy = getSum9Mat(fx_fy);
   cv::Mat sum_fy_ft = getSum9Mat(fy_ft);
 
-  // TODO: 这里 u v 的计算方法不太明白，还是直接使用CV的光流接口吧
   cv::Mat det =
       sum_fx2.mul(sum_fy2) - sum_fx_fy.mul(sum_fx_fy); // A的行列式计算（二阶）
   u = sum_fx_fy.mul(sum_fy_ft) - sum_fy2.mul(sum_fx_ft); //算出u*det
@@ -55,7 +75,6 @@ void CtfLKOpticalFlow::getLucasKanadeOpticalFlow(cv::Mat &pre_img,
 }
 
 cv::Mat CtfLKOpticalFlow::getFx(cv::Mat &src1, cv::Mat &src2) {
-  // 两张图的梯度再相加，是不是不相加也可以？
   cv::Mat fx;
   cv::Mat kernel = cv::Mat::ones(2, 2, CV_64FC1);
   kernel.at<double>(0, 0) = -1.0;
@@ -225,6 +244,10 @@ void CtfLKOpticalFlow::draw_optical_flow(cv::Mat &img) {
       }
     }
   }
+
+  cv::imshow("Frame", img);
+  cv::waitKey(0);
+  cv::destroyAllWindows();
 }
 
 void CtfLKOpticalFlow::coarseToFineEstimation(cv::Mat &img1, cv::Mat &img2,
@@ -302,5 +325,12 @@ std::vector<cv::Mat> CtfLKOpticalFlow::getGaussianPyramid(cv::Mat &img,
     cv::pyrDown(pyr[pyr.size() - 1], tmp);
     pyr.push_back(tmp);
   }
+
+  for (auto &it : pyr) {
+    cv::imshow("pyr", it);
+    cv::waitKey(0);
+    cv::destroyAllWindows();
+  }
+
   return pyr;
 }

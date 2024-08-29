@@ -231,4 +231,8 @@ void LKOpticalFlow::draw_optical_flow(cv::Mat &img) {
       }
     }
   }
+
+  cv::imshow("Frame", img);
+  cv::waitKey(0);
+  cv::destroyAllWindows();
 }

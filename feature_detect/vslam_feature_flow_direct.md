@@ -93,7 +93,7 @@ Horn-Schunck算法引入了另一种假设 - 平滑性。与LK的光流一致性
 
 无论是Lucas-kanade还是Horn-schunck算法，均有小运动的假设。然而在实际场景的下，无法保证这个假设。
 
-光流金字塔算法可以改善小运假设带来的弊端
+光流金字塔算法可以改善小运动假设带来的弊端
 
 ![](./img/vslam_feature_flow_direct/img8.png)
 
