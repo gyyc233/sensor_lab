@@ -7,6 +7,10 @@ find_package(Eigen3 REQUIRED)
 find_package(OpenCV REQUIRED)
 find_package(Ceres REQUIRED)
 
+# gtsam 
+find_package( GTSAMCMakeTools )
+find_package( GTSAM REQUIRED )
+
 list(APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/g2o_test/cmake_modules)
 SET(G2O_ROOT /usr/local/include/g2o)
 find_package(G2O REQUIRED)
@@ -20,6 +24,9 @@ include_directories(${OpenCV_INCLUDE_DIRS})
 include_directories (${gflags_INCLUDE_DIR})
 include_directories (${G2O_INCLUDE_DIRS})
 include_directories(${Sophus_INCLUDE_DIRS})
+
+# gtsam 
+include_directories( ${GTSAM_INCLUDE_DIR} )
 
 include_directories(${PROJECT_SOURCE_DIR}/io)
 include_directories(${PROJECT_SOURCE_DIR}/common)
