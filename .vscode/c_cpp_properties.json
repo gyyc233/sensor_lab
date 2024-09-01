@@ -11,6 +11,7 @@
                 "/usr/local/include/pcl-1.14",
                 "/usr/local/include/ceres",
                 "/usr/local/include/g2o",
+                "/usr/local/include/DBoW3",
                 "/usr/include",
                 "/usr/include/opencv4",
                 "/usr/include/eigen3"

@@ -10,4 +10,6 @@ set( DBoW3_INCLUDE_DIRS "/usr/local/include" )
 set( DBoW3_LIBS "/usr/local/lib/libDBoW3.so" )
 
 add_executable(feature_training test/feature_training.cc)
+add_executable(loop_closure_test test/loop_closure.cc)
 target_link_libraries(feature_training ${OpenCV_LIBS} ${DBoW3_LIBS})
+target_link_libraries(loop_closure_test ${OpenCV_LIBS} ${DBoW3_LIBS})
