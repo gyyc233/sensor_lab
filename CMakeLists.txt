@@ -19,6 +19,7 @@ add_subdirectory(cere_test)
 add_subdirectory(g2o_test)
 add_subdirectory(task)
 add_subdirectory(loop_closure)
+add_subdirectory(dense_mapping)
 
 # copy floder to install path
 set(build_data_include ${CMAKE_CURRENT_SOURCE_DIR}/build)
