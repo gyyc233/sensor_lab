@@ -50,6 +50,7 @@ add_executable(dlt_camera_calibration_test test/dlt_camera_calibration_test.cc)
 add_executable(moving_lest_squares_test test/moving_lest_squares_test.cc)
 add_executable(least_square_polynomial_curve_fit_test test/least_square_polynomial_curve_fit_test.cc)
 add_executable(undistortion test/undistortion_test.cc)
+add_executable(tsai_lenz_calibration test/tsai_lenz_calibration.cc)
 
 target_link_libraries(cubic_spline_test algorithm glog::glog)
 target_link_libraries(dlt_camera_calibration_test algorithm glog::glog)
