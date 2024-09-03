@@ -47,8 +47,6 @@ int main() {
 
   pcl::PointCloud<pcl::PointXYZRGB>::Ptr point_cloud(
       new pcl::PointCloud<pcl::PointXYZRGB>);
-  // octomap tree
-  octomap::OcTree tree(0.01); // 参数为分辨率
 
   for (int i = 0; i < 5; i++) {
     pcl::PointCloud<pcl::PointXYZRGB>::Ptr sub_cloud(
@@ -60,7 +58,7 @@ int main() {
     Eigen::Isometry3d T = poses[i];
     // std::cout << "index: " << i << "pose: \n" << T.data() << std::endl;
 
-    octomap::Pointcloud oct_cloud; // the point cloud in octomap
+    // octomap::Pointcloud oct_cloud; // the point cloud in octomap
 
     // add point
     for (int v = 0; v < color.rows; v++) {
@@ -88,14 +86,9 @@ int main() {
         p.g = color.data[v * color.step + u * color.channels() + 1];
         p.r = color.data[v * color.step + u * color.channels() + 2];
         sub_cloud->points.push_back(p);
-        oct_cloud.push_back(point_world[0], point_world[1], point_world[2]);
       }
     }
     *point_cloud += *sub_cloud;
-    std::cout << "111" << std::endl;
-    tree.insertPointCloud(oct_cloud,
-                          octomap::point3d(T(0, 3), T(1, 3), T(2, 3)));
-    std::cout << "222" << std::endl;
   }
 
   // voxel filter
@@ -110,8 +103,16 @@ int main() {
   if (point_cloud->size() > 0)
     pcl::io::savePCDFileBinary("map.pcd", *point_cloud);
 
-  // 更新中间节点的占据信息并写入磁盘
-  tree.updateInnerOccupancy();
+  // octomap tree
+  octomap::OcTree tree(0.05); // 参数为分辨率
+  for (int i = 0; i < point_cloud->points.size(); i++) {
+    tree.updateNode(octomap::point3d(point_cloud->points[i].x,
+                                     point_cloud->points[i].y,
+                                     point_cloud->points[i].z),
+                    true);
+  }
+
+  tree.updateInnerOccupancy(); // update octomap
   std::cout << "saving octomap ... " << std::endl;
   tree.writeBinary("octomap.bt");
 
