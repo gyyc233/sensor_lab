@@ -18,6 +18,7 @@ public:
 
   void inputY(const std::vector<double> &y);
 
+  /// @brief 代数求解最小二乘多项式拟合
   void solveViaAlgebraic();
 
   void solveViaMatrix();

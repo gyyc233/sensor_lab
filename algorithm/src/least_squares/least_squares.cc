@@ -44,6 +44,8 @@ void LeastSquare::solveViaAlgebraic() {
       Y_.at<double>(i, 0) += std::pow(x_[k], i) * y_[k];
     }
   }
+  std::cout << "X_: \n" << X_ << std::endl;
+  std::cout << "Y_: \n" << Y_ << std::endl;
 
   // solve
   coefficient_ = cv::Mat::zeros(n_ + 1, 1, CV_64FC1);
@@ -70,6 +72,8 @@ void LeastSquare::solveViaMatrix() {
   for (int i = 0; i < m_ + 1; i++) {
     mat_Y_.at<double>(i, 0) += y_[i];
   }
+  std::cout << "mat_X_: \n" << mat_X_ << std::endl;
+  std::cout << "mat_Y_: \n" << mat_Y_ << std::endl;
 
   // solve
   mat_coefficient_opencv_ = cv::Mat::zeros(n_ + 1, 1, CV_64FC1);
