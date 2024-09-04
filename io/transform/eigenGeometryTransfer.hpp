@@ -32,7 +32,7 @@ void printfQuaternion(const Eigen::Quaterniond &quaternion);
 
 /// @brief euler convert rotation matrix
 /// @note
-/// 欧拉角定义：一共旋转三次，第一次绕自身Z轴旋转，第二次绕参考坐标系Y轴旋转，第三次绕参考坐标系X轴旋转
+/// 欧拉角定义：一共旋转三次，第一次绕参考坐标系Z轴旋转，第二次绕参考坐标系Y轴旋转，第三次绕参考坐标系X轴旋转
 /// @param roll (x), unit: deg
 /// @param pitch (y), unit: deg
 /// @param yaw (z), unit: deg
