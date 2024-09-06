@@ -7,7 +7,7 @@ permissions:
   pull-requests: write
 jobs:
   build:
-    name: Post welcome comment
+    name: C/C++ CI
     runs-on: ubuntu-latest
     steps:
       - run: gh pr comment $PR_URL --body "Welcome to the repository!"
