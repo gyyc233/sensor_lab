@@ -16,9 +16,36 @@ add_library(kalman_filter STATIC ${srcs})
 target_include_directories(kalman_filter PUBLIC include)
 target_link_libraries(kalman_filter ${OpenCV_LIBS} ${PCL_LIBRARIES})
 
+# ================================================================
+# add matplotlib-cpp
+add_library(kalman_matplotlib_cpp INTERFACE)
+target_include_directories(kalman_matplotlib_cpp INTERFACE ${PROJECT_SOURCE_DIR}/common)
+target_compile_features(kalman_matplotlib_cpp INTERFACE
+  cxx_std_11
+)
+# TODO: Use `Development.Embed` component when requiring cmake >= 3.18
+find_package(Python3 COMPONENTS Interpreter Development REQUIRED)
+target_link_libraries(kalman_matplotlib_cpp INTERFACE
+  Python3::Python
+  Python3::Module
+)
+find_package(Python3 COMPONENTS NumPy)
+if(Python3_NumPy_FOUND)
+  target_link_libraries(kalman_matplotlib_cpp INTERFACE
+    Python3::NumPy
+  )
+else()
+  target_compile_definitions(kalman_matplotlib_cpp INTERFACE WITHOUT_NUMPY)
+endif()
+install(
+  TARGETS kalman_matplotlib_cpp
+  EXPORT install_targets
+)
+# ================================================================
+
 add_executable(discrete_kalman_filter_test test/discrete_kalman_filter_test.cc)
 
-target_link_libraries(discrete_kalman_filter_test kalman_filter)
+target_link_libraries(discrete_kalman_filter_test kalman_filter kalman_matplotlib_cpp)
 
 # INSTALL
 install(

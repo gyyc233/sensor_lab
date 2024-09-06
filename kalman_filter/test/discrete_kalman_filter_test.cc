@@ -1,8 +1,11 @@
 #include "discrete_kalman_filter.h"
+#include "matplotlibcpp.h"
 #include <Eigen/Dense>
 #include <iostream>
 #include <memory>
 #include <vector>
+
+namespace plt = matplotlibcpp;
 
 // Test for the KalmanFilter class with 1D projectile motion. 1维平抛运动
 // 状态量有３个 位置 速度 加速度,这三者的时间状态方程如下
@@ -66,6 +69,11 @@ int main() {
   Eigen::VectorXd y(m);
   std::cout << "t = " << t << ", "
             << "x_hat[0]: " << dkf.state().transpose() << std::endl;
+
+  std::vector<double> test_index;
+  std::vector<double> test_y;
+  std::vector<double> test_correct;
+
   for (int i = 0; i < measurements.size(); i++) {
     std::cout << "============ index: " << i << "============" << std::endl;
     t += dt;
@@ -74,7 +82,14 @@ int main() {
     std::cout << "t = " << t << ", "
               << "y[" << i << "] = " << y.transpose() << ", x_hat[" << i
               << "] = " << dkf.state().transpose() << std::endl;
-    std::cin.get();
+
+    test_index.push_back(i);
+    test_y.push_back(y.transpose()(0, 0));
+    test_correct.push_back(dkf.state().transpose()(0, 0));
   }
+
+  plt::plot(test_index, test_y);
+  plt::plot(test_index, test_correct);
+  plt::show();
   return 0;
 }
