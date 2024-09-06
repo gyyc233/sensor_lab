@@ -20,7 +20,7 @@ include_directories(${PROJECT_SOURCE_DIR}/io)
 # ================================================================
 # add matplotlib-cpp
 add_library(matplotlib_cpp INTERFACE)
-target_include_directories(matplotlib_cpp INTERFACE include/common)
+target_include_directories(matplotlib_cpp INTERFACE ${PROJECT_SOURCE_DIR}/common)
 target_compile_features(matplotlib_cpp INTERFACE
   cxx_std_11
 )
