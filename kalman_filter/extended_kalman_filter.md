@@ -37,8 +37,26 @@ or
 
 ![](./img/ekf/img9.png)
 
+## matlab中对ekf的解释
+
+![](./img/ekf/img10.png)
+
+**当噪声在状态更新方程中是加法时,$F^{(w)}$是单位阵**
+![](./img/ekf/img11.png)
+
+**当噪声在测量方程中是加法时,$H^{(v)}$是单位阵**
+
+The extended Kalman filter loop is almost identical to the loop of Linear Kalman Filters except that:
+EK与LKF除了以下几处外几乎相同
+- The filter uses the exact nonlinear state update and measurement functions whenever possible. 滤波器尽可能使用精确的非线性状态更新和测量函数
+- The state Jacobian replaces the state transition matrix. 状态 Jacobian 替换状态转换矩阵
+- The measurement Jacobian replaces the measurement matrix. 测量 Jacobian 将替换测量矩阵
+
+![](./img/ekf/img12.png)
 
 参考
+
+[Extended Kalman Filters](https://ww2.mathworks.cn/help/driving/ug/extended-kalman-filters.html)
 
 [Extended Kalman Filter: How to Implement in C++ with Eigen](https://codingcorner.org/extended-kalman-filter-in-cpp-with-eigen3/)
 
