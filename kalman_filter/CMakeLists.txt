@@ -45,8 +45,12 @@ install(
 
 add_executable(discrete_kalman_filter_test test/discrete_kalman_filter_test.cc)
 add_executable(range_sensor_ekf_sample_test test/range_sensor_ekf_sample_test.cc)
+add_executable(range_sensor_ekf_test test/range_sensor_ekf_test.cc)
+add_executable(kf_state_estimation test/kf_state_estimation.cc)
 target_link_libraries(discrete_kalman_filter_test kalman_filter kalman_matplotlib_cpp)
 target_link_libraries(range_sensor_ekf_sample_test kalman_filter kalman_matplotlib_cpp)
+target_link_libraries(range_sensor_ekf_test kalman_filter kalman_matplotlib_cpp)
+target_link_libraries(kf_state_estimation kalman_filter kalman_matplotlib_cpp)
 
 # INSTALL
 install(

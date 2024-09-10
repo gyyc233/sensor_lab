@@ -78,6 +78,8 @@ K将随时间变化，K=>0:预测误差为0，系统完全取决于预测值,则
 
 参考
 
+[Kalman Filter: How to Implement in C++ with Eigen](https://codingcorner.org/kalman-filter-cpp-eigen-cmake/)
+
 [卡尔曼滤波器详解——从零开始(4) Kalman Filter from Zero](https://zhuanlan.zhihu.com/p/340523145)
 
 [kalman滤波理解三：协方差矩阵的计算](https://blog.csdn.net/u011362822/article/details/95905113)

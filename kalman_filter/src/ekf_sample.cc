@@ -31,7 +31,8 @@ void EKF::ekf_process(Eigen::VectorXd &z_k_observation_vector,
       A_k_ * state_estimate_k_minus_1 +
       getB(state_estimate_k_minus_1[2], dt) * control_vector_k_minus_1 +
       process_noise_v_k_minus_1_;
-  std::cout << "State Estimate Before EKF = \n" << state_estimate_k << std::endl;
+  std::cout << "State Estimate Before EKF = \n"
+            << state_estimate_k << std::endl;
 
   // 2. Predict the state covariance estimate based on the previous
   // covariance and some noise
@@ -57,7 +58,8 @@ void EKF::ekf_process(Eigen::VectorXd &z_k_observation_vector,
 
   // 4. Calculate an correct state estimate for time k
   state_estimate_k = state_estimate_k + K_k * measurement_residual_y_k;
-  std::cout << "corrected state_estimate_k = \n" << state_estimate_k << std::endl;
+  std::cout << "corrected state_estimate_k = \n"
+            << state_estimate_k << std::endl;
 
   // 5. correct the state covariance estimate for time k
   P_k = P_k - K_k * H_k_ * P_k;

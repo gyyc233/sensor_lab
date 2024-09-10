@@ -66,7 +66,8 @@ int main() {
                    sensor_noise_w_k);
 
   for (size_t i = 0; i < z_ks.size(); i++) {
-    std::cout<<"\n\n========== loop index: "<<i<<"=========="<<std::endl;
+    std::cout << "\n\n========== loop index: " << i
+              << "==========" << std::endl;
     Eigen::VectorXd z_k(n);
     z_k << z_ks[i][0], z_ks[i][1], z_ks[i][2];
 
