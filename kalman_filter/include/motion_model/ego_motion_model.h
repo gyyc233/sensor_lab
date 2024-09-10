@@ -1,8 +1,8 @@
 #ifndef OPENKF_EGO_MOTION_MODEL_H
 #define OPENKF_EGO_MOTION_MODEL_H
 
-#include "motion_model.h"
-#include "types.h"
+#include "motion_model.hpp"
+#include "types.hpp"
 
 namespace kf {
 namespace motionmodel {

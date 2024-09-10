@@ -1,19 +1,10 @@
 ///
 /// Copyright 2022 Mohanad Youssef (Al-khwarizmi)
-///
-/// Use of this source code is governed by an GPL-3.0 - style
-/// license that can be found in the LICENSE file or at
-/// https://opensource.org/licenses/GPL-3.0
-///
-/// @author Mohanad Youssef <mohanad.magdy.hammad@gmail.com>
-/// @file kalman_filter.h
-///
-
 #ifndef KALMAN_FILTER_LIB_H
 #define KALMAN_FILTER_LIB_H
 
-#include "motion_model/motion_model.h"
-#include "types.h"
+#include "motion_model/motion_model.hpp"
+#include "types.hpp"
 
 namespace kf {
 template <int32_t DIM_X, int32_t DIM_Z> class KalmanFilter {

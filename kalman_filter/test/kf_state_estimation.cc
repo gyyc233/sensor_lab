@@ -1,19 +1,8 @@
-///
-/// Copyright 2022 Mohanad Youssef (Al-khwarizmi)
-///
-/// Use of this source code is governed by an GPL-3.0 - style
-/// license that can be found in the LICENSE file or at
-/// https://opensource.org/licenses/GPL-3.0
-///
-/// @author Mohanad Youssef <mohanad.magdy.hammad@gmail.com>
-/// @file main.cpp
-///
-
 #include <iostream>
 #include <stdint.h>
 
-#include "kalman_filter.h"
-#include "types.h"
+#include "kalman_filter.hpp"
+#include "types.hpp"
 
 // state dimensions
 static constexpr size_t DIM_X{2};

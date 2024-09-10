@@ -1,14 +1,3 @@
-///
-/// Copyright 2022 Mohanad Youssef (Al-khwarizmi)
-///
-/// Use of this source code is governed by an GPL-3.0 - style
-/// license that can be found in the LICENSE file or at
-/// https://opensource.org/licenses/GPL-3.0
-///
-/// @author Mohanad Youssef <mohanad.magdy.hammad@gmail.com>
-/// @file types.h
-///
-
 #ifndef OPENKF_TYPES_H
 #define OPENKF_TYPES_H
 
