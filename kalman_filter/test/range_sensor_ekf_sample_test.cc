@@ -1,4 +1,4 @@
-#include "ekf.h"
+#include "ekf_sample.h"
 #include "matplotlibcpp.h"
 #include <Eigen/Dense>
 #include <iostream>
@@ -49,7 +49,7 @@ int main() {
 
   A_k << 1.0, 0, 0, 0, 1.0, 0, 0, 0, 1.0;
 
-  process_noise_v_k_minus_1 << 0.01, 0.01, 0.03;
+  process_noise_v_k_minus_1 << 0.01, 0.01, 0.003;
 
   Q_k << 1.0, 0, 0, 0, 1.0, 0, 0, 0, 1.0;
 
