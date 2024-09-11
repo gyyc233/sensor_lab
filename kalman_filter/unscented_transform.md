@@ -23,7 +23,7 @@ Cholesky decompose estimate square root of covariance $P_{xx}$ 协方差的平�
 
 ![](./img/unscented_transform/img5.png)
 
-２. 为2n+1点计算各自权重，第一个点是sigma点的均值, kappa是sigma点的缩放系数,经验上通常$n +\kappa = 3$　这样就可以计算所有的sigma点了
+２. 为2n+1点计算各自权重，第一个点是sigma点的均值, kappa是sigma点的缩放系数,经验上通常$\lambda +\kappa = 3$, $\lambda$ 是大Ｐ矩阵的维数　这样就可以计算所有的sigma点了
 
 ![](./img/unscented_transform/img2.png)
 

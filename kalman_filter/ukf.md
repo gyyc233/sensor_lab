@@ -21,7 +21,7 @@ Integrate the unscented transformation into the Kalman filter algorithm which wi
 
 ## Correction step
 
-1. 对Sigma点通过非线性函数映射到观测空间，并计算均值和协方差矩阵
+1. 对Sigma点通过非线性函数映射到观测空间，并计算均值和协方差矩阵.这里是重复了一遍unscented transform,但使用的非线性函数是H而不是F
 
 ![](./img/ukf/img5.png)
 

@@ -21,7 +21,7 @@ public:
 
   ///
   /// @brief adding process noise covariance Q to the augmented state covariance
-  /// matPa in the middle element of the diagonal.
+  /// matPa in the middle element of the diagonal. 将Q添加到Ｐ对角线中的中间
   ///
   void setCovarianceQ(const Matrix<DIM_V, DIM_V> &matQ) {
     const int32_t S_IDX{DIM_X};
@@ -37,6 +37,7 @@ public:
   ///
   /// @brief adding measurement noise covariance R to the augmented state
   /// covariance matPa in the third element of the diagonal.
+  /// 将R添加到Ｐ对角线中的右下角
   ///
   void setCovarianceR(const Matrix<DIM_N, DIM_N> &matR) {
     const int32_t S_IDX{DIM_X + DIM_V};
@@ -65,16 +66,20 @@ public:
   ///
   template <typename PredictionModelCallback>
   void predictUKF(PredictionModelCallback predictionModelFunc) {
+    // 1. get augment state and covariance
     // self.x_a[:self.dim_x] = x
     // self.P_a[:self.dim_x, : self.dim_x] = P
     updateAugmentedStateAndCovariance();
 
     const float32_t kappa{static_cast<float32_t>(3 - DIM_A)};
+    std::cout << "kappa: " << kappa << std::endl;
 
+    // 2. generated sigma x
     // xa_sigmas = self.sigma_points(self.x_a, self.P_a)
     Matrix<DIM_A, SIGMA_DIM> matSigmaXa{
         calculateSigmaPoints(m_vecXa, m_matPa, kappa)};
 
+    // 3. transform sigma points X through the nonlinear model f(X) to obtain Y
     // xx_sigmas = xa_sigmas[:self.dim_x, :]
     // Matrix<DIM_X, SIGMA_DIM> sigmaXx{ matSigmaXa.block<DIM_X, SIGMA_DIM>(0,
     // 0) };
@@ -99,8 +104,12 @@ public:
       util::copyToColumn<DIM_X, SIGMA_DIM>(i, sigmaXx, Yi); // Y[:, i] = y
     }
 
+    // 4. get new mean and covariance
     // y, Pyy = self.calculate_mean_and_covariance(y_sigmas)
     calculateWeightedMeanAndCovariance<DIM_X>(sigmaXx, m_vecX, m_matP);
+    std::cout << "unscented transform mean as vecX: \n" << m_vecX << std::endl;
+    std::cout << "unscented transform covariance as m_matP: \n"
+              << m_matP << std::endl;
 
     //// self.x_a[:self.dim_x] = y
     //// self.P_a[:self.dim_x, : self.dim_x] = Pyy
@@ -115,6 +124,7 @@ public:
   template <typename MeasurementModelCallback>
   void correctUKF(MeasurementModelCallback measurementModelFunc,
                   const Vector<DIM_Z> &vecZ) {
+    // 1. generated augment state and covariance
     // self.x_a[:self.dim_x] = x
     // self.P_a[:self.dim_x, : self.dim_x] = P
     updateAugmentedStateAndCovariance();
@@ -154,14 +164,19 @@ public:
     calculateWeightedMeanAndCovariance<DIM_Z>(sigmaY, vecY, matPyy);
 
     // TODO: calculate cross correlation
+    // 2. calculate cross correlation 计算互相关矩阵
     const Matrix<DIM_X, DIM_Z> matPxy{
         calculateCrossCorrelation(sigmaXx, m_vecX, sigmaY, vecY)};
 
-    // kalman gain
+    // 3. kalman gain
     const Matrix<DIM_X, DIM_Z> matK{matPxy * matPyy.inverse()};
+    std::cout << "kalman gain:\n" << matK << std::endl;
 
+    // 4. corrected m_vecX and m_matP
     m_vecX += matK * (vecZ - vecY);
     m_matP -= matK * matPyy * matK.transpose();
+    std::cout << "corrected m_vecX:\n" << m_vecX << std::endl;
+    std::cout << "corrected m_matP:\n" << m_matP << std::endl;
 
     //// self.x_a[:self.dim_x] = x
     //// self.P_a[:self.dim_x, : self.dim_x] = P
@@ -191,6 +206,7 @@ private:
     for (int32_t i{0}; i < DIM_X; ++i) {
       m_vecXa[i] = m_vecX[i];
     }
+    std::cout << "update augmented vecX:\n" << m_vecXa << std::endl;
   }
 
   ///
@@ -202,6 +218,7 @@ private:
         m_matPa(i, j) = m_matP(i, j);
       }
     }
+    std::cout << "update augmented m_matPa:\n" << m_matPa << std::endl;
   }
 
   ///
@@ -237,6 +254,7 @@ private:
     Matrix<DIM_A, DIM_A> matSa{lltOfPa.matrixL()}; // sqrt(P_{a})
 
     matSa *= scalarMultiplier; // sqrt( (n + \kappa) * P_{a} )
+    std::cout << "sqrt( (n + kappa) * P_{a} ): \n" << matSa << std::endl;
 
     Matrix<DIM_A, SIGMA_DIM> sigmaXa;
 
@@ -260,6 +278,9 @@ private:
           IDX_2, sigmaXa, vecShiftTerm); // X_{i+n}^a = \bar{xa} - sqrt( (n^a +
                                          // \kappa) * P^{a} )
     }
+
+    std::cout << "sigma points, row is dimension of augment state: \n"
+              << sigmaXa << std::endl;
 
     return sigmaXa;
   }
@@ -338,6 +359,7 @@ private:
                                              // \bar{y}) (Y[:, i] - \bar{y})^T
     }
 
+    std::cout << "calculate cross correlation:\n" << matPxy << std::endl;
     return matPxy;
   }
 };
