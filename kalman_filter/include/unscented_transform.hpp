@@ -119,6 +119,9 @@ private:
 
     _weights[0] = kappa / denoTerm;
     _weights[1] = 0.5F / denoTerm;
+
+    std::cout << "weight_0: " << _weights[0] << std::endl;
+    std::cout << "weight_i: " << _weights[1] << std::endl;
   }
 
   ///
@@ -132,14 +135,17 @@ private:
   void updateSigmaPoints(const Vector<DIM> &vecX,
                          const Matrix<DIM, DIM> &matPxx,
                          const float32_t kappa) {
+    std::cout << "n + kappa: " << DIM + kappa << std::endl;
     const float32_t scalarMultiplier{
         std::sqrt(DIM + kappa)}; // sqrt(n + \kappa)
 
     // cholesky factorization to get matrix Pxx square-root
     Eigen::LLT<Matrix<DIM, DIM>> lltOfPxx(matPxx);
     Matrix<DIM, DIM> matSxx{lltOfPxx.matrixL()}; // sqrt(P_{xx})
+    std::cout << "square-root of cov:\n" << matSxx << std::endl;
 
     matSxx *= scalarMultiplier; // sqrt( (n + \kappa) * P_{xx} )
+    std::cout << "sqrt( (n + kappa) * P_{xx} ):\n" << matSxx << std::endl;
 
     // X_0 = \bar{x}
     util::copyToColumn<DIM, SIGMA_DIM>(0, _sigmaX, vecX);
@@ -152,13 +158,19 @@ private:
       util::copyToColumn<DIM, SIGMA_DIM>(IDX_2, _sigmaX, vecX);
 
       const Vector<DIM> vecShiftTerm{util::getColumnAt<DIM, DIM>(i, matSxx)};
+      std::cout << "id: " << i << ", origin _sigmaX:\n" << _sigmaX << std::endl;
+      std::cout << "id: " << i << ", col of sqrt( (n + kappa) * P_{xx} ):\n"
+                << vecShiftTerm << std::endl;
 
       util::addColumnFrom<DIM, SIGMA_DIM>(
           IDX_1, _sigmaX,
           vecShiftTerm); // X_i     = \bar{x} + sqrt( (n + \kappa) * P_{xx} )
+      std::cout << "id: " << i << ", add _sigmaX:\n" << _sigmaX << std::endl;
+
       util::subColumnFrom<DIM, SIGMA_DIM>(
           IDX_2, _sigmaX,
           vecShiftTerm); // X_{i+n} = \bar{x} - sqrt( (n + \kappa) * P_{xx} )
+      std::cout << "id: " << i << ", sub _sigmaX:\n" << _sigmaX << std::endl;
     }
   }
 
@@ -175,6 +187,7 @@ private:
       const Vector<DIM> y{nonlinearFunction(x)}; // y = f(x)
 
       util::copyToColumn<DIM, SIGMA_DIM>(i, sigmaY, y); // Y[:, i] = y
+      std::cout << "sigma Y: \n" << sigmaY << std::endl;
     }
   }
 
@@ -194,6 +207,7 @@ private:
       vecY += _weights[1] * util::getColumnAt<DIM, SIGMA_DIM>(
                                 i, sigmaY); // y += W[0, i] Y[:, i]
     }
+    std::cout << "Y mean: \n" << vecY << std::endl;
 
     // 2. calculate covariance: P_{yy} = \sum_{i_0}^{2n} W[0, i] (Y[:, i] -
     // \bar{y}) (Y[:, i] - \bar{y})^T
@@ -214,6 +228,7 @@ private:
 
       matPyy += Pi; // y += W[0, i] (Y[:, i] - \bar{y}) (Y[:, i] - \bar{y})^T
     }
+    std::cout << "Y covariance: \n" << matPyy << std::endl;
   }
 };
 } // namespace kf

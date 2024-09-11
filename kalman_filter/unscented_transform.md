@@ -1,4 +1,5 @@
-
+- [unscented transform](#unscented-transform)
+- [unscented transform algorithm](#unscented-transform-algorithm)
 
 ## unscented transform
 
@@ -26,7 +27,7 @@ Cholesky decompose estimate square root of covariance $P_{xx}$ 协方差的平�
 
 ![](./img/unscented_transform/img2.png)
 
-3. sigma点通过非线性函数传播
+3. sigmaX点通过非线性函数传播，计算sigmaY
 
 ![](./img/unscented_transform/img3.png)
 

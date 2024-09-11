@@ -26,7 +26,7 @@ kf::Vector<DIM_2> function2(const kf::Vector<DIM_2> &x) {
 
 int main() {
   // example 1
-  runExample1();
+  // runExample1();
 
   // example 2
   runExample2();
