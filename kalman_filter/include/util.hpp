@@ -104,6 +104,7 @@ Matrix<ROWS, COLS_L> cholupdate(Matrix<ROWS, COLS_L> matL,
 template <int32_t ROWS, int32_t COLS>
 Matrix<ROWS, COLS> forwardSubstitute(const Matrix<ROWS, ROWS> &matA,
                                      const Matrix<ROWS, COLS> &matB) {
+  // solve AX=B, estimate X
   Matrix<ROWS, COLS> matX;
 
   for (int32_t k{0}; k < COLS; ++k) {
