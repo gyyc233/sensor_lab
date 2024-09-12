@@ -93,6 +93,7 @@ public:
     std::cout << "_weights[0] : \n" << _weights[0] << "\n";
     std::cout << "_weights[1] : \n" << _weights[1] << "\n";
     std::cout << "_sigmaX : \n" << _sigmaX << "\n";
+    std::cout << "_sigmaY : \n" << _sigmaY << "\n";
   }
 
   Matrix<1, 2> &weights() { return _weights; }
@@ -101,12 +102,18 @@ public:
   Matrix<DIM, SIGMA_DIM> &sigmaX() { return _sigmaX; }
   const Matrix<DIM, SIGMA_DIM> &sigmaX() const { return _sigmaX; }
 
+  Matrix<DIM, SIGMA_DIM> &sigmaY() { return _sigmaY; }
+  const Matrix<DIM, SIGMA_DIM> &sigmaY() const { return _sigmaY; }
+
 private:
   /// @brief unscented transform weight 0 for mean
   Matrix<1, 2> _weights;
 
   /// @brief input sigma points
   Matrix<DIM, SIGMA_DIM> _sigmaX;
+
+  /// @brief output sigma points
+  Matrix<DIM, SIGMA_DIM> _sigmaY;
 
   ///
   /// @brief algorithm to calculate the weights used to draw the sigma points
@@ -189,6 +196,7 @@ private:
       util::copyToColumn<DIM, SIGMA_DIM>(i, sigmaY, y); // Y[:, i] = y
       std::cout << "sigma Y: \n" << sigmaY << std::endl;
     }
+    _sigmaY = sigmaY;
   }
 
   ///

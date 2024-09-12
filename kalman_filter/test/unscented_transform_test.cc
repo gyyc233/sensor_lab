@@ -2,8 +2,11 @@
 #include <stdint.h>
 
 #include "kalman_filter.hpp"
+#include "matplotlibcpp.h"
 #include "types.hpp"
 #include "unscented_transform.hpp"
+
+namespace plt = matplotlibcpp;
 
 static constexpr size_t DIM_1{1};
 static constexpr size_t DIM_2{2};
@@ -79,5 +82,16 @@ void runExample2() {
   std::cout << "vecY: \n" << vecY << "\n";
   std::cout << "matPyy: \n" << matPyy << "\n";
 
+  auto sigma_x_points = UT.sigmaX();
+
+  std::vector<double> test_sigma_a;
+  std::vector<double> test_sigma_b;
+
+  for (int i = 0; i < 5; i++) {
+    test_sigma_a.push_back(sigma_x_points(0, i));
+    test_sigma_b.push_back(sigma_x_points(1, i));
+  }
+  plt::scatter(test_sigma_a, test_sigma_b);
+  plt::show();
   std::cout << " End of Example 2: ===========================" << std::endl;
 }
