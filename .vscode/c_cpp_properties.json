@@ -8,7 +8,7 @@
                 "/usr/local/include/glog",
                 "/usr/local/include/gflags",
                 "/usr/local/include/sophus",
-                "/usr/local/include/pcl-1.14",
+                "/usr/include/pcl-1.10",
                 "/usr/local/include/ceres",
                 "/usr/local/include/g2o",
                 "/usr/local/include/DBoW3",

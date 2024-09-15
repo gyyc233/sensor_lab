@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.20)
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -pthread")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -pthread -mfma")
 # set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -std=c99")
 
 # set gdb debug
@@ -21,6 +21,7 @@ add_subdirectory(task)
 add_subdirectory(loop_closure)
 add_subdirectory(dense_mapping)
 add_subdirectory(kalman_filter)
+add_subdirectory(path_plan)
 
 # copy floder to install path
 set(build_data_include ${CMAKE_CURRENT_SOURCE_DIR}/build)

@@ -13,7 +13,7 @@ include_directories(${OpenCV_INCLUDE_DIRS})
 include_directories(${Sophus_INCLUDE_DIRS})
 
 # pcl 
-find_package(PCL 1.14.1 REQUIRED)
+find_package(PCL 1.10 REQUIRED)
 include_directories( ${PCL_INCLUDE_DIRS} )
 link_directories(${PCL_LIBRARY_DIRS})
 add_definitions( ${PCL_DEFINITIONS} )
