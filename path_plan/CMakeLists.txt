@@ -52,7 +52,10 @@ target_link_libraries(dijkstra_test path_plan)
 add_executable(a_star_test test/a_star_test.cc)
 target_link_libraries(a_star_test path_plan)
 
+add_executable(dwa_test test/dwa_test.cc)
+target_link_libraries(dwa_test path_plan)
+
 # INSTALL
 install(
-  TARGETS easy_dijkstra_test a_star_test
+  TARGETS easy_dijkstra_test dijkstra_test a_star_test dwa_test
   ARCHIVE DESTINATION ${PROJECT_SOURCE_DIR}/build/install)
