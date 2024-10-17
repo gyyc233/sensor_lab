@@ -58,7 +58,10 @@ target_link_libraries(dwa_test path_plan)
 add_executable(rrt_test test/rrt_test.cc)
 target_link_libraries(rrt_test path_plan)
 
+add_executable(rrt_connect_test test/rrt_connect_test.cc)
+target_link_libraries(rrt_connect_test path_plan)
+
 # INSTALL
 install(
-  TARGETS easy_dijkstra_test dijkstra_test a_star_test dwa_test
+  TARGETS easy_dijkstra_test dijkstra_test a_star_test dwa_test rrt_test rrt_connect_test
   ARCHIVE DESTINATION ${PROJECT_SOURCE_DIR}/build/install)
