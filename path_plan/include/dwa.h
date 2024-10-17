@@ -1,5 +1,5 @@
-#ifndef CHHROBOTICS_CPP_DWA_H
-#define CHHROBOTICS_CPP_DWA_H
+#ifndef PATH_PLAN_DWA_H
+#define PATH_PLAN_DWA_H
 
 #include <Eigen/Dense>
 #include <algorithm>
@@ -50,4 +50,4 @@ public:
   dwaControl(VectorXd state, Vector2d goal, vector<Vector2d> obstacle);
 };
 
-#endif // CHHROBOTICS_CPP_DWA_H
+#endif // PATH_PLAN_DWA_H
