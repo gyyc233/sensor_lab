@@ -15,3 +15,9 @@ cmake ..
 make -j4
 make install
 ```
+
+### Path Plan
+
+#### Bezier Curve
+
+![bezier curve](./support_files/image/bezier_curve.png)
