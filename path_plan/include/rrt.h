@@ -60,6 +60,9 @@ public:
   calDistanceAngle(Node *from_node,
                    Node *to_node); // 计算两个节点间的距离和方位角
 
+  /// @brief 判断node与其它点连线是否有障碍
+  /// @param node
+  /// @return if safety return true
   bool obstacleFree(Node *node); //判断是否有障碍物
 
   bool isInsidePlayArea(Node *node); //判断是否在可行区域里面
