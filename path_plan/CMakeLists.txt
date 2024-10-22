@@ -67,7 +67,10 @@ target_link_libraries(rrt_star_test path_plan)
 add_executable(bezier_curve_test test/bezier_curve_test.cc)
 target_link_libraries(bezier_curve_test path_plan)
 
+add_executable(curve_interpolation test/curve_interpolation.cc)
+target_link_libraries(curve_interpolation path_plan)
+
 # INSTALL
 install(
-  TARGETS easy_dijkstra_test dijkstra_test a_star_test dwa_test rrt_test rrt_connect_test bezier_curve_test
+  TARGETS easy_dijkstra_test dijkstra_test a_star_test dwa_test rrt_test rrt_connect_test bezier_curve_test curve_interpolation
   ARCHIVE DESTINATION ${PROJECT_SOURCE_DIR}/build/install)
