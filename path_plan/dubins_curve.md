@@ -3,13 +3,14 @@
   - [Dubins曲线](#dubins曲线)
   - [CSC轨迹](#csc轨迹)
   - [CCC轨迹](#ccc轨迹)
-- [dubins 曲线推导计算](#dubins-曲线推导计算)
+- [dubins 曲线推导计算(基于向量的方法)](#dubins-曲线推导计算基于向量的方法)
   - [CSC轨迹推导计算](#csc轨迹推导计算)
     - [已知圆心位置和半径，求切点](#已知圆心位置和半径求切点)
     - [已知起点终点位姿，求圆心坐标](#已知起点终点位姿求圆心坐标)
 - [计算行驶轨迹](#计算行驶轨迹)
   - [CSC类型曲线轨迹求解流程](#csc类型曲线轨迹求解流程)
   - [CCC类型轨迹推导](#ccc类型轨迹推导)
+- [dubins 曲线推导计算(基于几何的方法)](#dubins-曲线推导计算基于几何的方法)
 - [总结](#总结)
 
 ## Dubin curve
@@ -80,7 +81,7 @@ dubins 曲线集合
 
 ![](./img/dubins_curve/img5.png)
 
-## dubins 曲线推导计算
+## dubins 曲线推导计算(基于向量的方法)
 
 计算的关键
 
@@ -131,6 +132,36 @@ CSC轨迹分为三段，start--t1圆周弧;t1--t2圆周弧;t2--end圆周弧
 
 ![](./img/dubins_curve/img14.png)
 
+## dubins 曲线推导计算(基于几何的方法)
+
+dubins路径集合为{LSL,RSR,RSL,LSR,RLR,LRL},L表示想左转的圆弧，R表示向左转的圆弧，S表示直线运动
+
+![](./img/dubins_curve/img15.png)
+
+LSL路径
+
+![](./img/dubins_curve/img16.png)
+
+RSR路径
+
+![](./img/dubins_curve/img17.png)
+
+RSL路径
+
+![](./img/dubins_curve/img18.png)
+
+LSR路径
+
+![](./img/dubins_curve/img19.png)
+
+RLR路径
+
+![](./img/dubins_curve/img20.png)
+
+LRL路径
+
+![](./img/dubins_curve/img21.png)
+
 ## 总结
 
 1. Dubins曲线是开环的，考虑到实际车辆行驶中的不确定性， Dubins还存在动态性的问题
@@ -140,4 +171,5 @@ CSC轨迹分为三段，start--t1圆周弧;t1--t2圆周弧;t2--end圆周弧
 ref
 
 - [路径规划—— Dubins 曲线推导(基于向量的方法)](https://blog.csdn.net/weixin_42301220/article/details/125328823)
+- [Dubins 曲线公式总结(基于几何的方法)](https://blog.csdn.net/weixin_42301220/article/details/125493646)
 - [车辆运动学模型](https://blog.csdn.net/weixin_42301220/article/details/124747072)
