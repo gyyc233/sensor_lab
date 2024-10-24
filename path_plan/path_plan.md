@@ -1,3 +1,10 @@
+- [path plan](#path-plan)
+  - [global path plan](#global-path-plan)
+  - [local path plan](#local-path-plan)
+  - [基于采样的路径规划](#基于采样的路径规划)
+  - [基于曲线插值的局部路径规划](#基于曲线插值的局部路径规划)
+    - [多项式曲线路径规划](#多项式曲线路径规划)
+  - [路径规划与路径平滑](#路径规划与路径平滑)
 
 
 ## path plan
@@ -45,7 +52,32 @@
 
 ![](./img/path_plan/img2.png)
 
+### 路径规划与路径平滑
+
+机器人通过栅格地图进行路径规划时，根据静态障碍物得到全局路径，如 Dijkstra's，A*，D-star，RRT等，规划出的路径都存在直线之间有急剧拐弯（曲率变化大）的问题,尽管通过将八邻域改为更多邻域，如前文所述，能略微改善曲率变化急剧的问题.这样的路径仍然不适于机器人运动模型，尤其是非全向机器人，如阿克曼底盘，所以需要一条符合机器人运动限制的路径.
+
+路径连续性
+
+![](./img/path_plan/img3.png)
+
+路径平滑的方法
+
+1. 多项式插值
+2. bezier曲线插值
+3. 三次样条插值
+4. Ｂ样条插值
+5. NURBS 曲线
+
+特殊曲线
+
+1. Dubin's 曲线
+   1. 给定平面内两点和运动方向，Dubins 用圆弧和线段在给定曲率范围内找到连接各点的最短平滑路径
+2. Clothoid 欧拉螺旋线,表示在复平面
+3. Hypocycloid
+4. Reeds-Shepp Curves，与Dubin相似
+
 ref
 
 - [路径规划 | 随机采样算法：PRM、RRT、RRT-Connect、RRT*](https://zhuanlan.zhihu.com/p/349074802)
 - [局部路径规划算法——曲线插值法](https://blog.csdn.net/weixin_42301220/article/details/125153270)
+- [路径平滑算法：机器人导航](https://zhuanlan.zhihu.com/p/364421182)
