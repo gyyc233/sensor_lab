@@ -26,18 +26,19 @@ public:
   double mod2Pi(double theta);
 
   /// @brief [x,y]-->[r,\theta] polar
-  /// @param x 
-  /// @param y 
-  /// @return 
+  /// @param x
+  /// @param y
+  /// @return
   vector<double> polar(double x, double y);
 
   /// @brief angle mod 2_pi
-  /// @param angle 
-  /// @return 
+  /// @param angle
+  /// @return
   double PI2PI(double angle);
 
   struct Path {
     double t = -0., p = 0., q = 0.; //初始值给定一个不会出现的数
+    // 总长度 = t+p+q
     string mode;
   };
 
