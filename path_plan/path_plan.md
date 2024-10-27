@@ -74,7 +74,7 @@
    1. 给定平面内两点和运动方向，Dubins 用圆弧和线段在给定曲率范围内找到连接各点的最短平滑路径
 2. Clothoid 欧拉螺旋线,表示在复平面
 3. Hypocycloid
-4. Reeds-Shepp Curves，与Dubin相似
+4. Reeds-Shepp Curves，与Dubin相似(TODO:)
 
 ref
 

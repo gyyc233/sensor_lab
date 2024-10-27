@@ -1,11 +1,89 @@
+# Sensor ab <!-- omit in toc -->
+
+A repository of implementations and notes that provide services for the math, computer vision, AI, robotics, autonomous driving related methods I have studied
+
 :construction:
 
-- [sensor lab](#sensor-lab)
-  - [using](#using)
+- [Getting Started](#getting-started)
+  - [Prerequisites](#prerequisites)
+- [Algorithm](#algorithm)
+- [Feature Detect](#feature-detect)
+- [Pose Estimation](#pose-estimation)
+- [Kalman Filter](#kalman-filter)
+- [pcl\_test](#pcl_test)
+- [cere\_test](#cere_test)
+- [g2o\_test](#g2o_test)
+- [Path Plan](#path-plan)
+- [Path Tracking](#path-tracking)
+- [task](#task)
+- [Usage](#usage)
 
-# sensor lab
+## Getting Started
 
-## using
+### Prerequisites
+
+## Algorithm
+
+this module summarizes some methods for tradition image process, hand-eye calibration, curve fit
+
+**image undistortion**
+
+![](./support_files/image/algorithm/img1.png)
+
+## Feature Detect
+
+## Pose Estimation
+
+## Kalman Filter
+
+## pcl_test
+
+## cere_test
+
+## g2o_test
+
+## Path Plan
+
+this module conclude some common tips and knowledge in global or local path plan. 
+
+**Dijkstra global path plan**
+![Dijkstra](./support_files/image/path_plan/dijkstra_demo.png)
+
+**A star global path plan**
+
+![A*](./support_files/image/path_plan/astar_demo.png)
+
+**DWA local path plan**
+
+![dwa](./support_files/image/path_plan/dwa_demo.png)
+
+**RRT* sample based local oath plan**
+
+![RRT*](./support_files/image/path_plan/rrt_star_demo.png)
+
+**Bezier Curve local oath plan**
+
+![bezier curve](./support_files/image/path_plan/bezier_curve.png)
+
+**B spline curve local oath plan**
+
+![b spline curve](./support_files/image/path_plan/b_spline_demo.png)
+
+**Dubins Curve path plan**
+
+![dubins curve LSR](./support_files/image/path_plan/dubins_curve_1.png)
+
+![dubins curve LSL](./support_files/image/path_plan/dubins_curve_2.png)
+
+**Reeds-Shepp**
+
+TODO: 
+
+## Path Tracking
+
+## task
+
+## Usage
 
 ```bash
 mkdir build && cd build
@@ -15,9 +93,3 @@ cmake ..
 make -j4
 make install
 ```
-
-### Path Plan
-
-#### Bezier Curve
-
-![bezier curve](./support_files/image/bezier_curve.png)
