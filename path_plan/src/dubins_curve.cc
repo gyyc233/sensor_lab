@@ -180,6 +180,8 @@ Dubins::interpolate(double ind, double length, char m, double max_curvature,
   // for(int i=0;i<path_x.size();i++){
   //    cout<<path_x[i]<<",";
   //}
+
+  // 直线段插值
   if (m == 'S') {
     path_x[ind] = origin_x + length / max_curvature * cos(origin_yaw);
     path_y[ind] = origin_y + length / max_curvature * sin(origin_yaw);
@@ -221,8 +223,11 @@ vector<vector<double>> Dubins::generate_local_course(double total_length,
                                                      string modes,
                                                      double max_curvature,
                                                      double step_size) {
+  // calculate sample points number
   double n_point = trunc(total_length / step_size) + lengths.size() +
                    4; // trunc返回整数部分，忽略小数部分。
+
+  // 记录每个采样点的信息和它所指的下一目标点的方向
   vector<double> p_x(n_point, 0.0), p_y(n_point, 0.0), p_yaw(n_point, 0.0),
       directions(n_point, 0.0);
   double ind = 1;
@@ -231,9 +236,11 @@ vector<vector<double>> Dubins::generate_local_course(double total_length,
   } else {
     directions[0] = -1;
   }
-  double ll = 0.;
-  double dist;
+  double ll = 0.; // 剩余距离
+  double dist;    // 用步长约束前进距离
   double pd;
+
+  // 解析模式中的每一段
   for (int i = 0; i < modes.size(); i++) {
     if (lengths[i] == 0.)
       continue;
@@ -251,6 +258,7 @@ vector<vector<double>> Dubins::generate_local_course(double total_length,
     } else {
       pd = dist - ll;
     }
+
     while (abs(pd) <= abs(lengths[i])) {
       ind += 1;
       vector<vector<double>> inter =
@@ -258,9 +266,8 @@ vector<vector<double>> Dubins::generate_local_course(double total_length,
                       origin_yaw, p_x, p_y, p_yaw, directions);
       p_x = inter[0], p_y = inter[1], p_yaw = inter[2], directions = inter[3];
       pd += dist;
-      // cout<<ind<<","<<pd<<","<<
-      // modes[i]<<","<<max_curvature<<","<<origin_x<<","<<origin_y<<","<<origin_yaw<<endl;
     }
+
     ll = lengths[i] - pd - dist; // calc remain length
     ind += 1;
     vector<vector<double>> inter =
@@ -272,12 +279,25 @@ vector<vector<double>> Dubins::generate_local_course(double total_length,
     cout << "no path" << endl;
     return {};
   }
+
   while (p_x.size() >= 1 && p_x[p_x.size() - 1] == 0) {
     p_x.pop_back();
     p_y.pop_back();
     p_yaw.pop_back();
     directions.pop_back();
   }
+
+  std::cout << "p_x size(): " << p_x.size() << std::endl;
+  std::cout << "p_y size(): " << p_y.size() << std::endl;
+  std::cout << "p_yaw size(): " << p_yaw.size() << std::endl;
+  std::cout << "directions size(): " << directions.size() << std::endl;
+
+  for (int i = 0; i < p_x.size(); i++) {
+    std::cout << "index: " << i << ", p_x: " << p_x[i] << ", p_y: " << p_y[i]
+              << ", p_yaw: " << p_yaw[i] << ", directions: " << directions[i]
+              << std::endl;
+  }
+
   return {p_x, p_y, p_yaw, directions};
 }
 
@@ -287,8 +307,14 @@ Dubins::dubins_path_planning_from_origin(Vector3d goal, double curvature,
   double dx = goal[0];
   double dy = goal[1];
   double D = hypot(dx, dy); // Return `sqrt(X*X + Y*Y)'
-  double d = D * curvature;
-  double theta = mod2Pi(atan2(dy, dx));
+  double d = D * curvature; //
+
+  if (abs(d) < 0.0000001) {
+    Dubins::ResultDubins failed_ret;
+    return failed_ret;
+  }
+
+  double theta = mod2Pi(atan2(dy, dx)); // theta起点和终点航向角的角度差
   double alpha = mod2Pi(-theta);
   double beta = mod2Pi(goal[2] - theta);
 
@@ -305,6 +331,8 @@ Dubins::dubins_path_planning_from_origin(Vector3d goal, double curvature,
   double cost4 = abs(path4.t) + abs(path4.p) + abs(path4.q);
   double cost5 = abs(path5.t) + abs(path5.p) + abs(path5.q);
   double cost6 = abs(path6.t) + abs(path6.p) + abs(path6.q);
+
+  // 筛选出最短路径
   vector<double> costs{cost1, cost2, cost3, cost4, cost5, cost6};
   double best_cost = numeric_limits<double>::max();
   for (int i = 0; i < costs.size(); i++) {
@@ -356,7 +384,7 @@ Dubins::dubins_path_planning_from_origin(Vector3d goal, double curvature,
 Dubins::ResultDubins Dubins::dubins_path_planning(Vector3d start, Vector3d goal,
                                                   double curvature,
                                                   double step_size) {
-  ResultDubins res;
+  // 将起点平移到原点并旋转一定角度，使终点也落在x轴上
   goal[0] -= start[0];
   goal[1] -= start[1];
   Matrix3d l_rot;
@@ -370,6 +398,8 @@ Dubins::ResultDubins Dubins::dubins_path_planning(Vector3d start, Vector3d goal,
 
   ResultDubins rd = dubins_path_planning_from_origin(
       Vector3d(le_xy(0, 0), le_xy(0, 1), le_yaw), curvature, step_size);
+
+  // 将插值点旋转回原始坐标系
   Matrix3d rot;
   rot =
       AngleAxisd(-start[2], Eigen::Vector3d::UnitZ()); //从欧拉角中获取旋转矩阵
@@ -392,8 +422,12 @@ Dubins::ResultDubins Dubins::dubins_path_planning(Vector3d start, Vector3d goal,
     x_list[i] = converted_xy(i, 0) + start[0];
     y_list[i] = converted_xy(i, 1) + start[1];
     yaw_list[i] = PI2PI(rd.p_yaw[i] + start[2]);
+    std::cout << "index: " << i << ", x_list: " << x_list[i]
+              << ", y_list: " << y_list[i] << ", yaw_list: " << yaw_list[i]
+              << std::endl;
   }
 
+  ResultDubins res;
   res.p_x = x_list;
   res.p_y = y_list;
   res.p_yaw = yaw_list;

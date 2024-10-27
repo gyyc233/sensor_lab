@@ -9,7 +9,7 @@ int main() {
   RRT::Node *end_node = new RRT::Node(6.0, 10.0);
 
   std::vector<double> rnd_area{-2, 15}; // 采样区域，x,y ∈ [min,max];
-  std::vector<double> play_area{-1, 12, 0,
+  std::vector<double> play_area{-1, 14, 0,
                                 14}; // 约束随机树的范围[xmin,xmax,ymin,ymax]
 
   double radius = 0.5;

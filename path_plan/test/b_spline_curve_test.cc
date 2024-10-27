@@ -4,10 +4,9 @@
 namespace plt = matplotlibcpp;
 
 int main() {
-  vector<Vector2d> Ps{
-      Vector2d(9.036145, 51.779661), Vector2d(21.084337, 70.084746),
-      Vector2d(37.607573, 50.254237), Vector2d(51.893287, 69.745763),
-      Vector2d(61.187608, 49.576271)};
+  vector<Vector2d> Ps{Vector2d(9.0, 10.5),  Vector2d(51.0, 40.23),
+                      Vector2d(77.0, 30.0), Vector2d(65.0, 15.8),
+                      Vector2d(40.0, 10.0), Vector2d(25.3, 15.8)};
 
   vector<double> x_ref, y_ref;
   for (int i = 0; i < Ps.size(); i++) {
