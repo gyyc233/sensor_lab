@@ -22,6 +22,7 @@ add_subdirectory(loop_closure)
 add_subdirectory(dense_mapping)
 add_subdirectory(kalman_filter)
 add_subdirectory(path_plan)
+add_subdirectory(path_tracking)
 
 # copy floder to install path
 set(build_data_include ${CMAKE_CURRENT_SOURCE_DIR}/build)
