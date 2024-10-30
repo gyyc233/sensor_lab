@@ -1,4 +1,4 @@
-# Sensor ab <!-- omit in toc -->
+# Sensor Lab <!-- omit in toc -->
 
 A repository of implementations and notes that provide services for the math, computer vision, AI, robotics, autonomous driving related methods I have studied
 
@@ -57,15 +57,15 @@ this module conclude some common tips and knowledge in global or local path plan
 
 ![dwa](./support_files/image/path_plan/dwa_demo.png)
 
-**RRT* sample based local oath plan**
+**RRT* sample based local path plan**
 
 ![RRT*](./support_files/image/path_plan/rrt_star_demo.png)
 
-**Bezier Curve local oath plan**
+**Bezier Curve local path plan**
 
 ![bezier curve](./support_files/image/path_plan/bezier_curve.png)
 
-**B spline curve local oath plan**
+**B spline curve local path plan**
 
 ![b spline curve](./support_files/image/path_plan/b_spline_demo.png)
 
