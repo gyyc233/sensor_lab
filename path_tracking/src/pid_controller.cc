@@ -23,10 +23,13 @@ double PID_controller::calOutput(double state) {
   this->error = this->target - state;
   double u = this->error * this->kp + this->sum_error * this->ki +
              (this->error - this->pre_error) * this->kd;
+
+  // limit error bound
   if (u < this->lower)
     u = this->lower;
   else if (u > this->upper)
     u = this->upper;
+
   this->pre_error = this->error;
   this->sum_error = this->sum_error + this->error;
   return u;

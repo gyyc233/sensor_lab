@@ -81,6 +81,10 @@ TODO:
 
 ## Path Tracking
 
+**PID Controller**
+
+![PID Controller](./support_files/image/path_tracking/pid_demo.png)
+
 ## task
 
 ## Usage
