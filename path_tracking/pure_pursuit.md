@@ -48,3 +48,5 @@ pure pursuit 纯追踪算法的实现和这个比较类似
 ## 总结
 
 纯跟踪算法是假设车辆做定圆运动，其本质是P控制，这也就意味着算法的上限不会很高，智能通过方法去优化
+
+ref: [纯跟踪算法（Pure Pursuit）](https://blog.csdn.net/WaiNgai1999/article/details/132062188)

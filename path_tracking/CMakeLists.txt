@@ -46,7 +46,11 @@ add_executable(pid_controller_test test/pid_controller_test.cc utils/kinematic_m
 target_include_directories(pid_controller_test PUBLIC utils)
 target_link_libraries(pid_controller_test path_tracking)
 
+add_executable(pure_pursuit_test test/pure_pursuit_test.cc utils/kinematic_model.cc)
+target_include_directories(pure_pursuit_test PUBLIC utils)
+target_link_libraries(pure_pursuit_test path_tracking)
+
 # INSTALL
 install(
-  TARGETS pid_controller_test
+  TARGETS pid_controller_test pure_pursuit_test
   ARCHIVE DESTINATION ${PROJECT_SOURCE_DIR}/build/install)
