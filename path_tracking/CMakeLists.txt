@@ -50,7 +50,11 @@ add_executable(pure_pursuit_test test/pure_pursuit_test.cc utils/kinematic_model
 target_include_directories(pure_pursuit_test PUBLIC utils)
 target_link_libraries(pure_pursuit_test path_tracking)
 
+add_executable(stanley_test test/stanley_test.cc utils/kinematic_model.cc)
+target_include_directories(stanley_test PUBLIC utils)
+target_link_libraries(stanley_test path_tracking)
+
 # INSTALL
 install(
-  TARGETS pid_controller_test pure_pursuit_test
+  TARGETS pid_controller_test pure_pursuit_test stanley_test
   ARCHIVE DESTINATION ${PROJECT_SOURCE_DIR}/build/install)
