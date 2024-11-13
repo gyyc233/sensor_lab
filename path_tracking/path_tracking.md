@@ -17,7 +17,7 @@
 ### based on vehicle kinematics
 
 - PID controller：采用预瞄控制思想，即以车辆前方预瞄点处的运动状态作为反馈设计PID
-- LQR
+- LQR: 线性二次型调节器
 - MPC
 
 ### based on vector
