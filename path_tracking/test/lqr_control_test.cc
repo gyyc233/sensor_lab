@@ -1,7 +1,8 @@
 #include "kinematic_model.h"
-#include "my_reference_path.h"
 #include "lqr_control.h"
 #include "matplotlibcpp.h"
+#include "my_reference_path.h"
+namespace plt = matplotlibcpp;
 
 int main() {
   double dt = 0.1;  // 时间间隔，单位：s

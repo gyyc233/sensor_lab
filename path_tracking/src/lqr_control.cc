@@ -2,6 +2,8 @@
 
 LQRControl::LQRControl(int n) : n_(n) {}
 
+LQRControl::~LQRControl() {}
+
 Eigen::MatrixXd LQRControl::calRicatti(Eigen::MatrixXd &A, Eigen::MatrixXd &B,
                                        Eigen::MatrixXd &Q, Eigen::MatrixXd &R) {
   Eigen::MatrixXd P = Q;
