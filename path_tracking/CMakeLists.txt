@@ -42,7 +42,7 @@ add_library(path_tracking STATIC ${srcs})
 target_include_directories(path_tracking PUBLIC include)
 target_link_libraries(path_tracking ${OpenCV_LIBS} ${PCL_LIBRARIES} path_tracking_matplotlib_cpp)
 
-add_executable(pid_controller_test test/pid_controller_test.cc utils/kinematic_model.cc)
+add_executable(pid_controller_test test/pid_controller_test.cc utils/kinematic_model.cc utils/my_reference_path.cc)
 target_include_directories(pid_controller_test PUBLIC utils)
 target_link_libraries(pid_controller_test path_tracking)
 
@@ -54,7 +54,11 @@ add_executable(stanley_test test/stanley_test.cc utils/kinematic_model.cc)
 target_include_directories(stanley_test PUBLIC utils)
 target_link_libraries(stanley_test path_tracking)
 
+add_executable(lqr_control_test test/lqr_control_test.cc utils/kinematic_model.cc utils/my_reference_path.cc)
+target_include_directories(lqr_control_test PUBLIC utils)
+target_link_libraries(lqr_control_test path_tracking)
+
 # INSTALL
 install(
-  TARGETS pid_controller_test pure_pursuit_test stanley_test
+  TARGETS pid_controller_test pure_pursuit_test stanley_test lqr_control_test
   ARCHIVE DESTINATION ${PROJECT_SOURCE_DIR}/build/install)
