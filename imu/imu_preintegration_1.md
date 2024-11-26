@@ -117,6 +117,5 @@ $$
 ## 参考文章
 
 - [IMU预积分的理解和推导](https://zhuanlan.zhihu.com/p/473227932)
-- [如何理解IMU以及其预积分](https://zhuanlan.zhihu.com/p/38009126)
 - [简明预积分推导](https://zhuanlan.zhihu.com/p/388859808)
 - [预积分Forster](https://zhuanlan.zhihu.com/p/635496502)
