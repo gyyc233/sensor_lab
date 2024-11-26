@@ -89,6 +89,8 @@
 
 or
 
+![](./img/imu_preintegration_2/img19.png)
+
 ![](./img/imu_preintegration_2/img18.png)
 
 以上就是IMU预积分避免重新积分，降低运算量的关键
