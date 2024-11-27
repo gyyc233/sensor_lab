@@ -10,8 +10,8 @@
 #include <Eigen/Dense>
 #include <Eigen/Geometry>
 
-#include "sophus/se2.hpp"
-#include "sophus/se3.hpp"
+#include "sophus/se2.h"
+#include "sophus/se3.h"
 
 using Vec2i = Eigen::Vector2i;
 using Vec3i = Eigen::Vector3i;
@@ -61,12 +61,10 @@ const Vec3d Zero3d(0, 0, 0);
 const Vec3f Zero3f(0, 0, 0);
 
 // pose represented as sophus structs
-using SE2 = Sophus::SE2d;
-using SE2f = Sophus::SE2f;
-using SO2 = Sophus::SO2d;
-using SE3 = Sophus::SE3d;
-using SE3f = Sophus::SE3f;
-using SO3 = Sophus::SO3d;
+using SE2 = Sophus::SE2;
+using SO2 = Sophus::SO2;
+using SE3 = Sophus::SE3;
+using SO3 = Sophus::SO3;
 
 using IdType = unsigned long;
 
