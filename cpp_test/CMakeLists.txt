@@ -7,10 +7,11 @@ find_package(glog 0.6.0 REQUIRED)
 add_executable(template_test template_test.cc)
 add_executable(variadic_templates_test variadic_templates_test.cc)
 add_executable(left_value_right_value_test left_value_right_value_test.cc)
+add_executable(diy_smart_ptr_test diy_smart_ptr_test.cc diy_smart_ptr.hpp)
 
 target_link_libraries(template_test glog::glog)
 
 # INSTALL
 install(
-  TARGETS template_test variadic_templates_test
+  TARGETS template_test variadic_templates_test left_value_right_value_test diy_smart_ptr_test
   ARCHIVE DESTINATION ${PROJECT_SOURCE_DIR}/build/install)
