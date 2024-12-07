@@ -73,5 +73,6 @@ int main() {
    * 达到释放A和B的条件，因此new出来的A和B对象被析构掉，解决了“强智能指针的交叉引用(循环引用)问题”
    **/
 
+  shared_ptr<int> aa(new int(10));
   return 0;
 }
