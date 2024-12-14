@@ -18,7 +18,7 @@ namespace sad {
  */
 template <typename T> struct NavState {
   using Vec3 = Eigen::Matrix<T, 3, 1>;
-  using SO3 = Sophus::SO3<T>;
+  // using SO3 = Sophus::SO3<T>;
 
   NavState() = default;
 
@@ -34,7 +34,7 @@ template <typename T> struct NavState {
       : timestamp_(time), R_(pose.so3()), p_(pose.translation()), v_(vel) {}
 
   /// 转换到Sophus
-  Sophus::SE3<T> GetSE3() const { return SE3(R_, p_); }
+  // Sophus::SE3<T> GetSE3() const { return SE3(R_, p_); }
 
   friend std::ostream &operator<<(std::ostream &os, const NavState<T> &s) {
     os << "p: " << s.p_.transpose() << ", v: " << s.v_.transpose()
