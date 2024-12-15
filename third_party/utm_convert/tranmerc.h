@@ -33,13 +33,12 @@
  *                                      (-90 to 90 degrees)
  *       TRANMERC_CENT_MER_ERROR     : Central meridian outside of valid range
  *                                      (-180 to 360 degrees)
- *       TRANMERC_A_ERROR            : Semi-major axis less than or equal to zero
- *       TRANMERC_INV_F_ERROR        : Inverse flattening outside of valid range
- *								  	                  (250 to 350)
- *       TRANMERC_SCALE_FACTOR_ERROR : Scale factor outside of valid
- *                                     range (0.3 to 3.0)
- *		 TM_LON_WARNING              : Distortion will result if longitude is more
- *                                      than 9 degrees from the Central Meridian
+ *       TRANMERC_A_ERROR            : Semi-major axis less than or equal to
+ *zero TRANMERC_INV_F_ERROR        : Inverse flattening outside of valid range
+ *								  	                  (250
+ *to 350) TRANMERC_SCALE_FACTOR_ERROR : Scale factor outside of valid range (0.3
+ *to 3.0) TM_LON_WARNING              : Distortion will result if longitude is
+ *more than 9 degrees from the Central Meridian
  *
  * REUSE NOTES
  *
@@ -110,8 +109,9 @@
 // extern "C" {
 //  #endif
 
-long Set_Transverse_Mercator_Parameters(double a, double f, double Origin_Latitude, double Central_Meridian,
-                                        double False_Easting, double False_Northing, double Scale_Factor);
+long Set_Transverse_Mercator_Parameters(
+    double a, double f, double Origin_Latitude, double Central_Meridian,
+    double False_Easting, double False_Northing, double Scale_Factor);
 /*
  * The function Set_Tranverse_Mercator_Parameters receives the ellipsoid
  * parameters and Tranverse Mercator projection parameters as inputs, and
@@ -130,8 +130,9 @@ long Set_Transverse_Mercator_Parameters(double a, double f, double Origin_Latitu
  *    Scale_Factor      : Projection scale factor                    (input)
  */
 
-void Get_Transverse_Mercator_Parameters(double *a, double *f, double *Origin_Latitude, double *Central_Meridian,
-                                        double *False_Easting, double *False_Northing, double *Scale_Factor);
+void Get_Transverse_Mercator_Parameters(
+    double *a, double *f, double *Origin_Latitude, double *Central_Meridian,
+    double *False_Easting, double *False_Northing, double *Scale_Factor);
 /*
  * The function Get_Transverse_Mercator_Parameters returns the current
  * ellipsoid and Transverse Mercator projection parameters.
@@ -147,7 +148,8 @@ void Get_Transverse_Mercator_Parameters(double *a, double *f, double *Origin_Lat
  *    Scale_Factor      : Projection scale factor                    (output)
  */
 
-long Convert_Geodetic_To_Transverse_Mercator(double Latitude, double Longitude, double *Easting, double *Northing);
+long Convert_Geodetic_To_Transverse_Mercator(double Latitude, double Longitude,
+                                             double *Easting, double *Northing);
 
 /*
  * The function Convert_Geodetic_To_Transverse_Mercator converts geodetic
@@ -163,7 +165,9 @@ long Convert_Geodetic_To_Transverse_Mercator(double Latitude, double Longitude, 
  *    Northing      : Northing/Y in meters                        (output)
  */
 
-long Convert_Transverse_Mercator_To_Geodetic(double Easting, double Northing, double *Latitude, double *Longitude);
+long Convert_Transverse_Mercator_To_Geodetic(double Easting, double Northing,
+                                             double *Latitude,
+                                             double *Longitude);
 
 /*
  * The function Convert_Transverse_Mercator_To_Geodetic converts Transverse

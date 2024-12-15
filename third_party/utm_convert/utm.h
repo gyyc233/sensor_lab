@@ -32,7 +32,8 @@
  *                                    (1 to 60) and within 1 of 'natural' zone
  *          UTM_A_ERROR            : Semi-major axis less than or equal to zero
  *          UTM_INV_F_ERROR        : Inverse flattening outside of valid range
- *								  	                (250 to 350)
+ *								  	                (250
+ *to 350)
  *
  * REUSE NOTES
  *
@@ -120,7 +121,8 @@ void Get_UTM_Parameters(double *a, double *f, long *override);
  *    override          : UTM override zone, zero indicates no override (output)
  */
 
-long Convert_Geodetic_To_UTM(double Latitude, double Longitude, long *Zone, char *Hemisphere, double *Easting,
+long Convert_Geodetic_To_UTM(double Latitude, double Longitude, long *Zone,
+                             char *Hemisphere, double *Easting,
                              double *Northing);
 /*
  * The function Convert_Geodetic_To_UTM converts geodetic (latitude and
@@ -137,7 +139,8 @@ long Convert_Geodetic_To_UTM(double Latitude, double Longitude, long *Zone, char
  *    Northing          : Northing (Y) in meters              (output)
  */
 
-long Convert_UTM_To_Geodetic(long Zone, char Hemisphere, double Easting, double Northing, double *Latitude,
+long Convert_UTM_To_Geodetic(long Zone, char Hemisphere, double Easting,
+                             double Northing, double *Latitude,
                              double *Longitude);
 /*
  * The function Convert_UTM_To_Geodetic converts UTM projection (zone,

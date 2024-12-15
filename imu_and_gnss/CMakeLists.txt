@@ -14,10 +14,15 @@ include_directories(${EIGEN3_INCLUDE_DIRS})
 include_directories(${OpenCV_INCLUDE_DIRS})
 
 include_directories(${PROJECT_SOURCE_DIR}/imu_and_gnss)
+include_directories(${PROJECT_SOURCE_DIR}/third_party)
 
 add_library(imu STATIC src/imu_integration.cc common/io_utils.cc)
 target_include_directories(imu PUBLIC include)
 target_link_libraries(imu ${OpenCV_LIBS} ${PCL_LIBRARIES} ${Sophus_LIBRARIES} glog::glog)
+
+add_library(gnss STATIC src/utm_convert.cc)
+target_include_directories(gnss PUBLIC include)
+target_link_libraries(gnss ${OpenCV_LIBS} ${PCL_LIBRARIES} ${Sophus_LIBRARIES} glog::glog)
 
 add_executable(imu_integration_test test/imu_integration_test.cc)
 
