@@ -13,7 +13,7 @@ include_directories(${Sophus_INCLUDE_DIRS})
 include_directories(${EIGEN3_INCLUDE_DIRS})
 include_directories(${OpenCV_INCLUDE_DIRS})
 
-include_directories(${PROJECT_SOURCE_DIR}/imu)
+include_directories(${PROJECT_SOURCE_DIR}/imu_and_gnss)
 
 add_library(imu STATIC src/imu_integration.cc common/io_utils.cc)
 target_include_directories(imu PUBLIC include)

@@ -24,7 +24,7 @@ add_subdirectory(dense_mapping)
 add_subdirectory(kalman_filter)
 add_subdirectory(path_plan)
 add_subdirectory(path_tracking)
-add_subdirectory(imu)
+add_subdirectory(imu_and_gnss)
 
 # copy floder to install path
 set(build_data_include ${CMAKE_CURRENT_SOURCE_DIR}/build)
