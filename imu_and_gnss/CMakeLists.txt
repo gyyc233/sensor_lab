@@ -5,7 +5,8 @@ find_package(glog 0.6.0 REQUIRED)
 find_package(Eigen3 REQUIRED)
 find_package(OpenCV REQUIRED)
 
-set(Sophus_DIR /home/bot/src/Sophus/build) # 改为自己的安装路径
+set(Sophus_DIR /home/V01/uids0025/src/Sophus/build)
+# set(Sophus_DIR /home/bot/src/Sophus/build) # 改为自己的安装路径
 
 find_package(Sophus REQUIRED)
 include_directories(${Sophus_INCLUDE_DIRS})
