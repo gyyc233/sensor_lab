@@ -3,8 +3,10 @@
 #include <glog/logging.h>
 #include <iomanip>
 
+// imu 直接积分
 int main(int argc, char **argv) {
   google::InitGoogleLogging(argv[0]);
+  google::SetStderrLogging(google::GLOG_INFO);
 
   // assume imu bias
   Vec3d gravity(0, 0, -9.8);

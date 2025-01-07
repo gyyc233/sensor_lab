@@ -21,13 +21,22 @@ add_library(imu STATIC src/imu_integration.cc common/io_utils.cc)
 target_include_directories(imu PUBLIC include)
 target_link_libraries(imu ${OpenCV_LIBS} ${PCL_LIBRARIES} ${Sophus_LIBRARIES} glog::glog)
 
+# utm_convert.a
+add_library(utm_convert STATIC ${PROJECT_SOURCE_DIR}/third_party/utm_convert/utm.cc ${PROJECT_SOURCE_DIR}/third_party/utm_convert/tranmerc.cc)
+target_include_directories(utm_convert PUBLIC include)
+target_link_libraries(utm_convert ${OpenCV_LIBS} ${PCL_LIBRARIES} ${Sophus_LIBRARIES} glog::glog)
+
 add_library(gnss STATIC src/utm_convert.cc)
 target_include_directories(gnss PUBLIC include)
-target_link_libraries(gnss ${OpenCV_LIBS} ${PCL_LIBRARIES} ${Sophus_LIBRARIES} glog::glog)
+target_link_libraries(gnss ${OpenCV_LIBS} ${PCL_LIBRARIES} ${Sophus_LIBRARIES} glog::glog utm_convert)
 
+# imu direct integration
 add_executable(imu_integration_test test/imu_integration_test.cc)
-
 target_link_libraries(imu_integration_test imu glog::glog)
+
+# gnss data process
+add_executable(gnss_data_test test/gnss_data_test.cc)
+target_link_libraries(gnss_data_test gnss glog::glog imu)
 
 # INSTALL
 install(

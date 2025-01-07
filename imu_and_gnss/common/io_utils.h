@@ -5,6 +5,7 @@
 #include <functional>
 #include <utility>
 
+#include "common/gnss.h"
 #include "common/imu.h"
 
 namespace sad {
@@ -14,9 +15,17 @@ public:
 
   /// 定义回调函数
   using IMUProcessFuncType = std::function<void(const IMU &)>;
+  using GNSSProcessFuncType = std::function<void(const GNSS &)>;
 
+  // register imu callback
   TxtIO &SetIMUProcessFunc(IMUProcessFuncType imu_proc) {
     imu_proc_ = std::move(imu_proc);
+    return *this;
+  }
+
+  // register gnss callback
+  TxtIO &SetGNSSProcessFunc(GNSSProcessFuncType gnss_proc) {
+    gnss_proc_ = std::move(gnss_proc);
     return *this;
   }
 
@@ -26,6 +35,7 @@ public:
 private:
   std::ifstream fin;
   IMUProcessFuncType imu_proc_;
+  GNSSProcessFuncType gnss_proc_;
 };
 } // namespace sad
 

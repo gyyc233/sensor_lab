@@ -32,6 +32,15 @@ void TxtIO::Go() {
       // imu_proc_(IMU(time, Vec3d(gx, gy, gz) * math::kDEG2RAD, Vec3d(ax, ay,
       // az)));
       imu_proc_(IMU(time, Vec3d(gx, gy, gz), Vec3d(ax, ay, az)));
+    } else if (data_type == "GNSS" && gnss_proc_) {
+      // longitude 经度; latitude 纬度; altitude　高度
+      double time, longitude, latitude, altitude, heading;
+      bool heading_valid;
+      // 数据以纬经高保存 emm...
+      ss >> time >> latitude >> longitude >> altitude >> heading >>
+          heading_valid;
+      gnss_proc_(GNSS(time, 4, Vec3d(latitude, longitude, altitude), heading,
+                      heading_valid));
     }
   }
 
