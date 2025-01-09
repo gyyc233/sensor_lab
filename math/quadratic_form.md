@@ -1,3 +1,9 @@
+- [quadratic\_form](#quadratic_form)
+  - [圆锥曲线与二次型](#圆锥曲线与二次型)
+  - [正定](#正定)
+- [主轴定理](#主轴定理)
+- [在函数极值中的应用](#在函数极值中的应用)
+  - [参考文章](#参考文章)
 
 # quadratic_form
 
@@ -60,6 +66,23 @@ $$
 
 用矩阵判断二次型是否正定：**特征值都大于0，则二次型正定**
 
+# 主轴定理
+
+主轴定理是指在几何学和线性代数中，与椭圆和双曲线的长轴和短轴有关的线。这些轴能够将椭圆和双曲线准确的描述出来，它们是正交的
+
+在代数上，主轴定理是完全平方公式的泛化。在线性代数和泛函分析中，它是谱定理的几何等价物
+
+![](./quadratic_form/img10.png)
+
+![](./quadratic_form/img11.png)
+
+# 在函数极值中的应用
+
+![](./quadratic_form/img13.png)
+
+![](./quadratic_form/img12.png)
+
 ## 参考文章
 
-![二次型 马同学](https://www.zhihu.com/question/38902714/answer/195435181)
+- [二次型 马同学](https://www.zhihu.com/question/38902714/answer/195435181)
+- [二次型](https://zealscott.com/notes/linearalgebra/quadratic%20form.html)
