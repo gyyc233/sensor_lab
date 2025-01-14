@@ -4,6 +4,8 @@
   - [Householder变换](#householder变换)
     - [几何角度](#几何角度)
     - [代数角度](#代数角度)
+    - [Householder 实际应用](#householder-实际应用)
+  - [基于 Householder 变换的QR分解](#基于-householder-变换的qr分解)
 
 # QR分解
 
@@ -28,7 +30,7 @@
 
 ## Householder变换
 
-Householder 变换是一种简洁而有意思的线性变换，也可称为镜面反射变换
+Householder (豪斯霍尔德)变换是一种简洁而有意思的线性变换，也可称为镜面反射变换
 
 ### 几何角度
 
@@ -44,12 +46,25 @@ $v, w^Tv=1$，则, $Hv=(I-2w{w^T})v = v-2w({w^T}v) = v$
 
 ![](./qr_decomposition/h1.png)
 
-于是也可以得到，Householder变换不改变向量模长，是一种正交变换。两次镜面变换后将反射为自身，同时也是一种对合变换,即$HH^T = I, {H^2} = I$
+于是也可以得到， Householder 变换不改变向量模长，是一种正交变换。两次镜面变换后将反射为自身，同时也是一种对合变换,即$HH^T = I, {H^2} = I$
 
 ### 代数角度
 
+上式表明1,-1为 Householder 矩阵的特征值，对于向量$w$可以找到$n-1$个向量$v_1,v_2,...,v_{n-1}$构成n维欧式空间的一组标准正交基．记P=$[w1,v_1,v_2, ..., v_{n-1}]$
 
+![](./qr_decomposition/qr_4.png)
+
+上式给出了 Householder 的对角化过程，通过秩为1的矩阵$ww^T$改变了单位矩阵的一个特征值，进而改变其一个特征向量上的缩放变换
+
+### Householder 实际应用
+
+![](./qr_decomposition/qr_5.png)
+
+## 基于 Householder 变换的QR分解
+
+![](./qr_decomposition/qr_6.png)
 
 参考资料
 
 - [Householder变换](https://zhuanlan.zhihu.com/p/576026040)
+- [基于Householder变换完成QR分解](https://blog.csdn.net/m0_66360845/article/details/137052786)
