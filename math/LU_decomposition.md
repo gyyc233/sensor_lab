@@ -22,9 +22,78 @@
 - 用一个数乘某一个方程的左右两边
 - 将一个方程的两边乘一个数然后加到另一个方程上
 
+高斯消元步骤
+
+1. 构造增广矩阵。即系数矩阵 A 加上常数向量 b，也就是 (A|b)
+2. 通过以交换行、某行乘以非负常数和两行相加这三种初等变化将原系统转化为更简单的三角形式
+3. 得到简化的三角方阵组
+4. 带入求解相关系数
+
+## 矩阵消元例子
+
+![](./LU_decomposition/img_2.png)
+
+![](./LU_decomposition/img_3.png)
+
+这个例子中最后我们的到了U上三角矩阵，R矩阵并不直观
+
+## 消元矩阵
+
+以下面这个例子简单计算R矩阵
+
+![](./LU_decomposition/img_4.png)
+
+![](./LU_decomposition/img_5.png)
+
+那么R矩阵就是$(E_{32}E_{21})^{-1}$
+
+消元还经常用到置换矩阵 (permutation matrix)
+
+$$
+\begin{bmatrix}
+    0&1\\1&0
+\end{bmatrix}
+
+\begin{bmatrix}
+    a&b\\c&d
+\end{bmatrix}
+
+\begin{bmatrix}
+    c&d\\a&b
+\end{bmatrix}
+$$
+
+- 原矩阵两行进行了互换
+
+$$
+\begin{bmatrix}
+    a&b\\c&d
+\end{bmatrix}
+
+\begin{bmatrix}
+    0&1\\1&0
+\end{bmatrix}
+
+\begin{bmatrix}
+    b&a\\d&c
+\end{bmatrix}
+$$
+
+- 原矩阵两列进行了互换
+
+## 逆
+
+假设这些初等变换是可逆的，则有
+
+![](./LU_decomposition/img_6.png)
+
+# 杜尔里特 UR分解
+
+![](./LU_decomposition/img_7.png)
 
 参考文章
 
-- [高斯消元](https://www.cnblogs.com/horizonshd/p/15365988.html#algebra2.1)
+- [高斯消元1](https://www.cnblogs.com/horizonshd/p/15365988.html#algebra2.1)
+- [高斯消元2](https://blog.csdn.net/justidle/article/details/108794887)
 - [待定系数](https://zhuanlan.zhihu.com/p/363948873)
 - [矩阵的分解——LU分解](https://blog.csdn.net/qq_28972011/article/details/123935820?utm_medium=distribute.pc_relevant.none-task-blog-2~default~baidujs_baidulandingword~default-0-123935820-blog-138027566.235^v43^control&spm=1001.2101.3001.4242.1&utm_relevant_index=3)
