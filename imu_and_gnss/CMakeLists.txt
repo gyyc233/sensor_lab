@@ -30,6 +30,10 @@ add_library(gnss STATIC src/utm_convert.cc)
 target_include_directories(gnss PUBLIC include)
 target_link_libraries(gnss ${OpenCV_LIBS} ${PCL_LIBRARIES} ${Sophus_LIBRARIES} glog::glog utm_convert)
 
+add_library(eskf STATIC include/eskf.hpp)
+target_include_directories(eskf PUBLIC include)
+target_link_libraries(eskf ${OpenCV_LIBS} ${PCL_LIBRARIES} ${Sophus_LIBRARIES} glog::glog imu gnss utm_convert)
+
 # imu direct integration
 add_executable(imu_integration_test test/imu_integration_test.cc)
 target_link_libraries(imu_integration_test imu glog::glog)
