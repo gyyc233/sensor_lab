@@ -7,6 +7,7 @@
 
 #include "common/gnss.h"
 #include "common/imu.h"
+#include "odom.h"
 
 namespace sad {
 class TxtIO {
@@ -16,6 +17,7 @@ public:
   /// 定义回调函数
   using IMUProcessFuncType = std::function<void(const IMU &)>;
   using GNSSProcessFuncType = std::function<void(const GNSS &)>;
+  using OdomProcessFuncType = std::function<void(const Odom &)>;
 
   // register imu callback
   TxtIO &SetIMUProcessFunc(IMUProcessFuncType imu_proc) {
@@ -29,6 +31,12 @@ public:
     return *this;
   }
 
+  // register odom callback
+  TxtIO &SetOdomProcessFunc(OdomProcessFuncType odom_proc) {
+    odom_proc_ = std::move(odom_proc);
+    return *this;
+  }
+
   // 遍历文件内容，调用回调函数
   void Go();
 
@@ -36,6 +44,7 @@ private:
   std::ifstream fin;
   IMUProcessFuncType imu_proc_;
   GNSSProcessFuncType gnss_proc_;
+  OdomProcessFuncType odom_proc_;
 };
 } // namespace sad
 

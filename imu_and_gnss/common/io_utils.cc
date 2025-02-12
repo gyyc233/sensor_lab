@@ -41,6 +41,10 @@ void TxtIO::Go() {
           heading_valid;
       gnss_proc_(GNSS(time, 4, Vec3d(latitude, longitude, altitude), heading,
                       heading_valid));
+    } else if (data_type == "ODOM" && odom_proc_) {
+      double time, wl, wr;
+      ss >> time >> wl >> wr;
+      odom_proc_(Odom(time, wl, wr));
     }
   }
 
