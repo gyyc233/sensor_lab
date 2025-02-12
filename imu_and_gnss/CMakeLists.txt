@@ -17,7 +17,7 @@ include_directories(${OpenCV_INCLUDE_DIRS})
 include_directories(${PROJECT_SOURCE_DIR}/imu_and_gnss)
 include_directories(${PROJECT_SOURCE_DIR}/third_party)
 
-add_library(imu STATIC src/imu_integration.cc common/io_utils.cc)
+add_library(imu STATIC src/imu_integration.cc common/io_utils.cc src/static_imu_init.cc)
 target_include_directories(imu PUBLIC include)
 target_link_libraries(imu ${OpenCV_LIBS} ${PCL_LIBRARIES} ${Sophus_LIBRARIES} glog::glog)
 
