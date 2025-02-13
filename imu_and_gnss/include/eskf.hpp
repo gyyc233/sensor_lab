@@ -22,7 +22,7 @@ namespace sad {
 template <typename S = double> class ESKF {
 public:
   /// 类型定义
-  using SO3 = Sophus::SO3<S>;                    // 旋转变量类型
+  using SO3 = Sophus::SO3;                       // 旋转变量类型
   using VecT = Eigen::Matrix<S, 3, 1>;           // 向量类型
   using Vec18T = Eigen::Matrix<S, 18, 1>;        // 18维向量类型
   using Mat3T = Eigen::Matrix<S, 3, 3>;          // 3x3矩阵类型
@@ -36,7 +36,7 @@ public:
     Options() = default;
 
     /// IMU 测量与零偏参数
-    double imu_dt_ = 0.01; // IMU测量间隔
+    double imu_dt = 0.01; // IMU测量间隔
     // NOTE IMU噪声项都为离散时间，不需要再乘dt，可以由初始化器指定IMU噪声
     double gyro_var = 1e-5;      // 陀螺测量标准差
     double acce_var = 1e-2;      // 加计测量标准差
@@ -55,8 +55,8 @@ public:
     double gnss_ang_noise = 1.0 * math::kDEG2RAD; // GNSS旋转噪声
 
     /// 其他配置
-    bool update_bias_gyro_ = true; // 是否更新陀螺bias
-    bool update_bias_acce_ = true; // 是否更新加计bias
+    bool update_bias_gyro = true; // 是否更新陀螺bias
+    bool update_bias_acce = true; // 是否更新加计bias
   };
 
   /// @brief 初始零偏取零
@@ -143,7 +143,7 @@ private:
         ea2, ea2, 0, 0, 0;
 
     // 设置里程计噪声
-    double o2 = options_.odom_var_ * options_.odom_var_;
+    double o2 = options_.odom_var * options_.odom_var;
     odom_noise_.diagonal() << o2, o2, o2;
 
     // 设置GNSS状态
@@ -159,11 +159,11 @@ private:
     v_ += dx_.template block<3, 1>(3, 0);
     R_ = R_ * SO3::exp(dx_.template block<3, 1>(6, 0));
 
-    if (options_.update_bias_gyro_) {
+    if (options_.update_bias_gyro) {
       bg_ += dx_.template block<3, 1>(9, 0);
     }
 
-    if (options_.update_bias_acce_) {
+    if (options_.update_bias_acce) {
       ba_ += dx_.template block<3, 1>(12, 0);
     }
 
@@ -217,7 +217,7 @@ template <typename S> bool ESKF<S>::Predict(const IMU &imu) {
   assert(imu.timestamp_ >= current_time_);
 
   double dt = imu.timestamp_ - current_time_;
-  if (dt > (5 * options_.imu_dt_) || dt < 0) {
+  if (dt > (5 * options_.imu_dt) || dt < 0) {
     // 时间间隔不对，可能是第一个IMU数据，没有历史信息
     LOG(INFO) << "skip this imu because dt_ = " << dt;
     current_time_ = imu.timestamp_;
@@ -249,9 +249,8 @@ template <typename S> bool ESKF<S>::Predict(const IMU &imu) {
   F.template block<3, 3>(6, 9) = -Mat3T::Identity() * dt; // theta 对 bg
 
   // mean and cov prediction
-  dx_ =
-      F *
-      dx_; // 这行其实没必要算，dx_在重置之后应该为零，因此这步可以跳过，但F需要参与Cov部分计算，所以保留
+  // 下行其实没必要算，dx_在重置之后应该为零，因此这步可以跳过，但F需要参与Cov部分计算，所以保留
+  dx_ = F * dx_;
   cov_ = F * cov_.eval() * F.transpose() + Q_;
   current_time_ = imu.timestamp_;
   return true;
@@ -269,10 +268,10 @@ template <typename S> bool ESKF<S>::ObserveWheelSpeed(const Odom &odom) {
       cov_ * H.transpose() * (H * cov_ * H.transpose() + odom_noise_).inverse();
 
   // velocity obs
-  double velo_l = options_.wheel_radius_ * odom.left_pulse_ /
-                  options_.circle_pulse_ * 2 * M_PI / options_.odom_span_;
-  double velo_r = options_.wheel_radius_ * odom.right_pulse_ /
-                  options_.circle_pulse_ * 2 * M_PI / options_.odom_span_;
+  double velo_l = options_.wheel_radius * odom.left_pulse_ /
+                  options_.circle_pulse * 2 * M_PI / options_.odom_span;
+  double velo_r = options_.wheel_radius * odom.right_pulse_ /
+                  options_.circle_pulse * 2 * M_PI / options_.odom_span;
   double average_vel = 0.5 * (velo_l + velo_r);
 
   VecT vel_odom(average_vel, 0.0, 0.0);
@@ -300,8 +299,7 @@ template <typename S> bool ESKF<S>::ObserveGps(const GNSS &gnss) {
   }
 
   assert(gnss.heading_valid_);
-  ObserveSE3(gnss.utm_pose_, options_.gnss_pos_noise_,
-             options_.gnss_ang_noise_);
+  ObserveSE3(gnss.utm_pose_, options_.gnss_pos_noise, options_.gnss_ang_noise);
   current_time_ = gnss.unix_time_;
 
   return true;

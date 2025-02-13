@@ -42,6 +42,10 @@ target_link_libraries(imu_integration_test imu glog::glog)
 add_executable(gnss_data_test test/gnss_data_test.cc)
 target_link_libraries(gnss_data_test gnss glog::glog imu)
 
+# eskf gins
+add_executable(run_eskf_gins test/run_eskf_gins.cc)
+target_link_libraries(run_eskf_gins eskf)
+
 # INSTALL
 install(
   TARGETS imu_integration_test imu
