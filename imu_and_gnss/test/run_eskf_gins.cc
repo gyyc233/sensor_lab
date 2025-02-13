@@ -63,6 +63,7 @@ int main(int argc, char **argv) {
   bool first_gnss_set = false;
   Vec3d origin = Vec3d::Zero();
 
+  // this 指针的链式调用
   // 1. call SetIMUProcessFunc
   // 2. call SetGNSSProcessFunc
   // 3. call SetOdomProcessFunc
