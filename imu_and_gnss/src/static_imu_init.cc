@@ -3,6 +3,7 @@
 #include <glog/logging.h>
 
 namespace sad {
+StaticIMUInit::StaticIMUInit() {}
 StaticIMUInit::StaticIMUInit(Options options = Options()) : options_(options) {}
 
 StaticIMUInit::~StaticIMUInit() {}
@@ -55,22 +56,33 @@ bool StaticIMUInit::TryInit() {
   math::ComputeMeanAndCovDiag(init_imu_deque_, mean_acce, cov_acce_,
                               [this](const IMU &imu) { return imu.acce_; });
 
+  LOG(INFO) << "estimate acce mean: " << mean_acce.transpose();
+  LOG(INFO) << "estimate gyro mean: " << mean_gyro.transpose();
+  LOG(INFO) << "estimate acce cov: " << cov_acce_.transpose();
+  LOG(INFO) << "estimate gyro cov: " << cov_gyro_.transpose();
+
   // 以acce均值为方向，取9.8长度为重力
-  LOG(INFO) << "mean acce: " << mean_acce.transpose();
   gravity_ = -mean_acce / mean_acce.norm() * options_.gravity_norm;
+  LOG(INFO) << "estimate gravity: " << gravity_.transpose();
 
   // 重新计算加计的协方差
   math::ComputeMeanAndCovDiag(
       init_imu_deque_, mean_acce, cov_acce_,
       [this](const IMU &imu) { return imu.acce_ + gravity_; });
 
+  LOG(INFO) << "second estimate acce mean: " << mean_acce.transpose();
+  LOG(INFO) << "second estimate acce cov: " << cov_acce_.transpose();
+
   // 检查IMU噪声
+  // cov_gyro_ 中每个元素的平方之和再开方
+  LOG(INFO) << "gyro noise (cov normalized): " << cov_gyro_.norm();
   if (cov_gyro_.norm() > options_.max_static_gyro_var) {
     LOG(ERROR) << "陀螺仪测量噪声太大" << cov_gyro_.norm() << " > "
                << options_.max_static_gyro_var;
     return false;
   }
 
+  LOG(INFO) << "acce noise (cov normalized): " << cov_acce_.norm();
   if (cov_acce_.norm() > options_.max_static_acce_var) {
     LOG(ERROR) << "加计测量噪声太大" << cov_acce_.norm() << " > "
                << options_.max_static_acce_var;
@@ -83,14 +95,14 @@ bool StaticIMUInit::TryInit() {
 
   LOG(INFO) << "IMU 初始化成功，初始化时间= "
             << current_time_ - init_start_time_
-            << ", bg = " << init_bg_.transpose()
-            << ", ba = " << init_ba_.transpose()
-            << ", gyro sq = " << cov_gyro_.transpose()
-            << ", acce sq = " << cov_acce_.transpose()
-            << ", grav = " << gravity_.transpose()
-            << ", norm: " << gravity_.norm();
+            << ", \nbg = " << init_bg_.transpose()
+            << ", \nba = " << init_ba_.transpose()
+            << ", \ngyro sq = " << cov_gyro_.transpose()
+            << ", \nacce sq = " << cov_acce_.transpose()
+            << ", \ngrav = " << gravity_.transpose()
+            << ", \nnorm: " << gravity_.norm();
   LOG(INFO) << "mean gyro: " << mean_gyro.transpose()
-            << " acce: " << mean_acce.transpose();
+            << " \nacce: " << mean_acce.transpose();
   init_success_ = true;
   return true;
 }

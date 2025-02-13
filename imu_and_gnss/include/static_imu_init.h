@@ -31,6 +31,7 @@ public:
         true; // 是否使用odom来判断车辆静止（部分数据集没有odom选项）
   };
 
+  StaticIMUInit();
   StaticIMUInit(Options options);
   ~StaticIMUInit();
 
