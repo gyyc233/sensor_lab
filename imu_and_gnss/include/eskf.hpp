@@ -15,7 +15,7 @@ namespace sad {
  * 可以指定观测GNSS的读数，GNSS应该事先转换到车体坐标系
  *
  * 本书使用18维的ESKF，标量类型可以由S指定，默认取double
- * 变量顺序：p, v, R, bg, ba, grav，与书本对应
+ * 变量顺序：p, v, R, bg, ba, grav，名义状态量
  * @tparam S    状态变量的精度，取float或double
  */
 
@@ -29,7 +29,8 @@ public:
   using MotionNoiseT = Eigen::Matrix<S, 18, 18>; // 运动噪声类型
   using OdomNoiseT = Eigen::Matrix<S, 3, 3>;     // 里程计噪声类型
   using GnssNoiseT = Eigen::Matrix<S, 6, 6>;     // GNSS噪声类型
-  using Mat18T = Eigen::Matrix<S, 18, 18>;       // 18维方差类型
+  using Mat18T = Eigen::Matrix<S, 18, 18>; // 18维方差类型 p, v, R, bg, ba, grav
+                                           // 每个状态量有3维，3*6
   using NavStateT = NavState<S>; // 整体名义状态变量类型
 
   struct Options {
@@ -82,12 +83,14 @@ public:
   }
 
   /// 使用IMU递推
+  /// 需要计算名义状态变量的更新过程以及协方差矩阵的递推
   bool Predict(const IMU &imu);
 
   /// 使用轮速计观测
   bool ObserveWheelSpeed(const Odom &odom);
 
   /// 使用GPS观测
+  /// GNSS对R的观测可以直接写成对误差状态theta的观测
   bool ObserveGps(const GNSS &gnss);
 
   /**
@@ -224,7 +227,8 @@ template <typename S> bool ESKF<S>::Predict(const IMU &imu) {
     return false;
   }
 
-  // nominal state 递推
+  // nominal state 名义状态变量的更新
+  // 离散时间运动方程
   VecT new_p = p_ + v_ * dt + 0.5 * (R_ * (imu.acce_ - ba_)) * dt * dt +
                0.5 * g_ * dt * dt;
   VecT new_v = v_ + R_ * (imu.acce_ - ba_) * dt + g_ * dt;
@@ -240,12 +244,12 @@ template <typename S> bool ESKF<S>::Predict(const IMU &imu) {
   // F实际上是稀疏矩阵，也可以不用矩阵形式进行相乘而是写成散装形式，这里为了教学方便，使用矩阵形式
   Mat18T F = Mat18T::Identity();                         // 主对角线
   F.template block<3, 3>(0, 3) = Mat3T::Identity() * dt; // p 对 v
-  F.template block<3, 3>(3, 6) =
-      -R_.matrix() * SO3::hat(imu.acce_ - ba_) * dt;      // v对theta
+  F.template block<3, 3>(3, 6) = -R_.matrix() * SO3::hat(imu.acce_ - ba_) *
+                                 dt; // v对theta 李代数so3 -> 三维反对称矩阵
   F.template block<3, 3>(3, 12) = -R_.matrix() * dt;      // v 对 ba
   F.template block<3, 3>(3, 15) = Mat3T::Identity() * dt; // v 对 g
   F.template block<3, 3>(6, 6) =
-      SO3::exp(-(imu.gyro_ - bg_) * dt).matrix();         // theta 对 theta
+      SO3::exp(-(imu.gyro_ - bg_) * dt).matrix(); // theta 对 theta 李代数转李群
   F.template block<3, 3>(6, 9) = -Mat3T::Identity() * dt; // theta 对 bg
 
   // mean and cov prediction
@@ -254,6 +258,9 @@ template <typename S> bool ESKF<S>::Predict(const IMU &imu) {
   cov_ = F * cov_.eval() * F.transpose() + Q_;
   current_time_ = imu.timestamp_;
   return true;
+
+  // 预测的实质是使用imu的读数对名义状态进行递推,同时在协方差矩阵中合入运动过程噪声，这样协方差矩阵回慢慢变大
+  // 而误差状态会在观测过程置零 F * dx_ 为0
 }
 
 template <typename S> bool ESKF<S>::ObserveWheelSpeed(const Odom &odom) {
@@ -299,6 +306,7 @@ template <typename S> bool ESKF<S>::ObserveGps(const GNSS &gnss) {
   }
 
   assert(gnss.heading_valid_);
+  // 使用SE3进行观测
   ObserveSE3(gnss.utm_pose_, options_.gnss_pos_noise, options_.gnss_ang_noise);
   current_time_ = gnss.unix_time_;
 
@@ -308,6 +316,7 @@ template <typename S> bool ESKF<S>::ObserveGps(const GNSS &gnss) {
 template <typename S>
 bool ESKF<S>::ObserveSE3(const SE3 &pose, double trans_noise,
                          double ang_noise) {
+  // 这里认为RTK可以提供6自由度的观测（双天线）
   /// 既有旋转，也有平移
   /// 观测状态变量中的p, R，H为6x18，其余为零
   Eigen::Matrix<S, 6, 18> H = Eigen::Matrix<S, 6, 18>::Zero();
@@ -319,7 +328,10 @@ bool ESKF<S>::ObserveSE3(const SE3 &pose, double trans_noise,
   noise_vec << trans_noise, trans_noise, trans_noise, ang_noise, ang_noise,
       ang_noise;
 
+  // gnss的噪声协方差矩阵
   Mat6d V = noise_vec.asDiagonal();
+
+  // 计算kalman gain
   Eigen::Matrix<S, 18, 6> K =
       cov_ * H.transpose() * (H * cov_ * H.transpose() + V).inverse();
 
@@ -333,6 +345,8 @@ bool ESKF<S>::ObserveSE3(const SE3 &pose, double trans_noise,
   cov_ = (Mat18T::Identity() - K * H) * cov_;
 
   UpdateAndReset();
+
+  // RTK读数主要是在观测阶段通过卡尔曼增益作用于误差状态变量中
   return true;
 }
 
