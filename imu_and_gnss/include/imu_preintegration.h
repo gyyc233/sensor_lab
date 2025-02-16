@@ -17,6 +17,13 @@ namespace sad {
  *
  * 调用Integrate来插入新的IMU读数，然后通过Get函数得到预积分的值
  * 雅可比也可以通过本类获得，可用于构建g2o的边类
+ * 预积分类需要做以下事情
+ * 1. 预积分的观测量
+ * 2. 预积分开始时imu的零偏b_g & b_a
+ * 3. 在积分时期内的测量噪声
+ * 4. 各积分量对imu零偏的jacobian matrix
+ * 5. 整个积分时间
+ * 6. imu的测量噪声和零偏随机游走噪声进行配置
  */
 class IMUPreintegration {
 public:
@@ -54,9 +61,9 @@ public:
   Vec3d GetDeltaPosition(const Vec3d &bg, const Vec3d &ba);
 
 public:
-  double dt_ = 0;                         // 整体预积分时间
-  Mat9d cov_ = Mat9d::Zero();             // 累计噪声矩阵
-  Mat6d noise_gyro_acce_ = Mat6d::Zero(); // 测量噪声矩阵
+  double dt_ = 0;             // 整体预积分时间
+  Mat9d cov_ = Mat9d::Zero(); // 累计噪声矩阵 旋转+速度+位移的噪声 9维
+  Mat6d noise_gyro_acce_ = Mat6d::Zero(); // 测量噪声矩阵 零偏噪声
 
   // 零偏
   Vec3d bg_ = Vec3d::Zero();
