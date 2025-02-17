@@ -60,6 +60,13 @@ public:
   Vec3d GetDeltaVelocity(const Vec3d &bg, const Vec3d &ba);
   Vec3d GetDeltaPosition(const Vec3d &bg, const Vec3d &ba);
 
+  // sophus right jacobian in SO3
+  Eigen::Matrix3d jr_test(const Eigen::Vector3d &omega);
+
+  Eigen::Matrix3d jr_inv_test(const Eigen::Vector3d &omega);
+
+  Eigen::Matrix3d hat_test(const Eigen::Vector3d &omega);
+
 public:
   double dt_ = 0;             // 整体预积分时间
   Mat9d cov_ = Mat9d::Zero(); // 累计噪声矩阵 旋转+速度+位移的噪声 9维

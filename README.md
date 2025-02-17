@@ -30,6 +30,7 @@ A repository of implementations and notes that provide services for the math, co
 - Sophus, commit SHA `a621ff` [local build](./task/local_build_sophus.md), support SO(3) and SE(3) operator
 - glog
 - gflags
+- gtest build gtest and `sudo cp libgtest*.a /usr/local/lib`
 - Ceres 1.12.0, deal with complicated non-linear optimization problems like Bundle Adjustment
 - G2O, like Ceres
 - DBoW3, loop closure

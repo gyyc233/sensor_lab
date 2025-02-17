@@ -53,7 +53,7 @@ void IMUPreintegration::Integrate(const IMU &imu, double dt) {
   // 旋转部分
   // 4. 更新旋转部分测量值
   Vec3d omega = gyr * dt;        // 转动量
-  Mat3d rightJ = SO3::jr(omega); // 右雅可比
+  Mat3d rightJ = jr_test(omega); // 右雅可比
   SO3 deltaR = SO3::exp(omega);  // exp后
   dR_ = dR_ * deltaR;            // (4.9)
 
@@ -96,6 +96,53 @@ NavStated IMUPreintegration::Predict(const sad::NavStated &start,
   state.bg_ = bg_;
   state.ba_ = ba_;
   return state;
+}
+
+Eigen::Matrix3d IMUPreintegration::jr_test(const Eigen::Vector3d &omega) {
+  double theta = omega.norm();
+  if (theta < 1e-6) {
+    return Eigen::Matrix3d::Identity();
+  }
+
+  Eigen::Vector3d a = omega;
+  a.normalize();
+  double sin_theta = std::sin(theta);
+  double cos_theta = std::cos(theta);
+
+  Eigen::Matrix3d ret = (sin_theta / theta) * Eigen::Matrix3d ::Identity() +
+                        (1 - sin_theta / theta) * a * a.transpose() +
+                        (1 - cos_theta) / theta * hat_test(a);
+
+  return ret;
+}
+
+Eigen::Matrix3d IMUPreintegration::jr_inv_test(const Eigen::Vector3d &omega) {
+  double theta = omega.norm();
+  if (theta < 1e-6) {
+    return Eigen::Matrix3d::Identity();
+  }
+
+  Eigen::Vector3d a = omega;
+  a.normalize();
+
+  double cot_half_theta = cos(0.5 * theta) / sin(0.5 * theta);
+  Eigen::Matrix3d ret =
+      0.5 * theta * cot_half_theta * Eigen::Matrix3d ::Identity() +
+      (1 - 0.5 * theta * cot_half_theta) * a * a.transpose() -
+      0.5 * theta * hat_test(a);
+
+  return ret;
+}
+
+Eigen::Matrix3d IMUPreintegration::hat_test(const Eigen::Vector3d &omega) {
+  Eigen::Matrix3d Omega;
+  // clang-format off
+  Omega <<
+      0.0, -omega[2],  omega[1],
+        omega[2], 0.0, -omega[0],
+      -omega[1],  omega[0], 0.0;
+  // clang-format on
+  return Omega;
 }
 
 } // namespace sad
