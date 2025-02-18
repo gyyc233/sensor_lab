@@ -13,6 +13,7 @@ include_directories(${EIGEN3_INCLUDE_DIRS})
 include_directories(${OpenCV_INCLUDE_DIRS})
 
 include_directories(${PROJECT_SOURCE_DIR}/pcl_test)
+include_directories(${PROJECT_SOURCE_DIR}/common)
 include_directories(${PROJECT_SOURCE_DIR}/third_party)
 
 add_executable(point_cloud_test test/point_cloud_test.cc)

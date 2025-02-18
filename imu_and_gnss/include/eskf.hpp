@@ -1,7 +1,7 @@
 #ifndef __IMU_GNSS_ESKF_H__
 #define __IMU_GNSS_ESKF_H__
 
-#include "common/eigen_types.h"
+#include "eigen_type/eigen_types.h"
 #include "common/gnss.h"
 #include "common/imu.h"
 #include "common/math_utils.h"

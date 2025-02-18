@@ -5,7 +5,7 @@
 #ifndef MAPPING_IMU_H
 #define MAPPING_IMU_H
 
-#include "common/eigen_types.h"
+#include "eigen_type/eigen_types.h"
 #include <memory>
 
 namespace sad {

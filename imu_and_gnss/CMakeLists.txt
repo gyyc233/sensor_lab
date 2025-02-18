@@ -13,7 +13,7 @@ include_directories(${Sophus_INCLUDE_DIRS})
 
 include_directories(${EIGEN3_INCLUDE_DIRS})
 include_directories(${OpenCV_INCLUDE_DIRS})
-
+include_directories(${PROJECT_SOURCE_DIR}/common)
 include_directories(${PROJECT_SOURCE_DIR}/imu_and_gnss)
 include_directories(${PROJECT_SOURCE_DIR}/third_party)
 

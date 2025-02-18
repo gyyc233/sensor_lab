@@ -1,7 +1,7 @@
 #ifndef SLAM_IN_AUTO_DRIVING_GNSS_H
 #define SLAM_IN_AUTO_DRIVING_GNSS_H
 
-#include "eigen_types.h"
+#include "eigen_type/eigen_types.h"
 #include <memory>
 
 namespace sad {

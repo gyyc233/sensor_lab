@@ -5,7 +5,7 @@
 #ifndef SAD_NAV_STATE_H
 #define SAD_NAV_STATE_H
 
-#include "common/eigen_types.h"
+#include "eigen_type/eigen_types.h"
 #include <sophus/so3.h>
 
 namespace sad {

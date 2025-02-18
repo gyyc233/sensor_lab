@@ -1,7 +1,7 @@
 #ifndef __IMU_INTEGRATION_H__
 #define __IMU_INTEGRATION_H__
 
-#include "common/eigen_types.h"
+#include "eigen_type/eigen_types.h"
 #include "common/imu.h"
 #include "common/nav_state.h"
 
