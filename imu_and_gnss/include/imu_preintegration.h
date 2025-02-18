@@ -6,9 +6,9 @@
 #include <utility>
 #include <vector>
 
-#include "eigen_type/eigen_types.h"
 #include "common/imu.h"
 #include "common/nav_state.h"
+#include "eigen_type/eigen_types.h"
 
 namespace sad {
 

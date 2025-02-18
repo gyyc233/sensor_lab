@@ -1,9 +1,9 @@
 #ifndef __STATIC_IMU_INIT_H__
 #define __STATIC_IMU_INIT_H__
 
-#include "eigen_type/eigen_types.h"
 #include "common/imu.h"
 #include "common/odom.h"
+#include "eigen_type/eigen_types.h"
 #include <deque>
 
 namespace sad {

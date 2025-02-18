@@ -1,12 +1,12 @@
 #ifndef __IMU_GNSS_ESKF_H__
 #define __IMU_GNSS_ESKF_H__
 
-#include "eigen_type/eigen_types.h"
 #include "common/gnss.h"
 #include "common/imu.h"
 #include "common/math_utils.h"
 #include "common/nav_state.h"
 #include "common/odom.h"
+#include "eigen_type/eigen_types.h"
 
 namespace sad {
 
