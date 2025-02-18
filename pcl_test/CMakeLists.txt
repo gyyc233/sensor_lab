@@ -16,14 +16,14 @@ include_directories(${PROJECT_SOURCE_DIR}/pcl_test)
 include_directories(${PROJECT_SOURCE_DIR}/third_party)
 
 add_executable(point_cloud_test test/point_cloud_test.cc)
+add_executable(pcd_to_bird_eye_test test/pcd_to_bird_eye_test.cc)
+add_executable(scan_to_range_image test/scan_to_range_image.cc)
 
 target_link_libraries(point_cloud_test ${PCL_LIBRARIES})
-
-add_executable(pcd_to_bird_eye_test test/pcd_to_bird_eye_test.cc)
-
 target_link_libraries(pcd_to_bird_eye_test ${PCL_LIBRARIES} ${OpenCV_LIBS} pthread glog::glog gflags)
+target_link_libraries(scan_to_range_image ${PCL_LIBRARIES} ${OpenCV_LIBS} pthread glog::glog gflags)
 
 # INSTALL
 install(
-  TARGETS point_cloud_test 
+  TARGETS point_cloud_test pcd_to_bird_eye_test scan_to_range_image
   ARCHIVE DESTINATION ${PROJECT_SOURCE_DIR}/build/install)
