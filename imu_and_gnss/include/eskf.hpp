@@ -3,10 +3,10 @@
 
 #include "common/gnss.h"
 #include "common/imu.h"
-#include "common/math_utils.h"
 #include "common/nav_state.h"
 #include "common/odom.h"
 #include "eigen_type/eigen_types.h"
+#include "math_utils.h"
 
 namespace sad {
 

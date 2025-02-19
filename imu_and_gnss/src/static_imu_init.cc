@@ -1,5 +1,5 @@
 #include "static_imu_init.h"
-#include "common/math_utils.h"
+#include "math_utils.h"
 #include <glog/logging.h>
 
 namespace sad {
