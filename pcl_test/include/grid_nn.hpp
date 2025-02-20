@@ -47,6 +47,7 @@ public:
       nearby_type_ = NearbyType::NEARBY6;
     }
 
+    //　初始化附近栅格
     GenerateNearbyGrids();
   }
 
@@ -105,6 +106,18 @@ template <int dim> bool GridNN<dim>::SetPointCloud(CloudPtr cloud) {
 template <int dim>
 Eigen::Matrix<int, dim, 1>
 GridNN<dim>::Pos2Grid(const Eigen::Matrix<float, dim, 1> &pt) {
+  // pt.array() 的返回类型在编译期未知
+  // 如果不加 template 关键字, 则代码中的cast就会被当做是模板类的一个成员变量,
+  // 而cast后面跟着的<NewScalarType>中的<也会被编译期当做小于号,
+  // 从而导致编译错误
+
+  // 所以对于 templated type/class, 要加上template关键字,
+  // 告诉编译器后面跟着的cast 是一个templated method
+  // 而不是一个成员变量, 让编译器正确识别这部分语法和编译
+
+  // template 关键字不仅仅可以出现在 cast 前面进行修饰，
+  // 还可以出现在其他词前面修饰。 无论后面是什么，其基本原理和上面是相同的，
+  // 都是告知编译器如何处理其后的代码, 若遇到可以进行类比
   return pt.array().template round().template cast<int>();
   // Eigen::Matrix<int, dim, 1> ret;
   // for (int i = 0; i < dim; ++i) {
