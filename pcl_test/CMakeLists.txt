@@ -20,9 +20,19 @@ add_executable(point_cloud_test test/point_cloud_test.cc)
 add_executable(pcd_to_bird_eye_test test/pcd_to_bird_eye_test.cc)
 add_executable(scan_to_range_image test/scan_to_range_image.cc)
 
+add_library(nearest_neighbour_search STATIC 
+  src/brute_force_nearest_neighbour.cc
+  src/kd_tree.cc
+  src/octop_tree.cc)
+target_include_directories(nearest_neighbour_search PUBLIC include)
+target_link_libraries(nearest_neighbour_search  ${PCL_LIBRARIES} ${OpenCV_LIBS} pthread glog::glog gflags)
+
 target_link_libraries(point_cloud_test ${PCL_LIBRARIES})
 target_link_libraries(pcd_to_bird_eye_test ${PCL_LIBRARIES} ${OpenCV_LIBS} pthread glog::glog gflags)
 target_link_libraries(scan_to_range_image ${PCL_LIBRARIES} ${OpenCV_LIBS} pthread glog::glog gflags)
+
+add_executable(nearest_neighbour_search_test test/nearest_neighbour_search_test.cc)
+target_link_libraries(nearest_neighbour_search_test nearest_neighbour_search gtest)
 
 # INSTALL
 install(
