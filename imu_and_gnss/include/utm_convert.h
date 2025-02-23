@@ -1,7 +1,7 @@
 #ifndef SLAM_IN_AUTO_DRIVING_UTM_CONVERT_H
 #define SLAM_IN_AUTO_DRIVING_UTM_CONVERT_H
 
-#include "common/gnss.h"
+#include "navigation_and_mapping/gnss.h"
 
 namespace sad {
 

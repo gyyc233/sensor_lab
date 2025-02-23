@@ -1,10 +1,10 @@
 #ifndef __IMU_GNSS_ESKF_H__
 #define __IMU_GNSS_ESKF_H__
 
-#include "common/gnss.h"
-#include "common/imu.h"
-#include "common/nav_state.h"
-#include "common/odom.h"
+#include "navigation_and_mapping/gnss.h"
+#include "navigation_and_mapping/imu.h"
+#include "navigation_and_mapping/nav_state.h"
+#include "navigation_and_mapping/odom.h"
 #include "eigen_type/eigen_types.h"
 #include "math_utils.h"
 

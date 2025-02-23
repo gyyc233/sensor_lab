@@ -2,8 +2,8 @@
 #include <iomanip>
 #include <memory>
 
-#include "common/gnss.h"
-#include "common/io_utils.h"
+#include "navigation_and_mapping/gnss.h"
+#include "navigation_and_mapping/io_utils.h"
 #include "utm_convert.h"
 
 int main(int argc, char **argv) {
