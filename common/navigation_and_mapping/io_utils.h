@@ -5,8 +5,8 @@
 #include <functional>
 #include <utility>
 
-#include "common/gnss.h"
-#include "common/imu.h"
+#include "gnss.h"
+#include "imu.h"
 #include "odom.h"
 
 namespace sad {

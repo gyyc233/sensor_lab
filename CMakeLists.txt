@@ -11,9 +11,6 @@ set(CMAKE_CXX_FLAGS_RELEASE "$ENV{CXXFLAGS} -O3 -Wall")
 
 project(sensor_lab LANGUAGES CXX)
 
-# for basic CI/CD
-option(ONLY_CPP_TEST "Only Cpp test" OFF)
-
 # =============== add ROS =====================
 option(ROS_CATKIN "ros catkin" OFF)
 
@@ -24,6 +21,8 @@ if(ROS_CATKIN)
 endif()
 # =============== add ROS =====================
 
+# for basic CI/CD
+option(ONLY_CPP_TEST "Only Cpp test" OFF)
 if(ONLY_CPP_TEST)
   message(STATUS "Only Cpp test is ON")
   add_subdirectory(cpp_test)
