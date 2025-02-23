@@ -15,7 +15,7 @@ project(sensor_lab LANGUAGES CXX)
 option(ONLY_CPP_TEST "Only Cpp test" OFF)
 
 # =============== add ROS =====================
-option(ROS_CATKIN "ros catkim" ON)
+option(ROS_CATKIN "ros catkin" OFF)
 
 if(ROS_CATKIN)
   message(STATUS "ros catkin was ON")
