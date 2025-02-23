@@ -18,6 +18,7 @@ if(ROS_CATKIN)
   message(STATUS "ros catkin was ON")
   add_definitions(-DROS_CATKIN)
   include(cmake/find_ros.cmake)
+  add_subdirectory(lidar_2d)
 endif()
 # =============== add ROS =====================
 

@@ -15,7 +15,8 @@
                 "/usr/local/include/octovis",
                 "/usr/include",
                 "/usr/include/opencv4",
-                "/usr/include/eigen3"
+                "/usr/include/eigen3",
+                "/opt/ros/noetic/include"
             ],
             "defines": [],
             "compilerPath": "/usr/bin/gcc",
