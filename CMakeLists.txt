@@ -11,7 +11,18 @@ set(CMAKE_CXX_FLAGS_RELEASE "$ENV{CXXFLAGS} -O3 -Wall")
 
 project(sensor_lab LANGUAGES CXX)
 
+# for basic CI/CD
 option(ONLY_CPP_TEST "Only Cpp test" OFF)
+
+# =============== add ROS =====================
+option(ROS_CATKIN "ros catkim" ON)
+
+if(ROS_CATKIN)
+  message(STATUS "ros catkin was ON")
+  add_definitions(-DROS_CATKIN)
+  include(cmake/find_ros.cmake)
+endif()
+# =============== add ROS =====================
 
 if(ONLY_CPP_TEST)
   message(STATUS "Only Cpp test is ON")
