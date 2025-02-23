@@ -129,7 +129,9 @@ bool FitPlane(std::vector<Eigen::Matrix<S, 3, 1>> &data,
     A.row(i)[3] = 1.0;
   }
 
+  // 对A做SVD分解并计算它的右特异向量矩阵
   Eigen::JacobiSVD<Eigen::MatrixXd> svd(A, Eigen::ComputeThinV);
+  // 取最小的右奇异向量
   plane_coeffs = svd.matrixV().col(3);
 
   // check error eps
@@ -161,6 +163,7 @@ bool FitLine(std::vector<Eigen::Matrix<S, 3, 1>> &data,
   }
 
   Eigen::JacobiSVD<Eigen::MatrixXd> svd(Y, Eigen::ComputeFullV);
+  // 取最大的右奇异向量
   dir = svd.matrixV().col(0);
 
   // check eps

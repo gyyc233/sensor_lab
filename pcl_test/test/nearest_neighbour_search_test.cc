@@ -94,6 +94,39 @@ TEST(NN_TEST, KDTREE_BASICS) {
   SUCCEED();
 }
 
+TEST(CH5_TEST, OCTREE_BASICS) {
+  sad::CloudPtr cloud(new sad::PointCloudType);
+  sad::PointType p1, p2, p3, p4;
+  p1.x = 0;
+  p1.y = 0;
+  p1.z = 0;
+
+  p2.x = 1;
+  p2.y = 0;
+  p2.z = 0;
+
+  p3.x = 0;
+  p3.y = 1;
+  p3.z = 0;
+
+  p4.x = 1;
+  p4.y = 1;
+  p4.z = 0;
+
+  cloud->points.push_back(p1);
+  cloud->points.push_back(p2);
+  cloud->points.push_back(p3);
+  cloud->points.push_back(p4);
+
+  sad::OctoTree octree;
+  octree.BuildTree(cloud);
+  octree.SetApproximate(false);
+  LOG(INFO) << "Octo tree leaves: " << octree.size()
+            << ", points: " << cloud->size();
+
+  SUCCEED();
+}
+
 int main(int argc, char **argv) {
   google::InitGoogleLogging(argv[0]);
   FLAGS_stderrthreshold = google::INFO;

@@ -34,6 +34,9 @@ target_link_libraries(scan_to_range_image ${PCL_LIBRARIES} ${OpenCV_LIBS} pthrea
 add_executable(nearest_neighbour_search_test test/nearest_neighbour_search_test.cc)
 target_link_libraries(nearest_neighbour_search_test nearest_neighbour_search gtest)
 
+add_executable(linear_fitting_test test/linear_fitting_test.cc)
+target_link_libraries(linear_fitting_test ${PCL_LIBRARIES} ${OpenCV_LIBS} gtest glog::glog gflags)
+
 # INSTALL
 install(
   TARGETS point_cloud_test pcd_to_bird_eye_test scan_to_range_image
