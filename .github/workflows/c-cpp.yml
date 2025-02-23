@@ -1,18 +1,25 @@
-name: Post welcome comment
+name: C/C++ CI
 
 on:
+  push:
+    branches: [ "main" ]
   pull_request:
-    types: [opened]
-
-permissions:
-  pull-requests: write
+    branches: [ "main" ]
 
 jobs:
-  build:
-    name: Post welcome comment
+  build_ubuntu:
+
     runs-on: ubuntu-latest
+
     steps:
-      - run: gh pr comment $PR_URL --body "Welcome to the repository!"
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          PR_URL: ${{ github.event.pull_request.html_url }}
+    - uses: actions/checkout@v3
+    - name: install_deps
+      run: sudo apt install libeigen3-dev
+    - name: build
+      run: mkdir build
+    - name: cmake only cpp test
+      run: cmake -DONLY_CPP_TEST=ON ..
+      working-directory: ./build/
+    - name: build
+      run: make -j8
+      working-directory: ./build/
