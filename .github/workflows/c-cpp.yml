@@ -14,7 +14,7 @@ jobs:
     steps:
     - uses: actions/checkout@v3
     - name: install_deps
-      run: sudo apt install libeigen3-dev
+      run: sudo apt install libeigen3-dev libgoogle-glog-dev
     - name: build
       run: mkdir build
     - name: cmake only cpp test
