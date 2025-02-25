@@ -19,6 +19,7 @@ if(ROS_CATKIN)
   add_definitions(-DROS_CATKIN)
   include(cmake/find_ros.cmake)
   add_subdirectory(lidar_2d)
+  return()
 endif()
 # =============== add ROS =====================
 
@@ -27,7 +28,6 @@ option(ONLY_CPP_TEST "Only Cpp test" OFF)
 if(ONLY_CPP_TEST)
   message(STATUS "Only Cpp test is ON")
   add_subdirectory(cpp_test)
-  return
 else()
   add_subdirectory(algorithm)
   add_subdirectory(feature_detect)
