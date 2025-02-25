@@ -4,6 +4,11 @@
 #include "eigen_type/eigen_types.h"
 #include <memory>
 
+#ifdef ROS_CATKIN
+#include <sensor_msgs/Imu.h>
+#include <sensor_msgs/NavSatFix.h>
+#endif
+
 namespace sad {
 
 /// GNSS状态位信息
@@ -40,20 +45,21 @@ struct GNSS {
     status_ = GpsStatusType(status);
   }
 
+#ifdef ROS_CATKIN
   /// 从ros的NavSatFix进行转换
   /// NOTE 这个只有位置信息而没有朝向信息，UTM坐标请从ch3的代码进行转换
-  // GNSS(sensor_msgs::NavSatFix::Ptr msg) {
-  //   unix_time_ = msg->header.stamp.toSec();
-  //   // 状态位
-  //   if (int(msg->status.status) >=
-  //   int(sensor_msgs::NavSatStatus::STATUS_FIX)) {
-  //     status_ = GpsStatusType::GNSS_FIXED_SOLUTION;
-  //   } else {
-  //     status_ = GpsStatusType::GNSS_OTHER;
-  //   }
-  //   // 经纬度
-  //   lat_lon_alt_ << msg->latitude, msg->longitude, msg->altitude;
-  // }
+  GNSS(sensor_msgs::NavSatFix::Ptr msg) {
+    unix_time_ = msg->header.stamp.toSec();
+    // 状态位
+    if (int(msg->status.status) >= int(sensor_msgs::NavSatStatus::STATUS_FIX)) {
+      status_ = GpsStatusType::GNSS_FIXED_SOLUTION; // 进入固定解
+    } else {
+      status_ = GpsStatusType::GNSS_OTHER;
+    }
+    // 经纬度
+    lat_lon_alt_ << msg->latitude, msg->longitude, msg->altitude;
+  }
+#endif
 
   double unix_time_ = 0;                                 // unix系统时间
   GpsStatusType status_ = GpsStatusType::GNSS_NOT_EXIST; // GNSS 状态位

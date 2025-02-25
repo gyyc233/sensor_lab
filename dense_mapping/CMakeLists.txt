@@ -1,6 +1,6 @@
 file(GLOB_RECURSE srcs CONFIGURE_DEPENDS src/*.cc include/*.h)
 
-set( CMAKE_CXX_FLAGS "-std=c++11 -march=native -O3 -fopenmp" )
+# set( CMAKE_CXX_FLAGS "-std=c++11 -march=native -O3 -fopenmp" )
 
 find_package(Eigen3 REQUIRED)
 find_package(OpenCV REQUIRED)

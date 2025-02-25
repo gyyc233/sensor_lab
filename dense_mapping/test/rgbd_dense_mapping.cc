@@ -6,6 +6,7 @@
 #include <opencv2/highgui/highgui.hpp>
 #include <pcl/filters/statistical_outlier_removal.h>
 #include <pcl/filters/voxel_grid.h>
+#include <pcl/impl/pcl_base.hpp>
 #include <pcl/io/pcd_io.h>
 #include <pcl/point_types.h>
 

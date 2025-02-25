@@ -1,6 +1,7 @@
 #ifndef COMMON_POINT_CLOUD_POINT_TYPES_H
 #define COMMON_POINT_CLOUD_POINT_TYPES_H
 
+#define PCL_NO_PRECOMPILE
 #include <pcl/impl/pcl_base.hpp>
 #include <pcl/point_cloud.h>
 #include <pcl/point_types.h>

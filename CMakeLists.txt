@@ -27,6 +27,7 @@ option(ONLY_CPP_TEST "Only Cpp test" OFF)
 if(ONLY_CPP_TEST)
   message(STATUS "Only Cpp test is ON")
   add_subdirectory(cpp_test)
+  return
 else()
   add_subdirectory(algorithm)
   add_subdirectory(feature_detect)
