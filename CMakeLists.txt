@@ -19,7 +19,6 @@ if(ROS_CATKIN)
   add_definitions(-DROS_CATKIN)
   include(cmake/find_ros.cmake)
   add_subdirectory(lidar_2d)
-  return()
 endif()
 # =============== add ROS =====================
 

@@ -21,7 +21,7 @@ add_library(imu STATIC
   ${PROJECT_SOURCE_DIR}/common/navigation_and_mapping/io_utils.cc 
   src/static_imu_init.cc)
 target_include_directories(imu PUBLIC include)
-target_link_libraries(imu ${OpenCV_LIBS} ${PCL_LIBRARIES} ${Sophus_LIBRARIES} glog::glog)
+target_link_libraries(imu ${OpenCV_LIBS} ${PCL_LIBRARIES} ${Sophus_LIBRARIES} ${catkin_LIBRARIES} glog::glog)
 
 # utm_convert.a
 add_library(utm_convert STATIC ${PROJECT_SOURCE_DIR}/third_party/utm_convert/utm.cc ${PROJECT_SOURCE_DIR}/third_party/utm_convert/tranmerc.cc)
