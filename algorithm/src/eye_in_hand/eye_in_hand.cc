@@ -2,6 +2,7 @@
 #include "transform/cv_eigen_convert.hpp"
 #include "transform/eigenGeometryTransfer.hpp"
 #include <iostream>
+#include <fstream>
 
 using namespace Algorithm;
 
