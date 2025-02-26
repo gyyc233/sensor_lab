@@ -1,11 +1,8 @@
-- [std::bind](#stdbind)
-- [std::function](#stdfunction)
-  - [为什么C++中有函数指针还需要std::function](#为什么c中有函数指针还需要stdfunction)
-  - [std::function](#stdfunction-1)
+- [std::function \& function pointer](#stdfunction--function-pointer)
 
 ## std::bind
 
-- bind是对C++98标准中函数适配器bind1st/bind2nd的泛化和增强(这两个在C++17中被弃用)，可以适配任意的可调用对象，包括函数指针、函数引用、成员函数指针和函数对象。
+- bind可以适配任意的可调用对象，包括函数指针、函数引用、成员函数指针和函数对象。
 - bind接受的第一个参数必须是一个可调用的对象f,可以是函数、函数指针、函数对象和成员函数指针，之后接受的参数的数量必须与f的参数数量相等，这些参数将被传递给f作为入参。
 - 绑定完成后，bind会返回一个函数对象，它内部保存了f的拷贝，具有operator(),返回值类型被自动推导为f的返回值类型。反生调用时，这个函数对象将把之前存储的参数转发给f完成调用。
 - 绑定器可以返回一个转换后的某元函数对象，用于匹配泛型算法
@@ -199,6 +196,24 @@ private:
 ```
 
 根据以上实现，我们对function的底层原理有了深刻的认识，能够自己实现一个接收任意参数的function模板类。虽然以上实现和标准库还差得很远，但是起到了学习、理解的作用吧
+
+# std::function & function pointer
+
+- 函数指针 `typedef double (*fun_ptr)(int); // 声明一个指入参int返回值double的函数指针`，只能指向全局或静态函数
+- `std::function` 除了可以指向全局和静态函数，还可以指向仿函数，Lambda 表达式，类成员函数，甚至函数签名不一致的函数, 对于后两个需要使用std::bind进行配合或者使用lambda进行封装
+
+```cpp
+std::function<void(Foo*)> ff = [](Foo* foo){ foo->f1() };
+
+std::function<void(void)> ff2 = std::bind(&Foo::f1, &foo);
+
+void classA::function(int data_1, double data_2){}
+// ...
+std::bind(&classA::function, this, std::placeholders::_1, std::placeholders::_2));
+```
+
+1. static函数可以正常通过的原因是它被编译器视为一个全局函数，具有有效的函数指针
+2. 非静态成员函数的地址（即函数指针）本身虽然是有意义的，因为它指向了函数的实现。但是，你不能直接用这个函数指针来调用函数，因为你需要提供一个this指针, 解决方法一是通过std::bind函数绑定，二是用lambda表达式封装
 
 参考文章
 
