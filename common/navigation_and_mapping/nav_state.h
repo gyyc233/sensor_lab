@@ -33,8 +33,8 @@ template <typename T> struct NavState {
   NavState(double time, const SE3 &pose, const Vec3 &vel = Vec3::Zero())
       : timestamp_(time), R_(pose.so3()), p_(pose.translation()), v_(vel) {}
 
-  /// 转换到Sophus
-  // Sophus::SE3<T> GetSE3() const { return SE3(R_, p_); }
+  // 转换到Sophus
+  Sophus::SE3 GetSE3() const { return SE3(R_, p_); }
 
   friend std::ostream &operator<<(std::ostream &os, const NavState<T> &s) {
     os << "p: " << s.p_.transpose() << ", v: " << s.v_.transpose()

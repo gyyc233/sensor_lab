@@ -75,55 +75,72 @@ void RosbagIO::Go() {
   LOG(INFO) << "bag " << bag_file_ << " finished.";
 }
 
-// RosbagIO &RosbagIO::AddImuHandle(RosbagIO::ImuHandle f) {
-//   return AddHandle(
-//       GetIMUTopicName(), [&f, this](const rosbag::MessageInstance &m) -> bool
-//       {
-//         auto msg = m.template instantiate<sensor_msgs::Imu>();
-//         if (msg == nullptr) {
-//           return false;
-//         }
+RosbagIO &RosbagIO::AddImuHandle(RosbagIO::ImuHandle f) {
+  return AddHandle(
+      GetIMUTopicName(), [&f, this](const rosbag::MessageInstance &m) -> bool {
+        auto msg = m.template instantiate<sensor_msgs::Imu>();
+        if (msg == nullptr) {
+          return false;
+        }
 
-//         IMUPtr imu;
-//         if (dataset_type_ == DatasetType::AVIA) {
-//           // Livox内置imu的加计需要乘上重力常数
-//           imu = std::make_shared<IMU>(
-//               msg->header.stamp.toSec(),
-//               Vec3d(msg->angular_velocity.x, msg->angular_velocity.y,
-//                     msg->angular_velocity.z),
-//               Vec3d(msg->linear_acceleration.x * 9.80665,
-//                     msg->linear_acceleration.y * 9.80665,
-//                     msg->linear_acceleration.z * 9.80665));
-//         } else {
-//           imu = std::make_shared<IMU>(
-//               msg->header.stamp.toSec(),
-//               Vec3d(msg->angular_velocity.x, msg->angular_velocity.y,
-//                     msg->angular_velocity.z),
-//               Vec3d(msg->linear_acceleration.x, msg->linear_acceleration.y,
-//                     msg->linear_acceleration.z));
-//         }
-//         return f(imu);
-//       });
-// }
+        IMUPtr imu;
+        if (dataset_type_ == DatasetType::AVIA) {
+          // Livox内置imu的加计需要乘上重力常数
+          imu = std::make_shared<IMU>(
+              msg->header.stamp.toSec(),
+              Vec3d(msg->angular_velocity.x, msg->angular_velocity.y,
+                    msg->angular_velocity.z),
+              Vec3d(msg->linear_acceleration.x * 9.80665,
+                    msg->linear_acceleration.y * 9.80665,
+                    msg->linear_acceleration.z * 9.80665));
+        } else {
+          imu = std::make_shared<IMU>(
+              msg->header.stamp.toSec(),
+              Vec3d(msg->angular_velocity.x, msg->angular_velocity.y,
+                    msg->angular_velocity.z),
+              Vec3d(msg->linear_acceleration.x, msg->linear_acceleration.y,
+                    msg->linear_acceleration.z));
+        }
+        return f(imu);
+      });
+}
 
-// std::string RosbagIO::GetIMUTopicName() const {
-//   if (dataset_type_ == DatasetType::ULHK) {
-//     return ulhk_imu_topic;
-//   } else if (dataset_type_ == DatasetType::UTBM) {
-//     return utbm_imu_topic;
-//   } else if (dataset_type_ == DatasetType::NCLT) {
-//     return nclt_imu_topic;
-//   } else if (dataset_type_ == DatasetType::WXB_3D) {
-//     return wxb_imu_topic;
-//   } else if (dataset_type_ == DatasetType::AVIA) {
-//     return avia_imu_topic;
-//   } else {
-//     LOG(ERROR) << "cannot load imu topic name of dataset "
-//                << int(dataset_type_);
-//   }
+std::string RosbagIO::GetIMUTopicName() const {
+  if (dataset_type_ == DatasetType::ULHK) {
+    return ulhk_imu_topic;
+  } else if (dataset_type_ == DatasetType::UTBM) {
+    return utbm_imu_topic;
+  } else if (dataset_type_ == DatasetType::NCLT) {
+    return nclt_imu_topic;
+  } else if (dataset_type_ == DatasetType::WXB_3D) {
+    return wxb_imu_topic;
+  } else if (dataset_type_ == DatasetType::AVIA) {
+    return avia_imu_topic;
+  } else {
+    LOG(ERROR) << "cannot load imu topic name of dataset "
+               << int(dataset_type_);
+  }
 
-//   return "";
-// }
+  return "";
+}
+
+std::string RosbagIO::GetLidarTopicName() const {
+  if (dataset_type_ == DatasetType::NCLT) {
+    return nclt_lidar_topic;
+  }
+  if (dataset_type_ == DatasetType::ULHK) {
+    return ulhk_lidar_topic;
+  }
+  if (dataset_type_ == DatasetType::WXB_3D) {
+    return wxb_lidar_topic;
+  }
+  if (dataset_type_ == DatasetType::UTBM) {
+    return utbm_lidar_topic;
+  }
+  if (dataset_type_ == DatasetType::AVIA) {
+    return avia_lidar_topic;
+  }
+}
 
 #endif
 

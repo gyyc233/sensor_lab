@@ -1,26 +1,31 @@
 #ifndef LIDAR_UTILS_H
 #define LIDAR_UTILS_H
 
+#ifdef ROS_CATKIN
+#include <pcl_conversions/pcl_conversions.h>
 #include <sensor_msgs/LaserScan.h>
 #include <sensor_msgs/MultiEchoLaserScan.h>
 #include <sensor_msgs/PointCloud.h>
 #include <sensor_msgs/PointCloud2.h>
 #include <sensor_msgs/point_cloud_conversion.h>
+#endif
 
 #include <pcl/filters/voxel_grid.h>
-#include <pcl_conversions/pcl_conversions.h>
 
 #include "point_cloud/point_types.h"
 // #include "velodyne_msgs/VelodyneScan.h"
 
+#ifdef ROS_CATKIN
 /// 雷达扫描的一些消息定义和工具函数
 using Scan2d = sensor_msgs::LaserScan;
 using MultiScan2d = sensor_msgs::MultiEchoLaserScan;
 // using PacketsMsg = velodyne_msgs::VelodyneScan;
 // using PacketsMsgPtr = boost::shared_ptr<PacketsMsg>;
+#endif
 
 namespace sad {
 
+#ifdef ROS_CATKIN
 inline Scan2d::Ptr MultiToScan2d(MultiScan2d::Ptr mscan) {
   Scan2d::Ptr scan(new Scan2d);
   scan->header = mscan->header;
@@ -79,6 +84,7 @@ CloudPtr ConvertToCloud(typename pcl::PointCloud<PointT>::Ptr input) {
   cloud->width = input->width;
   return cloud;
 }
+#endif
 
 /// 对点云进行voxel filter,指定分辨率
 inline CloudPtr VoxelCloud(CloudPtr cloud, float voxel_size = 0.1) {
