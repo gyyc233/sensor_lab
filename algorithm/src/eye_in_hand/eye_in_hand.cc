@@ -1,8 +1,8 @@
 #include "eye_in_hand/eye_in_hand.h"
 #include "transform/cv_eigen_convert.hpp"
 #include "transform/eigenGeometryTransfer.hpp"
-#include <iostream>
 #include <fstream>
+#include <iostream>
 
 using namespace Algorithm;
 
