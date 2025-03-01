@@ -9,6 +9,8 @@
   - [enable\_if](#enable_if)
     - [sophus enable\_if example2](#sophus-enable_if-example2)
     - [对函数模板使用 enable\_if](#对函数模板使用-enable_if)
+  - [explicit](#explicit)
+  - [do { } while(false) 包裹宏定义](#do---whilefalse-包裹宏定义)
 
 # sophus study note
 
@@ -353,3 +355,112 @@ using enable_if_t = typename std::enable_if<B, T>::type;
        return get<k-1>(base); 
  }
 ```
+
+## explicit
+
+sophus 在很多类的构造函数面前都会使用`explicit`
+
+```cpp
+/// Nullopt type of lightweight optional class.
+struct nullopt_t {
+  explicit constexpr nullopt_t() {}
+};
+
+//////////////////////////////////////////////////
+
+/// Constructor from 4x4 matrix
+///
+/// Precondition: Top-left 3x3 matrix needs to be "scaled-orthogonal" with
+///               positive determinant. The last row must be ``(0, 0, 0, 1)``.
+///
+SOPHUS_FUNC explicit Sim3(Matrix<Scalar, 4, 4> const& T)
+    : rxso3_(T.template topLeftCorner<3, 3>()),
+      translation_(T.template block<3, 1>(0, 3)) {}
+
+```
+
+explicit 来修饰一个类的构造函数时，它表明这个构造函数是显式的。不加 explicit 或加 implicit 修饰时，则表明时隐式的
+
+example
+
+```cpp
+class ExString 
+{
+public:
+    ExString(int size):_size(size){
+        _pstr = malloc(size + 1); // 为_pstr分为内存，大小为size
+        memset(_pstr, 0, size + 1);  
+    }
+    EXString(const char* p){
+        int size = strlen(p);
+        _pstr = malloc(size + 1);
+        strncpy(_pstr, p, size);
+        _size = strlen(_pstr);
+    }
+    // 以下为析构函数， 省略
+    
+private:
+    ExString();
+    char* _pstr;
+    int _size;
+    
+};
+```
+
+```cpp
+ExString str1(24);    // OK, 分配了24字节内存
+ExString str2 = 10;   // OK, 分配了10字节内存，下面会展开分析
+ExString str3;        // NOK, 因为没有默认构造函数
+ExString str4("aaa"); // OK, 调用的是EXString(const char* p)
+ExString str5 = 'c';  // OK，把'c'看为ascii码转为整数，然后调用ExString(int size)
+
+```
+
+上述代码中， ExString str2 = 10; 是怎么OK的呢
+
+在C++中， 当构造函数只有一个参数时，则编译时就会生成一个缺省的转换操作，来把参数转换为本类对象，所以ExString str2 = 10; 等同于如下
+
+```cpp
+ExString temp(10);      // 数据类型转换
+ExString str2 = temp;  
+```
+
+这种隐式的数据类型转换很多时候并不是预期的，如何组织编译器做这种转换呢？ 答案就是用 explicit 关键字修饰， 如下：
+
+```cpp
+class ExString 
+{
+public: 
+    explicit ExString(int size):_size(size) {
+       // 代码同上，省略...
+    }
+    // 代码同上，省略...
+};
+```
+
+这个时候执行构造语句，很多需要转换数据类型的语句就不能成功了：
+
+```cpp
+ExString str2 = 10;   // NOK, explicit关键字存在， 不能隐式把10转为ExString了
+ExString str5 = 'c';  // NOK, 同上
+```
+
+- explicit 就是防止类构造函数的隐式数据转换
+- explicit 可应用的场合：
+  - 当类构造函数只有一个参数时
+  - 当类构造函数有两个及以上参数时，若第2个参数和其后参数都有默认值时
+- 原则: 当只有一个参数的类构造函数情况下, 请显式增加 explicit 清晰表达期望的效果
+
+## do { } while(false) 包裹宏定义
+
+```cpp
+#define SOPHUS_ENSURE(expr, ...)                                              \
+  do {                                                                        \
+    if (!(expr)) {                                                            \
+      SOPHUS_DEDAULT_ENSURE_FAILURE_IMPL(SOPHUS_FUNCTION, __FILE__, __LINE__, \
+                                         ##__VA_ARGS__);                      \
+    }                                                                         \
+  } while (false)
+```
+
+主要是为了封闭代码，让宏定义被封闭在 do {} while(false) 中， 这样宏用在其他的程序结构中（比如 if ... else ... ）就不容易出错
