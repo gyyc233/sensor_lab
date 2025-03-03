@@ -26,10 +26,10 @@ public:
     IMUPreintegration::Options preinteg_options;
 
     // 噪声
-    double bias_gyro_var = 1e-6;          // 陀螺零偏游走标准差
-    double bias_acce_var = 1e-4;          // 加计零偏游走标准差
-    Mat3d bg_rw_info = Mat3d::Identity(); // 陀螺随机游走信息阵
-    Mat3d ba_rw_info = Mat3d::Identity(); // 加计随机游走信息阵
+    double bias_gyro_var = 1e-6; // 陀螺零偏游走标准差
+    double bias_acce_var = 1e-4; // 加计零偏游走标准差
+    Mat3d bg_rw_info = Mat3d::Identity(); // 陀螺随机游走信息阵,是协防差的逆矩阵
+    Mat3d ba_rw_info = Mat3d::Identity(); // 加计随机游走信息阵,是协防差的逆矩阵
 
     double gnss_pos_noise = 0.1;                  // GNSS位置方差
     double gnss_height_noise = 0.1;               // GNSS高度方差
@@ -43,7 +43,7 @@ public:
     double wheel_radius = 0.155;  // 轮子半径
     double circle_pulse = 1024.0; // 编码器每圈脉冲数
 
-    bool verbose_ = true; // 是否输出调试信息
+    bool verbose = true; // 是否输出调试信息
   };
 
   GinsImuPreIntegration(Options options = Options());

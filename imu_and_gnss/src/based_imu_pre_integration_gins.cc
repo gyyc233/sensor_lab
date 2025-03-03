@@ -6,6 +6,9 @@
 #include <g2o/core/robust_kernel.h>
 #include <g2o/solvers/dense/linear_solver_dense.h>
 
+#include "g2o_preintegration_types.h"
+#include "g2o_types/g2o_types.h"
+
 namespace sad {
 GinsImuPreIntegration::GinsImuPreIntegration(Options options)
     : options_(options) {
@@ -144,158 +147,161 @@ void GinsImuPreIntegration::Optimize() {
   // 创建稀疏求解器
   g2o::SparseOptimizer optimizer;
   optimizer.setAlgorithm(solver);
-  // TODO:
   // 需要定义各种顶点和边
 
-  // // 上时刻顶点， pose, v, bg, ba
-  // auto v0_pose = new VertexPose();
-  // v0_pose->setId(0);
-  // v0_pose->setEstimate(last_frame_->GetSE3());
-  // optimizer.addVertex(v0_pose);
+  // 上时刻顶点， pose, v, bg, ba
+  auto v0_pose = new VertexPose();
+  v0_pose->setId(0);
+  v0_pose->setEstimate(last_frame_->GetSE3());
+  optimizer.addVertex(v0_pose);
 
-  // auto v0_vel = new VertexVelocity();
-  // v0_vel->setId(1);
-  // v0_vel->setEstimate(last_frame_->v_);
-  // optimizer.addVertex(v0_vel);
+  auto v0_vel = new VertexVelocity();
+  v0_vel->setId(1);
+  v0_vel->setEstimate(last_frame_->v_);
+  optimizer.addVertex(v0_vel);
 
-  // auto v0_bg = new VertexGyroBias();
-  // v0_bg->setId(2);
-  // v0_bg->setEstimate(last_frame_->bg_);
-  // optimizer.addVertex(v0_bg);
+  auto v0_bg = new VertexGyroBias();
+  v0_bg->setId(2);
+  v0_bg->setEstimate(last_frame_->bg_);
+  optimizer.addVertex(v0_bg);
 
-  // auto v0_ba = new VertexAccBias();
-  // v0_ba->setId(3);
-  // v0_ba->setEstimate(last_frame_->ba_);
-  // optimizer.addVertex(v0_ba);
+  auto v0_ba = new VertexAccBias();
+  v0_ba->setId(3);
+  v0_ba->setEstimate(last_frame_->ba_);
+  optimizer.addVertex(v0_ba);
 
-  // // 本时刻顶点，pose, v, bg, ba
-  // auto v1_pose = new VertexPose();
-  // v1_pose->setId(4);
-  // v1_pose->setEstimate(this_frame_->GetSE3());
-  // optimizer.addVertex(v1_pose);
+  // 本时刻顶点，pose, v, bg, ba
+  auto v1_pose = new VertexPose();
+  v1_pose->setId(4);
+  v1_pose->setEstimate(this_frame_->GetSE3());
+  optimizer.addVertex(v1_pose);
 
-  // auto v1_vel = new VertexVelocity();
-  // v1_vel->setId(5);
-  // v1_vel->setEstimate(this_frame_->v_);
-  // optimizer.addVertex(v1_vel);
+  auto v1_vel = new VertexVelocity();
+  v1_vel->setId(5);
+  v1_vel->setEstimate(this_frame_->v_);
+  optimizer.addVertex(v1_vel);
 
-  // auto v1_bg = new VertexGyroBias();
-  // v1_bg->setId(6);
-  // v1_bg->setEstimate(this_frame_->bg_);
-  // optimizer.addVertex(v1_bg);
+  auto v1_bg = new VertexGyroBias();
+  v1_bg->setId(6);
+  v1_bg->setEstimate(this_frame_->bg_);
+  optimizer.addVertex(v1_bg);
 
-  // auto v1_ba = new VertexAccBias();
-  // v1_ba->setId(7);
-  // v1_ba->setEstimate(this_frame_->ba_);
-  // optimizer.addVertex(v1_ba);
+  auto v1_ba = new VertexAccBias();
+  v1_ba->setId(7);
+  v1_ba->setEstimate(this_frame_->ba_);
+  optimizer.addVertex(v1_ba);
 
-  // // 预积分边
-  // auto edge_inertial = new EdgeInertial(pre_integ_, options_.gravity_);
-  // edge_inertial->setVertex(0, v0_pose);
-  // edge_inertial->setVertex(1, v0_vel);
-  // edge_inertial->setVertex(2, v0_bg);
-  // edge_inertial->setVertex(3, v0_ba);
-  // edge_inertial->setVertex(4, v1_pose);
-  // edge_inertial->setVertex(5, v1_vel);
-  // auto* rk = new g2o::RobustKernelHuber();
-  // rk->setDelta(200.0);
-  // edge_inertial->setRobustKernel(rk);
-  // optimizer.addEdge(edge_inertial);
+  // 预积分边
+  auto edge_inertial = new EdgeInertial(pre_integ_, options_.gravity);
+  edge_inertial->setVertex(0, v0_pose);
+  edge_inertial->setVertex(1, v0_vel);
+  edge_inertial->setVertex(2, v0_bg);
+  edge_inertial->setVertex(3, v0_ba);
+  edge_inertial->setVertex(4, v1_pose);
+  edge_inertial->setVertex(5, v1_vel);
 
-  // // 两个零偏随机游走
-  // auto* edge_gyro_rw = new EdgeGyroRW();
-  // edge_gyro_rw->setVertex(0, v0_bg);
-  // edge_gyro_rw->setVertex(1, v1_bg);
-  // edge_gyro_rw->setInformation(options_.bg_rw_info_);
-  // optimizer.addEdge(edge_gyro_rw);
+  // Huber核函数: 数据中异常值较温和但数量较多
+  // Cauchy核函数: 异常值的数量相对较少但幅度较大(即噪声点极端但不频繁)
+  auto *rk = new g2o::RobustKernelHuber();
+  rk->setDelta(200.0);
+  edge_inertial->setRobustKernel(rk);
+  optimizer.addEdge(edge_inertial);
 
-  // auto* edge_acc_rw = new EdgeAccRW();
-  // edge_acc_rw->setVertex(0, v0_ba);
-  // edge_acc_rw->setVertex(1, v1_ba);
-  // edge_acc_rw->setInformation(options_.ba_rw_info_);
-  // optimizer.addEdge(edge_acc_rw);
+  // 两个零偏随机游走
+  auto *edge_gyro_rw = new EdgeGyroRW();
+  edge_gyro_rw->setVertex(0, v0_bg);
+  edge_gyro_rw->setVertex(1, v1_bg);
+  edge_gyro_rw->setInformation(options_.bg_rw_info);
+  optimizer.addEdge(edge_gyro_rw);
 
-  // // 上时刻先验
-  // auto* edge_prior = new EdgePriorPoseNavState(*last_frame_, prior_info_);
-  // edge_prior->setVertex(0, v0_pose);
-  // edge_prior->setVertex(1, v0_vel);
-  // edge_prior->setVertex(2, v0_bg);
-  // edge_prior->setVertex(3, v0_ba);
-  // optimizer.addEdge(edge_prior);
+  auto *edge_acc_rw = new EdgeAccRW();
+  edge_acc_rw->setVertex(0, v0_ba);
+  edge_acc_rw->setVertex(1, v1_ba);
+  edge_acc_rw->setInformation(options_.ba_rw_info);
+  optimizer.addEdge(edge_acc_rw);
 
-  // // GNSS边
-  // auto edge_gnss0 = new EdgeGNSS(v0_pose, last_gnss_.utm_pose_);
-  // edge_gnss0->setInformation(options_.gnss_info_);
-  // optimizer.addEdge(edge_gnss0);
+  // 上时刻先验
+  auto *edge_prior = new EdgePriorPoseNavState(*last_frame_, prior_info_);
+  edge_prior->setVertex(0, v0_pose);
+  edge_prior->setVertex(1, v0_vel);
+  edge_prior->setVertex(2, v0_bg);
+  edge_prior->setVertex(3, v0_ba);
+  optimizer.addEdge(edge_prior);
 
-  // auto edge_gnss1 = new EdgeGNSS(v1_pose, this_gnss_.utm_pose_);
-  // edge_gnss1->setInformation(options_.gnss_info_);
-  // optimizer.addEdge(edge_gnss1);
+  // GNSS边
+  auto edge_gnss0 = new EdgeGNSS(v0_pose, last_gnss_.utm_pose_);
+  edge_gnss0->setInformation(options_.gnss_info);
+  optimizer.addEdge(edge_gnss0);
 
-  // // Odom边
-  // EdgeEncoder3D* edge_odom = nullptr;
-  // Vec3d vel_world = Vec3d::Zero();
-  // Vec3d vel_odom = Vec3d::Zero();
-  // if (last_odom_set_) {
-  //     // velocity obs
-  //     double velo_l =
-  //         options_.wheel_radius_ * last_odom_.left_pulse_ /
-  //         options_.circle_pulse_ * 2 * M_PI / options_.odom_span_;
-  //     double velo_r =
-  //         options_.wheel_radius_ * last_odom_.right_pulse_ /
-  //         options_.circle_pulse_ * 2 * M_PI / options_.odom_span_;
-  //     double average_vel = 0.5 * (velo_l + velo_r);
-  //     vel_odom = Vec3d(average_vel, 0.0, 0.0);
-  //     vel_world = this_frame_->R_ * vel_odom;
+  auto edge_gnss1 = new EdgeGNSS(v1_pose, this_gnss_.utm_pose_);
+  edge_gnss1->setInformation(options_.gnss_info);
+  optimizer.addEdge(edge_gnss1);
 
-  //     edge_odom = new EdgeEncoder3D(v1_vel, vel_world);
-  //     edge_odom->setInformation(options_.odom_info_);
-  //     optimizer.addEdge(edge_odom);
+  // Odom边
+  EdgeEncoder3D *edge_odom = nullptr;
+  Vec3d vel_world = Vec3d::Zero();
+  Vec3d vel_odom = Vec3d::Zero();
+  if (last_odom_set_) {
+    // velocity obs
+    double velo_l = options_.wheel_radius * last_odom_.left_pulse_ /
+                    options_.circle_pulse * 2 * M_PI / options_.odom_span;
+    double velo_r = options_.wheel_radius * last_odom_.right_pulse_ /
+                    options_.circle_pulse * 2 * M_PI / options_.odom_span;
+    double average_vel = 0.5 * (velo_l + velo_r);
+    vel_odom = Vec3d(average_vel, 0.0, 0.0);
+    vel_world = this_frame_->R_ * vel_odom;
 
-  //     // 重置odom数据到达标志位，等待最新的odom数据
-  //     last_odom_set_ = false;
-  // }
+    edge_odom = new EdgeEncoder3D(v1_vel, vel_world);
+    edge_odom->setInformation(options_.odom_info);
+    optimizer.addEdge(edge_odom);
 
-  // optimizer.setVerbose(options_.verbose_);
-  // optimizer.initializeOptimization();
-  // optimizer.optimize(20);
+    // 重置odom数据到达标志位，等待最新的odom数据
+    last_odom_set_ = false;
+  }
 
-  // if (options_.verbose_) {
-  //     // 获取结果，统计各类误差
-  //     LOG(INFO) << "chi2/error: ";
-  //     LOG(INFO) << "preintegration: " << edge_inertial->chi2() << "/" <<
-  //     edge_inertial->error().transpose();
-  //     // LOG(INFO) << "gnss0: " << edge_gnss0->chi2() << ", " <<
-  //     edge_gnss0->error().transpose(); LOG(INFO) << "gnss1: " <<
-  //     edge_gnss1->chi2() << ", " << edge_gnss1->error().transpose();
-  //     LOG(INFO) << "bias: " << edge_gyro_rw->chi2() << "/" <<
-  //     edge_acc_rw->error().transpose(); LOG(INFO) << "prior: " <<
-  //     edge_prior->chi2() << "/" << edge_prior->error().transpose(); if
-  //     (edge_odom) {
-  //         LOG(INFO) << "body vel: " << (v1_pose->estimate().so3().inverse() *
-  //         v1_vel->estimate()).transpose(); LOG(INFO) << "meas: " <<
-  //         vel_odom.transpose(); LOG(INFO) << "odom: " << edge_odom->chi2() <<
-  //         "/" << edge_odom->error().transpose();
-  //     }
-  // }
+  optimizer.setVerbose(options_.verbose);
+  optimizer.initializeOptimization();
+  optimizer.optimize(20);
 
-  // last_frame_->R_ = v0_pose->estimate().so3();
-  // last_frame_->p_ = v0_pose->estimate().translation();
-  // last_frame_->v_ = v0_vel->estimate();
-  // last_frame_->bg_ = v0_bg->estimate();
-  // last_frame_->ba_ = v0_ba->estimate();
+  if (options_.verbose) {
+    // 获取结果，统计各类误差
+    LOG(INFO) << "chi2/error: ";
+    LOG(INFO) << "preintegration: " << edge_inertial->chi2() << "/"
+              << edge_inertial->error().transpose();
+    // LOG(INFO) << "gnss0: " << edge_gnss0->chi2() << ", " <<
+    edge_gnss0->error().transpose();
+    LOG(INFO) << "gnss1: " << edge_gnss1->chi2() << ", "
+              << edge_gnss1->error().transpose();
+    LOG(INFO) << "bias: " << edge_gyro_rw->chi2() << "/"
+              << edge_acc_rw->error().transpose();
+    LOG(INFO) << "prior: " << edge_prior->chi2() << "/"
+              << edge_prior->error().transpose();
+    if (edge_odom) {
+      LOG(INFO) << "body vel: "
+                << (v1_pose->estimate().so3().inverse() * v1_vel->estimate())
+                       .transpose();
+      LOG(INFO) << "meas: " << vel_odom.transpose();
+      LOG(INFO) << "odom: " << edge_odom->chi2() << "/"
+                << edge_odom->error().transpose();
+    }
+  }
 
-  // this_frame_->R_ = v1_pose->estimate().so3();
-  // this_frame_->p_ = v1_pose->estimate().translation();
-  // this_frame_->v_ = v1_vel->estimate();
-  // this_frame_->bg_ = v1_bg->estimate();
-  // this_frame_->ba_ = v1_ba->estimate();
+  last_frame_->R_ = v0_pose->estimate().so3();
+  last_frame_->p_ = v0_pose->estimate().translation();
+  last_frame_->v_ = v0_vel->estimate();
+  last_frame_->bg_ = v0_bg->estimate();
+  last_frame_->ba_ = v0_ba->estimate();
 
-  // // 重置integ
-  // options_.preinteg_options_.init_bg_ = this_frame_->bg_;
-  // options_.preinteg_options_.init_ba_ = this_frame_->ba_;
-  // pre_integ_ =
-  // std::make_shared<IMUPreintegration>(options_.preinteg_options_);
+  this_frame_->R_ = v1_pose->estimate().so3();
+  this_frame_->p_ = v1_pose->estimate().translation();
+  this_frame_->v_ = v1_vel->estimate();
+  this_frame_->bg_ = v1_bg->estimate();
+  this_frame_->ba_ = v1_ba->estimate();
+
+  // 重置integ
+  options_.preinteg_options.init_bg_ = this_frame_->bg_;
+  options_.preinteg_options.init_ba_ = this_frame_->ba_;
+  pre_integ_ = std::make_shared<IMUPreintegration>(options_.preinteg_options);
 }
 
 } // namespace sad

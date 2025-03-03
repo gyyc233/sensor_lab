@@ -21,6 +21,8 @@ namespace sad {
 class VertexPose : public g2o::BaseVertex<6, SE3> {
 public:
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+
+  // 旋转和平移顶点
   VertexPose() {}
 
   bool read(std::istream &is) override {
@@ -32,6 +34,7 @@ public:
                       Vec3d(data[0], data[1], data[2])));
       return true;
     }
+    return false;
   }
 
   bool write(std::ostream &os) const override {
@@ -207,7 +210,8 @@ public:
     // jacobian 6x6
     _jacobianOplusXi.setZero();
 
-    Eigen::Matrix3d mat = _measurement.so3().inverse() * v->estimate().so3();
+    Eigen::MatrixXd mat =
+        _measurement.so3().inverse().matrix() * v->estimate().so3().matrix();
 
     _jacobianOplusXi.block<3, 3>(0, 0) = jr_inv_test(mat);  // dR/dR
     _jacobianOplusXi.block<3, 3>(3, 3) = Mat3d::Identity(); // dp/dp
@@ -290,73 +294,6 @@ public:
 
 private:
   SE3 TBG_;
-};
-
-/**
- * 6 自由度相对运动
- * 误差的平移在前，角度在后
- * 观测：T12
- */
-class EdgeRelativeMotion
-    : public g2o::BaseBinaryEdge<6, SE3, VertexPose, VertexPose> {
-public:
-  EIGEN_MAKE_ALIGNED_OPERATOR_NEW;
-  EdgeRelativeMotion() = default;
-  EdgeRelativeMotion(VertexPose *v1, VertexPose *v2, const SE3 &obs) {
-    setVertex(0, v1);
-    setVertex(1, v2);
-    setMeasurement(obs);
-  }
-
-  void computeError() override {
-    VertexPose *v1 = (VertexPose *)_vertices[0];
-    VertexPose *v2 = (VertexPose *)_vertices[1];
-    SE3 T12 = v1->estimate().inverse() * v2->estimate();
-    _error =
-        (_measurement.inverse() * v1->estimate().inverse() * v2->estimate())
-            .log();
-  };
-
-  virtual bool read(std::istream &is) override {
-    double data[7];
-    for (int i = 0; i < 7; i++) {
-      is >> data[i];
-    }
-    Quatd q(data[6], data[3], data[4], data[5]);
-    q.normalize();
-    setMeasurement(SE3(q, Vec3d(data[0], data[1], data[2])));
-    for (int i = 0; i < information().rows() && is.good(); i++) {
-      for (int j = i; j < information().cols() && is.good(); j++) {
-        is >> information()(i, j);
-        if (i != j)
-          information()(j, i) = information()(i, j);
-      }
-    }
-    return true;
-  }
-
-  virtual bool write(std::ostream &os) const override {
-    os << "EDGE_SE3:QUAT ";
-    auto *v1 = static_cast<VertexPose *>(_vertices[0]);
-    auto *v2 = static_cast<VertexPose *>(_vertices[1]);
-    os << v1->id() << " " << v2->id() << " ";
-    SE3 m = _measurement;
-    Eigen::Quaterniond q = m.unit_quaternion();
-    os << m.translation().transpose() << " ";
-    os << q.coeffs()[0] << " " << q.coeffs()[1] << " " << q.coeffs()[2] << " "
-       << q.coeffs()[3] << " ";
-
-    // information matrix
-    for (int i = 0; i < information().rows(); i++) {
-      for (int j = i; j < information().cols(); j++) {
-        os << information()(i, j) << " ";
-      }
-    }
-    os << std::endl;
-    return true;
-  }
-
-private:
 };
 
 /**
