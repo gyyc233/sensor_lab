@@ -1,4 +1,9 @@
+#include "based_imu_pre_integration_gins.h"
+#include "g2o_preintegration_types.h"
+#include "g2o_types/g2o_types.h"
 #include "imu_preintegration.h"
+#include "navigation_and_mapping/io_utils.h"
+
 #include <gflags/gflags.h>
 #include <glog/logging.h>
 #include <gtest/gtest.h>

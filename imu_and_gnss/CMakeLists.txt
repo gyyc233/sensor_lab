@@ -18,11 +18,11 @@ find_package(G2O REQUIRED)
 include_directories (${G2O_INCLUDE_DIRS})
 # g2o
 
-#PCL
+# PCL
 include_directories(${PCL_INCLUDE_DIRS})
 link_directories(${PCL_LIBRARY_DIRS})
 add_definitions(${PCL_DEFINITIONS})
-#PCL
+# PCL
 
 include_directories(${EIGEN3_INCLUDE_DIRS})
 include_directories(${OpenCV_INCLUDE_DIRS})
@@ -74,7 +74,7 @@ target_link_libraries(based_imu_pre_integration_gins imu_preintegration ${G2O_CO
 
 # gtest example
 add_executable(gtest_preintegration test/gtest_preintegration.cc)
-target_link_libraries(gtest_preintegration gtest pthread glog gflags imu_preintegration ${G2O_CORE_LIBRARY} ${G2O_STUFF_LIBRARY})
+target_link_libraries(gtest_preintegration gtest pthread glog gflags imu_preintegration based_imu_pre_integration_gins ${G2O_CORE_LIBRARY} ${G2O_STUFF_LIBRARY})
 
 # INSTALL
 install(
