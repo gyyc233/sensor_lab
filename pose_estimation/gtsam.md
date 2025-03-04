@@ -1,8 +1,13 @@
 
+# GTSAM
+
+- Georgia Tech Smoothing and Mapping Library
+- GTSAM is a C++ library that implements smoothing and mapping (SAM) in robotics and vision, using Factor Graphs and Bayes Networks as the underlying computing paradigm rather than sparse matrices.
+
 ## install gtsam
 
 ```bash
-git clone https://bitbucket.org/gtborg/gtsam.git
+git clone git@github.com:borglab/gtsam.git
 cd gtsam
 git checkout 4.2.0
 mkdir build && cd build
@@ -21,3 +26,7 @@ include_directories( ${GTSAM_INCLUDE_DIR} )
 #......
 target_link_libraries(gtsam)
 ```
+
+## 参考文章
+
+- [GTSAM快速入门](https://zhuanlan.zhihu.com/p/621999120)
