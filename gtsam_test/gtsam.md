@@ -16,7 +16,9 @@ make -j4
 sudo make install
 ```
 
-`-DGTSAM_USE_SYSTEM_EIGEN=ON` avoid Eigen version conflicts
+- `-DGTSAM_USE_SYSTEM_EIGEN=ON` avoid Eigen version conflicts
+- copy `libmetis-gtsam.so` to `/usr/lib/`
+-  `sudo cp /usr/local/lib/libmetis-gtsam.so /usr/lib` [libmetis-gtsam issue 380](https://github.com/borglab/gtsam/issues/380)
 
 set CMakeLists.txt
 ```cmake
