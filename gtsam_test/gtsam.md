@@ -11,10 +11,12 @@ git clone git@github.com:borglab/gtsam.git
 cd gtsam
 git checkout 4.2.0
 mkdir build && cd build
-cmake ..
+cmake -DGTSAM_USE_SYSTEM_EIGEN=ON ..
 make -j4
 sudo make install
 ```
+
+`-DGTSAM_USE_SYSTEM_EIGEN=ON` avoid Eigen version conflicts
 
 set CMakeLists.txt
 ```cmake

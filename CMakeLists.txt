@@ -43,6 +43,7 @@ else()
   add_subdirectory(path_plan)
   add_subdirectory(path_tracking)
   add_subdirectory(imu_and_gnss)
+  add_subdirectory(gtsam_test)
 endif()
 
 # copy floder to install path

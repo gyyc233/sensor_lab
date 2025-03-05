@@ -16,6 +16,7 @@
                 "/usr/include",
                 "/usr/include/opencv4",
                 "/usr/include/eigen3",
+                "/usr/local/include/gtsam",
                 "/opt/ros/noetic/include"
             ],
             "defines": [],

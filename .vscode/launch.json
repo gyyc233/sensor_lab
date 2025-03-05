@@ -5,7 +5,7 @@
             "name": "(gdb) Launch",
             "type": "cppdbg",
             "request": "launch",
-            "program": "${workspaceFolder}/build/imu_and_gnss/run_eskf_gins",
+            "program": "${workspaceFolder}/build/gtsam_test/localization_example",
             "args": [],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}/build",
