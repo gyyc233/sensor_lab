@@ -31,6 +31,19 @@ include_directories( ${GTSAM_INCLUDE_DIR} )
 target_link_libraries(gtsam)
 ```
 
+### my gtsam build
+
+```shell
+cmake -DCMAKE_BUILD_TYPE=Release -DGTSAM_BUILD_TESTS=OFF -DGTSAM_BUILD_UNSTABLE=ON -DGTSAM_WITH_TBB=OFF -DGTSAM_BUILD_EXAMPLES_ALWAYS=ON -DGTSAM_ALLOW_DEPRECATED_SINCE_V42=OFF -DGTSAM_USE_QUATERNIONS=OFF -DGTSAM_ROT3_EXPMAP=ON -DGTSAM_POSE3_EXPMAP=ON -DGTSAM_USE_SYSTEM_EIGEN=ON -DGTSAM_USE_SYSTEM_METIS=OFF -DGTSAM_BUILD_WITH_MARCH_NATIVE=OFF -DGTSAM_SINGLE_TEST_EXE=ON -DBOOST_ROOT=$BOOST_ROOT -DBoost_NO_SYSTEM_PATHS=OFF -DBoost_ARCHITECTURE=-x64 -DEigen3_DIR=/usr/include/eigen3 ..
+```
+
+### uninstall
+
+```shell
+cd build
+build$ sudo xargs rm -rf < install_manifest.txt
+```
+
 ## 参考文章
 
 - [GTSAM快速入门](https://zhuanlan.zhihu.com/p/621999120)
