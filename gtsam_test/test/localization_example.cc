@@ -89,13 +89,12 @@ int main(int argc, char **argv) {
   // 1. Create a factor graph container and add factors to it
   gtsam::NonlinearFactorGraph graph;
 
-  // odom是运动方程
-  // like gnss 是测量方程
-
   // 2a. Add odometry factors
   // For simplicity, we will use the same noise model for each odometry factor
   auto odometryNoise = gtsam::noiseModel::Diagonal::Sigmas(gtsam::Vector3(0.2, 0.2, 0.1));
   // Create odometry (Between) factors between consecutive poses
+  // 加入odom观测边
+  // 假设这些是odom的观测，链接两个顶点，是二元边
   graph.emplace_shared<gtsam::BetweenFactor<gtsam::Pose2>>(1, 2, gtsam::Pose2(2.0, 0.0, 0.0),
                                              odometryNoise);
   graph.emplace_shared<gtsam::BetweenFactor<gtsam::Pose2>>(2, 3, gtsam::Pose2(2.0, 0.0, 0.0),
@@ -105,6 +104,7 @@ int main(int argc, char **argv) {
   // We will use our custom UnaryFactor for this.
   auto unaryNoise =
       gtsam::noiseModel::Diagonal::Sigmas(gtsam::Vector2(0.1, 0.1)); // 10cm std on x,y
+  // 加入like-gnss 观测边
   graph.emplace_shared<UnaryFactor>(1, 0.0, 0.0, unaryNoise);
   graph.emplace_shared<UnaryFactor>(2, 2.0, 0.0, unaryNoise);
   graph.emplace_shared<UnaryFactor>(3, 4.0, 0.0, unaryNoise);
@@ -113,10 +113,12 @@ int main(int argc, char **argv) {
   // 3. Create the data structure to hold the initialEstimate estimate to the
   // solution For illustrative purposes, these have been deliberately set to
   // incorrect values
+
+  // 创建一些有误差的顶点(可以假设是通过imu积分得到)
   gtsam::Values initialEstimate;
   initialEstimate.insert(1, gtsam::Pose2(0.5, 0.0, 0.2));
-  initialEstimate.insert(2, gtsam::Pose2(2.3, 0.1, -0.2));
-  initialEstimate.insert(3, gtsam::Pose2(4.1, 0.1, 0.1));
+  initialEstimate.insert(2, gtsam::Pose2(1.3, 0.1, -0.2));
+  initialEstimate.insert(3, gtsam::Pose2(2.1, 0.1, 0.1));
   initialEstimate.print("\nInitial Estimate:\n"); // print
 
   // 4. Optimize using Levenberg-Marquardt optimization. The optimizer
