@@ -40,13 +40,13 @@ std::vector<int> bfnn_point_k(CloudPtr cloud, const Vec3f &point, int k) {
 }
 
 void bfnn_cloud(CloudPtr cloud1, CloudPtr cloud2,
-                std::vector<std::pair<size_t, size_t>> &matches) {
+                std::vector<std::pair<int, int>> &matches) {
   // 单线程版本
-  std::vector<size_t> index(cloud2->size());
+  std::vector<int> index(cloud2->size());
   // 带初始化的捕获列表　用捕获到的信息初始化一个新的变量，在函数体内使用这个新的变量
   // 同样，这个捕获方式也是有值拷贝捕获和引用捕获两种方式
   std::for_each(index.begin(), index.end(),
-                [idx = 0](size_t &i) mutable { i = idx++; });
+                [idx = 0](int &i) mutable { i = idx++; });
 
   matches.resize(index.size());
   // c++17 std::execution::seq(串行执行):

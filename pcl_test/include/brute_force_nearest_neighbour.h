@@ -33,7 +33,7 @@ std::vector<int> bfnn_point_k(CloudPtr cloud, const Vec3f &point, int k = 5);
  * @return
  */
 void bfnn_cloud(CloudPtr cloud1, CloudPtr cloud2,
-                std::vector<std::pair<size_t, size_t>> &matches);
+                std::vector<std::pair<int, int>> &matches);
 
 /**
  * 对点云进行BF最近邻 多线程版本

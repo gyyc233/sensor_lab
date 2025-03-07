@@ -340,6 +340,16 @@ void OrbMy::BfMatch(const std::vector<DescType> &desc1,
                     std::vector<cv::DMatch> &matches) {
   const int d_max = 40;
 
+  auto number_of_1 = [](uint32_t data) -> int {
+    int count = 0;
+    while (data) {
+      if (data % 2 == 1)
+        count++;
+      data /= 2;
+    }
+    return count;
+  };
+
   for (size_t i1 = 0; i1 < desc1.size(); ++i1) {
     if (desc1[i1].empty())
       continue;
@@ -350,7 +360,8 @@ void OrbMy::BfMatch(const std::vector<DescType> &desc1,
       int distance = 0;
       for (int k = 0; k < 8; k++) {
         // _mm_popcnt_u32返回u32变量中含1的位数
-        distance += _mm_popcnt_u32(desc1[i1][k] ^ desc2[i2][k]);
+        uint32_t tmp = static_cast<uint32_t>(desc1[i1][k] ^ desc2[i2][k]);
+        distance += number_of_1(tmp);
       }
       if (distance < d_max && distance < m.distance) {
         m.distance = distance;

@@ -53,9 +53,10 @@ TEST(NN_TEST, BFNN) {
   LOG(INFO) << "3";
   LOG(INFO) << "points: " << cloud_1->size() << ", " << cloud_2->size();
 
+  std::vector<std::pair<int, int>> matches;
+
   sad::evaluate_and_call(
-      [&cloud_1, &cloud_2]() {
-        std::vector<std::pair<size_t, size_t>> matches;
+      [&cloud_1, &cloud_2, &matches]() {
         sad::bfnn_cloud(cloud_1, cloud_2, matches);
       },
       "暴力匹配（单线程）", 1);
