@@ -37,7 +37,8 @@ public:
 
   // The constructor requires the variable key, the (X, Y) measurement value,
   // and the noise model
-  UnaryFactor(gtsam::Key j, double x, double y, const gtsam::SharedNoiseModel &model)
+  UnaryFactor(gtsam::Key j, double x, double y,
+              const gtsam::SharedNoiseModel &model)
       : gtsam::NoiseModelFactorN<gtsam::Pose2>(model, j), mx_(x), my_(y) {}
 
   ~UnaryFactor() override {}
@@ -47,9 +48,9 @@ public:
   // implements the desired measurement function, returning a vector of errors
   // when evaluated at the provided variable value. It must also calculate the
   // Jacobians for this measurement function, if requested. 计算残差项
-  gtsam::Vector
-  evaluateError(const gtsam::Pose2 &q,
-                boost::optional<gtsam::Matrix &> H = boost::none) const override {
+  gtsam::Vector evaluateError(
+      const gtsam::Pose2 &q,
+      boost::optional<gtsam::Matrix &> H = boost::none) const override {
     // The measurement function for a GPS-like measurement h(q) which predicts
     // the measurement (m) is h(q) = q, q = [qx qy qtheta] The error is then
     // simply calculated as E(q) = h(q) - m: error_x = q.x - mx error_y = q.y -
@@ -91,19 +92,20 @@ int main(int argc, char **argv) {
 
   // 2a. Add odometry factors
   // For simplicity, we will use the same noise model for each odometry factor
-  auto odometryNoise = gtsam::noiseModel::Diagonal::Sigmas(gtsam::Vector3(0.2, 0.2, 0.1));
+  auto odometryNoise =
+      gtsam::noiseModel::Diagonal::Sigmas(gtsam::Vector3(0.2, 0.2, 0.1));
   // Create odometry (Between) factors between consecutive poses
   // 加入odom观测边
   // 假设这些是odom的观测，链接两个顶点，是二元边
-  graph.emplace_shared<gtsam::BetweenFactor<gtsam::Pose2>>(1, 2, gtsam::Pose2(2.0, 0.0, 0.0),
-                                             odometryNoise);
-  graph.emplace_shared<gtsam::BetweenFactor<gtsam::Pose2>>(2, 3, gtsam::Pose2(2.0, 0.0, 0.0),
-                                             odometryNoise);
+  graph.emplace_shared<gtsam::BetweenFactor<gtsam::Pose2>>(
+      1, 2, gtsam::Pose2(2.0, 0.0, 0.0), odometryNoise);
+  graph.emplace_shared<gtsam::BetweenFactor<gtsam::Pose2>>(
+      2, 3, gtsam::Pose2(2.0, 0.0, 0.0), odometryNoise);
 
   // 2b. Add "GPS-like" measurements
   // We will use our custom UnaryFactor for this.
-  auto unaryNoise =
-      gtsam::noiseModel::Diagonal::Sigmas(gtsam::Vector2(0.1, 0.1)); // 10cm std on x,y
+  auto unaryNoise = gtsam::noiseModel::Diagonal::Sigmas(
+      gtsam::Vector2(0.1, 0.1)); // 10cm std on x,y
   // 加入like-gnss 观测边
   graph.emplace_shared<UnaryFactor>(1, 0.0, 0.0, unaryNoise);
   graph.emplace_shared<UnaryFactor>(2, 2.0, 0.0, unaryNoise);
@@ -136,6 +138,14 @@ int main(int argc, char **argv) {
   cout << "x1 covariance:\n" << marginals.marginalCovariance(1) << endl;
   cout << "x2 covariance:\n" << marginals.marginalCovariance(2) << endl;
   cout << "x3 covariance:\n" << marginals.marginalCovariance(3) << endl;
+
+  // save factor graph as graphviz dot file
+  // Render dot file using "dot -Tpng localization_example.dot -o
+  // localization_example.png"
+  graph.saveGraph("localization_example.dot", result);
+
+  // Also print out to console
+  graph.dot(cout, result);
 
   return 0;
 }
