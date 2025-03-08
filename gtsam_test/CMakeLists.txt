@@ -10,3 +10,9 @@ target_link_libraries(localization_example ${GTSAM_LIBRARIES})
 
 add_executable(pose2_slam_example test/pose2_slam_example.cc)
 target_link_libraries(pose2_slam_example ${GTSAM_LIBRARIES})
+
+# PlanarSLAMExample
+add_executable(planar_slam_example test/planar_slam_example.cc)
+target_link_libraries(planar_slam_example ${GTSAM_LIBRARIES})
+
+# vSFMexample

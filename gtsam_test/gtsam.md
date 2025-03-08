@@ -33,6 +33,12 @@ target_link_libraries(gtsam)
 
 ```shell
 cmake -DCMAKE_BUILD_TYPE=Release -DGTSAM_BUILD_TESTS=OFF -DGTSAM_BUILD_UNSTABLE=ON -DGTSAM_WITH_TBB=OFF -DGTSAM_BUILD_EXAMPLES_ALWAYS=ON -DGTSAM_ALLOW_DEPRECATED_SINCE_V42=OFF -DGTSAM_USE_QUATERNIONS=ON -DGTSAM_ROT3_EXPMAP=ON -DGTSAM_POSE3_EXPMAP=ON -DGTSAM_USE_SYSTEM_EIGEN=ON -DGTSAM_USE_SYSTEM_METIS=OFF -DGTSAM_BUILD_WITH_MARCH_NATIVE=OFF -DGTSAM_SINGLE_TEST_EXE=ON -DBOOST_ROOT=$BOOST_ROOT -DBoost_NO_SYSTEM_PATHS=OFF -DBoost_ARCHITECTURE=-x64 -DEigen3_DIR=/usr/include/eigen3 ..
+
+make
+
+sudo make install
+
+sudo cp /usr/local/lib/libmetis-gtsam.so /usr/lib
 ```
 
 - 在我的机器上gtsam 4.2.0可以编译，但是使用时崩溃，试了很多办法，幸运的是，最后我使用上述编译选项终于过了，它们来自`.github/scripts/unix.sh`
