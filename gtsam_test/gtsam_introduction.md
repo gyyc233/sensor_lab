@@ -1,3 +1,9 @@
+- [GTSAM](#gtsam)
+  - [图优化（GraphOptimization）vs. GTSAM中使用的因子图优化（FactorGraph Optimization）区别 vs. BA](#图优化graphoptimizationvs-gtsam中使用的因子图优化factorgraph-optimization区别-vs-ba)
+  - [重要概念](#重要概念)
+- [simpler problem of modeling robot motion](#simpler-problem-of-modeling-robot-motion)
+- [Application](#application)
+- [reference](#reference)
 
 # GTSAM
 
@@ -82,7 +88,9 @@ cout << "x3 covariance:\n" << marginals.marginalCovariance(3) << endl;
 
 You should think of a factor graph as a function to be applied to values -as the notation f(X) / P(X|Z) implies- rather than as an object to be modified. 将因子图视为要应用于values的函数
 
-以上代码可能的输出
+# Application
+
+gtsam 已经为很多问题进行了因子图建模，包含VO, vslam, imu+gps, SFM, kalman filter, camera 可以参考`example/`, 还有好多学习文档. Awesome!
 
 # reference
 

@@ -3,6 +3,8 @@
  *  - The landmarks form a 10 meter cube 地图构成一个10mi的立方体
  *  - The robot rotates around the landmarks, always facing towards the cube
  * 机器人围绕地标旋转，始终面向立方体
+ * This version uses iSAM(增量式平滑和建图算子) to solve the problem
+ * incrementally(逐步)
  */
 
 // For loading the data

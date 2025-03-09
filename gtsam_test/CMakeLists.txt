@@ -19,3 +19,7 @@ target_link_libraries(planar_slam_example ${GTSAM_LIBRARIES})
 # vSFMexample with isam
 add_executable(v_slam_with_isam_example test/v_slam_with_isam_example.cc)
 target_link_libraries(v_slam_with_isam_example ${GTSAM_LIBRARIES})
+
+# vSFMexample with isam2
+add_executable(v_slam_with_isam2_example test/v_slam_with_isam2_example.cc)
+target_link_libraries(v_slam_with_isam2_example ${GTSAM_LIBRARIES})
