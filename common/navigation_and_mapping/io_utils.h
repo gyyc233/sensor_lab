@@ -95,7 +95,7 @@ public:
     return *this;
   }
 
-  /// 2D激光处理, topic_name: ros topic name; 
+  /// 2D激光处理, topic_name: ros topic name;
   RosbagIO &AddScan2DHandle(const std::string &topic_name, Scan2DHandle f) {
     return AddHandle(topic_name, [f](const rosbag::MessageInstance &m) -> bool {
       auto msg = m.instantiate<sensor_msgs::LaserScan>();

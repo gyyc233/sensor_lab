@@ -63,8 +63,12 @@ void RosbagIO::Go() {
     return;
   }
 
+  // rosbag::View实际上是一个包含rosbag::Connection对象的集合
+  // rosbag::Connection对象包含一组时间戳和消息，表示该主题的所有消息
   rosbag::View view(bag);
+  LOG(INFO) << "message number: " << view.size(); // 消息数量
   for (const rosbag::MessageInstance &m : view) {
+    // 每个迭代器返回的对象中包含了消息的时间戳，消息主题名等
     auto iter = process_func_.find(m.getTopic());
     if (iter != process_func_.end()) {
       iter->second(m);
