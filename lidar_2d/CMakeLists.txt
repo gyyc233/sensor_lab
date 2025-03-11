@@ -32,6 +32,12 @@ add_library(lidar_2d_utils STATIC src/lidar_2d_utils.cc ${PROJECT_SOURCE_DIR}/co
 target_include_directories(lidar_2d_utils PUBLIC include)
 target_link_libraries(lidar_2d_utils ${PCL_LIBRARIES} ${OpenCV_LIBS} ${Sophus_LIBRARIES} ${catkin_LIBRARIES} pthread glog::glog gflags)
 
+add_library(lidar_2d_icp STATIC src/icp_2d.cc)
+target_include_directories(lidar_2d_icp PUBLIC include)
+target_link_libraries(lidar_2d_icp ${PCL_LIBRARIES} ${OpenCV_LIBS} ${Sophus_LIBRARIES} ${catkin_LIBRARIES} pthread glog::glog gflags)
+
 add_executable(2dlidar_io_test test/2dlidar_io_test.cc)
+add_executable(2d_icp_s2s_test test/2d_icp_s2s_test.cc)
 
 target_link_libraries(2dlidar_io_test lidar_2d_utils)
+target_link_libraries(2d_icp_s2s_test lidar_2d_utils lidar_2d_icp)

@@ -24,7 +24,7 @@ public:
   /// @param target
   void setTarget(Scan2d::Ptr target) {
     target_scan_ = target;
-    BuildTargetKdTree();
+    buildTargetKdTree();
   }
 
   /// @brief 设置被配准的Scan
