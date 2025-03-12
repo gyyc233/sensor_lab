@@ -105,7 +105,32 @@ using namespace sad {
           has_outside_pts_ = true;
         }
       }
+
+      if (effective_num < min_effect_pts) {
+        return false;
+      }
+
+      // solve for dx
+      Vec3d dx = H.ldlt().solve(b);
+      if (isnan(dx[0])) {
+        break;
+      }
+
+      cost /= effective_num;
+      if (iter > 0 && cost >= lastCost) {
+        break;
+      }
+
+      LOG(INFO) << "iter " << iter << " cost = " << cost
+                << ", effect num: " << effective_num;
+
+      current_pose.translation() += dx.head<2>();
+      current_pose.so2() = current_pose.so2() * SO2::exp(dx[2]);
+      lastCost = cost;
     }
+
+    init_pose = current_pose;
+    return true;
   }
 }
 #endif
