@@ -1,12 +1,12 @@
 
-#ifndef LIKELIHOOD_FILED_H
-#define LIKELIHOOD_FILED_H
+#ifndef LIKELIHOOD_FIELD_H
+#define LIKELIHOOD_FIELD_H
 #ifdef ROS_CATKIN
 
 #include <opencv2/core.hpp>
 
 #include "eigen_type/eigen_types.h"
-#include "lidar_utils.h"
+#include "navigation_and_mapping/lidar_utils.h"
 
 namespace sad {
 class LikelihoodField {
@@ -60,7 +60,7 @@ private:
   bool has_outside_pts_ = false;  // 是否含有出了这个场的点
 
   // 参数配置
-  inline static const float resolution_ = 20; // 每米多少个像素
+  float resolution_ = 20; // 每米多少个像素
 };
 } // namespace sad
 

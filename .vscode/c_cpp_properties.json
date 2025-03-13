@@ -14,7 +14,7 @@
                 "/usr/local/include/DBoW3",
                 "/usr/local/include/octovis",
                 "/usr/include",
-                "/usr/include/opencv4",
+                "/usr/include/opencv4/opencv2",
                 "/usr/include/eigen3",
                 "/usr/local/include/gtsam",
                 "/opt/ros/noetic/include"

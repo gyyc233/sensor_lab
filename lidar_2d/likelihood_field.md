@@ -14,7 +14,7 @@ $$
 
 建立一个最小二乘的优化问题，使得点云中的每个点与地图中的对应点之间的距离最小？通过这样子就可以让扫描得到的点云都尽量的落到地图黑线上
 
-![](./img/likelihood_filed/img1.png)
+![](./img/likelihood_field/img1.png)
 
 ## 似然场
 
@@ -25,12 +25,12 @@ $$
 
 下图为某个二维扫描数据和它对应的似然场
 
-![](./img/likelihood_filed/img2.png)
+![](./img/likelihood_field/img2.png)
 
 似然场围绕每个扫描点产生并随距离变大而衰减，从图中的表现为图像灰度代表值，黑色为0，白色为1,其余为0-1，先把这个场定义为似然场 $\pi$
 
 - 似然场可以代替kd-tree，使用它的读数获取某个点的最近点
 
-![](./img/likelihood_filed/img3.png)
+![](./img/likelihood_field/img3.png)
 
-![](./img/likelihood_filed/img4.png)
+![](./img/likelihood_field/img4.png)

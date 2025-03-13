@@ -36,8 +36,14 @@ add_library(lidar_2d_icp STATIC src/icp_2d.cc)
 target_include_directories(lidar_2d_icp PUBLIC include)
 target_link_libraries(lidar_2d_icp ${PCL_LIBRARIES} ${OpenCV_LIBS} ${Sophus_LIBRARIES} ${catkin_LIBRARIES} pthread glog::glog gflags)
 
+add_library(likelihood_field STATIC src/likelihood_field.cc)
+target_include_directories(likelihood_field PUBLIC include)
+target_link_libraries(likelihood_field ${PCL_LIBRARIES} ${OpenCV_LIBS} ${Sophus_LIBRARIES} ${catkin_LIBRARIES} pthread glog::glog gflags)
+
 add_executable(2dlidar_io_test test/2dlidar_io_test.cc)
 add_executable(2d_icp_s2s_test test/2d_icp_s2s_test.cc)
+add_executable(likelihood_field_icp_test test/likelihood_field_icp_test.cc)
 
 target_link_libraries(2dlidar_io_test lidar_2d_utils)
 target_link_libraries(2d_icp_s2s_test lidar_2d_utils lidar_2d_icp)
+target_link_libraries(likelihood_field_icp_test lidar_2d_utils likelihood_field)
