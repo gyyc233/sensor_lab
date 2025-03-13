@@ -1,7 +1,16 @@
 #ifdef ROS_CATKIN
 
 #include "likelihood_field.h"
+#include "g2o_types.h"
 #include <glog/logging.h>
+
+#include <g2o/core/base_unary_edge.h>
+#include <g2o/core/block_solver.h>
+#include <g2o/core/optimization_algorithm_levenberg.h>
+#include <g2o/core/robust_kernel.h>
+#include <g2o/core/robust_kernel_impl.h>
+#include <g2o/core/sparse_optimizer.h>
+#include <g2o/solvers/dense/linear_solver_dense.h>
 
 namespace sad {
 
@@ -156,7 +165,80 @@ bool LikelihoodField::alignGaussNewton(SE2 &init_pose) {
   return true;
 }
 
-bool LikelihoodField::alignG2O(SE2 &init_pose) { return true; }
+bool LikelihoodField::alignG2O(SE2 &init_pose) {
+  // 1. create LinearSolver
+  // 每个误差项优化变量维度为3，误差值维度为1
+  typedef g2o::BlockSolver<g2o::BlockSolverTraits<3, 1>> Block;
+  typedef g2o::LinearSolverDense<Block::PoseMatrixType>
+      LinearSolverType; // 线性求解器类型
+  // 求解方式：LinearSolverDense dense cholesky分解法
+  Block::LinearSolverType *linear_solver =
+      new g2o::LinearSolverDense<Block::PoseMatrixType>();
+
+  // 2. create block solvers
+  Block *solver_ptr = new Block(linear_solver);
+
+  // 3. create optimization_algorithm_gauss_newton 总求解器
+  g2o::OptimizationAlgorithmLevenberg *solver =
+      new g2o::OptimizationAlgorithmLevenberg(solver_ptr);
+
+  // 4. create sparse optimizer
+  g2o::SparseOptimizer optimizer;
+  optimizer.setAlgorithm(solver);
+  optimizer.setVerbose(true); // 打开调试输出
+
+  auto *v = new VertexSE2();
+  v->setId(0);
+  v->setEstimate(init_pose);
+  optimizer.addVertex(v);
+
+  const double range_th = 15.0; // 不考虑太远的scan，不准
+  const double rk_delta = 0.8;
+  has_outside_pts_ = false;
+
+  // 遍历source
+  for (size_t i = 0; i < source_->ranges.size(); ++i) {
+    float r = source_->ranges[i];
+    if (r < source_->range_min || r > source_->range_max) {
+      continue;
+    }
+
+    if (r > range_th) {
+      continue;
+    }
+
+    float angle = source_->angle_min + i * source_->angle_increment;
+    if (angle < source_->angle_min + 30 * M_PI / 180.0 ||
+        angle > source_->angle_max - 30 * M_PI / 180.0) {
+      continue;
+    }
+
+    // 创建似然场边
+    auto e = new EdgeSE2LikelihoodFiled(field_, r, angle, resolution_);
+    e->setVertex(0, v); // 设置链接的顶点，这里这个边更新后再次指向自己
+
+    if (e->IsOutSide()) {
+      has_outside_pts_ = true;
+      delete e;
+      continue;
+    }
+
+    // 设置信息矩阵
+    e->setInformation(Eigen::Matrix<double, 1, 1>::Identity());
+
+    // 设置huber核函数
+    auto rk = new g2o::RobustKernelHuber;
+    rk->setDelta(rk_delta);
+    e->setRobustKernel(rk);
+    optimizer.addEdge(e);
+  }
+
+  optimizer.initializeOptimization();
+  optimizer.optimize(10);
+
+  init_pose = v->estimate();
+  return true;
+}
 
 cv::Mat LikelihoodField::getFieldImage() {
   cv::Mat image(field_.rows, field_.cols, CV_8UC3);

@@ -40,7 +40,6 @@ int main(int argc, char **argv) {
                            lf.alignGaussNewton(pose);
                          } else if (FLAGS_method == "g2o") {
                            lf.alignG2O(pose);
-                           return true;
                          }
 
                          LOG(INFO) << "aligned pose: "

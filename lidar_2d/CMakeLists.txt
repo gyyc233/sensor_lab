@@ -17,6 +17,13 @@ include_directories(${PCL_INCLUDE_DIRS})
 link_directories(${PCL_LIBRARY_DIRS})
 add_definitions(${PCL_DEFINITIONS})
 
+# g2o
+list(APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/lidar_2d/cmake_modules)
+SET(G2O_ROOT /usr/local/include/g2o)
+find_package(G2O REQUIRED)
+include_directories (${G2O_INCLUDE_DIRS})
+# g2o
+
 include_directories(${EIGEN3_INCLUDE_DIRS})
 include_directories(${OpenCV_INCLUDE_DIRS})
 include_directories(${PROJECT_SOURCE_DIR}/common)
@@ -38,7 +45,7 @@ target_link_libraries(lidar_2d_icp ${PCL_LIBRARIES} ${OpenCV_LIBS} ${Sophus_LIBR
 
 add_library(likelihood_field STATIC src/likelihood_field.cc)
 target_include_directories(likelihood_field PUBLIC include)
-target_link_libraries(likelihood_field ${PCL_LIBRARIES} ${OpenCV_LIBS} ${Sophus_LIBRARIES} ${catkin_LIBRARIES} pthread glog::glog gflags)
+target_link_libraries(likelihood_field ${PCL_LIBRARIES} ${OpenCV_LIBS} ${Sophus_LIBRARIES} ${catkin_LIBRARIES} pthread glog::glog gflags ${G2O_CORE_LIBRARY} ${G2O_STUFF_LIBRARY})
 
 add_executable(2dlidar_io_test test/2dlidar_io_test.cc)
 add_executable(2d_icp_s2s_test test/2d_icp_s2s_test.cc)
