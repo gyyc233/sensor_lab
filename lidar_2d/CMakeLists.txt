@@ -54,7 +54,9 @@ target_link_libraries(occupancy_map_2d ${PCL_LIBRARIES} ${OpenCV_LIBS} ${Sophus_
 add_executable(2dlidar_io_test test/2dlidar_io_test.cc)
 add_executable(2d_icp_s2s_test test/2d_icp_s2s_test.cc)
 add_executable(likelihood_field_icp_test test/likelihood_field_icp_test.cc)
+add_executable(occupancy_grid_test test/occupancy_grid_test.cc)
 
 target_link_libraries(2dlidar_io_test lidar_2d_utils)
 target_link_libraries(2d_icp_s2s_test lidar_2d_utils lidar_2d_icp)
 target_link_libraries(likelihood_field_icp_test lidar_2d_utils likelihood_field)
+target_link_libraries(occupancy_grid_test lidar_2d_utils occupancy_map_2d)

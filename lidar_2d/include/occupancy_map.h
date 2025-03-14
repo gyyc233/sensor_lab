@@ -94,6 +94,7 @@ private:
   std::vector<Model2DPoint> model_; // 用于填充占据栅格的模板，都是世界系下的点
 
   // 参数
+  // cpp 17开始　inline可以修饰变量
   inline static constexpr double closest_th_ = 0.2; // 近距离阈值
   inline static constexpr double endpoint_close_th_ =
       0.1; // 末端点障碍物近距离阈值
