@@ -25,3 +25,6 @@ jobs:
     - name: build
       run: make -j8
       working-directory: ./build/
+    - name: execution 1
+      run: ./algorithm/least_square_polynomial_curve_fit_test
+      working-directory: ./build/
