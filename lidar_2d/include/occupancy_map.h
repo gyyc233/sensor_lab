@@ -60,7 +60,7 @@ private:
   /// @brief 生成填充模板
   void buildModel();
 
-  /// @brief 从世界坐标系转到图像坐标系
+  /// @brief 从世界坐标系转到图像坐标系, 保持机器人在图像中央
   /// @tparam T
   /// @param pt
   /// @return
@@ -78,9 +78,9 @@ private:
   /// @return
   double findRangeInAngle(double angle, Scan2d::Ptr scan);
 
-  /// @brief Bresenham直线填充，给定起始点和终止点，将中间的区域填充为白色
-  /// @param p1
-  /// @param p2
+  /// @brief Bresenham 直线填充，给定起始点和终止点，将中间的区域填充为白色
+  /// @param p1 start point
+  /// @param p2 end point
   void bresenhamFilling(const Vec2i &p1, const Vec2i &p2);
 
   cv::Mat occupancy_grid_; // 8bit 占据栅格图像

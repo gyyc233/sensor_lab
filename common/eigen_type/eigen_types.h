@@ -109,9 +109,9 @@ inline size_t hash_vec<3>::operator()(const Eigen::Matrix<int, 3, 1> &v) const {
                 10000000);
 }
 
-// constexpr auto less_vec2i = [](const Vec2i &v1, const Vec2i &v2) {
-//   return v1[0] < v2[0] || (v1[0] == v2[0] && v1[1] < v2[1]);
-// };
+auto less_vec2i = [](const Vec2i &v1, const Vec2i &v2) {
+  return v1[0] < v2[0] || (v1[0] == v2[0] && v1[1] < v2[1]);
+};
 
 template <typename S> inline SE3 Mat4ToSE3(const Eigen::Matrix<S, 4, 4> &m) {
   /// 对R做归一化，防止sophus里的检查不过

@@ -47,6 +47,10 @@ add_library(likelihood_field STATIC src/likelihood_field.cc)
 target_include_directories(likelihood_field PUBLIC include)
 target_link_libraries(likelihood_field ${PCL_LIBRARIES} ${OpenCV_LIBS} ${Sophus_LIBRARIES} ${catkin_LIBRARIES} pthread glog::glog gflags ${G2O_CORE_LIBRARY} ${G2O_STUFF_LIBRARY})
 
+add_library(occupancy_map_2d STATIC src/occupancy_map.cc)
+target_include_directories(occupancy_map_2d PUBLIC include)
+target_link_libraries(occupancy_map_2d ${PCL_LIBRARIES} ${OpenCV_LIBS} ${Sophus_LIBRARIES} ${catkin_LIBRARIES} glog::glog gflags)
+
 add_executable(2dlidar_io_test test/2dlidar_io_test.cc)
 add_executable(2d_icp_s2s_test test/2d_icp_s2s_test.cc)
 add_executable(likelihood_field_icp_test test/likelihood_field_icp_test.cc)
