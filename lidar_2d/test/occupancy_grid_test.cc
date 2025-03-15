@@ -31,7 +31,7 @@ int main(int argc, char **argv) {
                         std::make_shared<sad::Frame>(scan),
                         sad::OccupancyMap::GridMethod::MODEL_POINTS);
                   },
-                  "Occupancy with model points");
+                  "Occupancy with model points", 1);
             } else {
               sad::evaluate_and_call(
                   [&]() {
@@ -39,7 +39,7 @@ int main(int argc, char **argv) {
                         std::make_shared<sad::Frame>(scan),
                         sad::OccupancyMap::GridMethod::BRESENHAM);
                   },
-                  "Occupancy with bresenham");
+                  "Occupancy with bresenham", 1);
             }
             cv::imshow("occupancy map", oc_map.getOccupancyGridBlackWhite());
             cv::waitKey(10);
