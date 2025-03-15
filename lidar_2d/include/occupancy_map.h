@@ -10,7 +10,7 @@ namespace sad {
 
 class OccupancyMap {
 public:
-  /// 栅格模板，预先计算
+  /// 栅格模板，预先计算(基于模版的栅格地图生成)
   struct Model2DPoint {
     int dx_ = 0;
     int dy_ = 0;
