@@ -11,7 +11,7 @@ void Submap::setOccuFromOtherSubmap(std::shared_ptr<Submap> other) {
     if (i > 9) {
       break;
     }
-    occupancy_map_.emplace_back(frames_in_other[i]);
+    occupancy_map_.addLidarFrame(frames_in_other[i]);
   }
 
   // 根据当前栅格生成似然场,以提供给当前子地图
@@ -22,10 +22,10 @@ bool Submap::matchScan(std::shared_ptr<Frame> frame) {
   // 在似然场中设置扫描数据为被配准对象
   field_.setSourceScan(frame->scan_);
   // 计算scan相对于submap的位姿
-  field_->alignG2O(frame_->pose_submap_); // 将优化后的位姿保存在pose_submap_
+  field_.alignG2O(frame->pose_submap_); // 将优化后的位姿保存在pose_submap_
 
   // 将scan位姿转到世界坐标系下
-  frame->pose_ = pose_ * frame_->pose_submap_;
+  frame->pose_ = pose_ * frame->pose_submap_;
 
   return true;
 }

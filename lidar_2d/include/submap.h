@@ -3,7 +3,7 @@
 #ifdef ROS_CATKIN
 
 #include "frame.h"
-#include "likelihood_filed.h"
+#include "likelihood_field.h"
 #include "occupancy_map.h"
 
 namespace sad {
@@ -57,12 +57,14 @@ public:
 
   size_t numFrames() const { return frames_.size(); }
 
-  void SetId(size_t id) { id_ = id; }
+  void setId(size_t id) { id_ = id; }
 
-  size_t GetId() const { return id_; }
+  size_t getId() const { return id_; }
 
   void setPose(const SE2 &pose);
 
+  /// @brief 获取子地图的世界坐标
+  /// @return
   SE2 getPose() const { return pose_; }
 
 private:
