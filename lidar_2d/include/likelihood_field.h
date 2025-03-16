@@ -37,7 +37,7 @@ public:
    * 使用g2o配准
    * @param init_pose 初始位姿 NOTE
    * 使用submap时，给定相对于该submap的位姿，估计结果也是针对于这个submap的位姿
-   * @return
+   * @return init_pose保存了优化后的位姿结果
    */
   bool alignG2O(SE2 &init_pose);
 
