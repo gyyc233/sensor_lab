@@ -72,7 +72,7 @@ bool MRLikelihoodField::alignG2O(SE2 &init_pose) {
   /// 成功匹配的话，打印一些信息
   for (int l = 0; l < levels_; ++l) {
     LOG(INFO) << "level " << l << " inliers: " << num_inliers_[l]
-              << ", ratio: " << inlier_ratio_[l] << poses_[l];
+              << ", ratio: " << inlier_ratio_[l];
   }
 
   return true;
@@ -202,7 +202,6 @@ bool MRLikelihoodField::alignInLevel(int level, SE2 &init_pose) {
 
   if (num_inliers > 100 && inlier_ratio > inlier_ratio_th) {
     init_pose = v->estimate();
-    poses_.emplace_back(v->estimate());
     return true;
   } else {
     // LOG(INFO) << "rejected because ratio is not enough: " << inlier_ratio;

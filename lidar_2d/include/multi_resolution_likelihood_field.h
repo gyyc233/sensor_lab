@@ -35,7 +35,7 @@ class MRLikelihoodField {
 
   /// @brief 设置中心（通常即submap中心）
   /// @param pose
-  void setPose(const std::vector<SE2> &poses) { poses_ = poses; }
+  void setPose(const SE2 &pose) { pose_ = pose; }
 
   /// @brief 设置匹配源
   /// @param scan
@@ -61,7 +61,7 @@ private:
 
   void buildModel();
 
-  std::vector<SE2> poses_;
+  SE2 poses;
 
   Scan2d::Ptr source_ = nullptr;
 

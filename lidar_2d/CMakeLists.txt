@@ -63,16 +63,18 @@ add_library(multi_resolution_likelihood_field STATIC src/multi_resolution_likeli
 target_include_directories(multi_resolution_likelihood_field PUBLIC include)
 target_link_libraries(multi_resolution_likelihood_field ${PCL_LIBRARIES} ${OpenCV_LIBS} ${Sophus_LIBRARIES} ${catkin_LIBRARIES} glog::glog gflags ${G2O_CORE_LIBRARY} ${G2O_STUFF_LIBRARY})
 
-# TEST
+# TEST mr_likelihood_field_test
 
 add_executable(2dlidar_io_test test/2dlidar_io_test.cc)
 add_executable(2d_icp_s2s_test test/2d_icp_s2s_test.cc)
 add_executable(likelihood_field_icp_test test/likelihood_field_icp_test.cc)
 add_executable(occupancy_grid_test test/occupancy_grid_test.cc)
 add_executable(mapping_2d_test test/mapping_2d_test.cc)
+add_executable(mr_likelihood_field_test test/mr_likelihood_field_test.cc)
 
 target_link_libraries(2dlidar_io_test lidar_2d_utils)
 target_link_libraries(2d_icp_s2s_test lidar_2d_utils lidar_2d_icp)
 target_link_libraries(likelihood_field_icp_test lidar_2d_utils likelihood_field)
 target_link_libraries(occupancy_grid_test lidar_2d_utils occupancy_map_2d)
 target_link_libraries(mapping_2d_test lidar_2d_utils mapping_2d)
+target_link_libraries(mr_likelihood_field_test lidar_2d_utils likelihood_field)
