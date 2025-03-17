@@ -6,7 +6,7 @@
 
 namespace sad {
 
-void Frame::Dump(const std::string &filename) {
+void Frame::dump(const std::string &filename) {
   std::ofstream fout(filename);
   fout << id_ << " " << keyframe_id_ << " " << timestamp_ << std::endl;
   fout << pose_.translation()[0] << " " << pose_.translation()[1] << " "
@@ -20,7 +20,7 @@ void Frame::Dump(const std::string &filename) {
   fout.close();
 }
 
-void Frame::Load(const std::string &filename) {
+void Frame::load(const std::string &filename) {
   std::ifstream fin(filename);
   if (!fin) {
     LOG(ERROR) << "cannot load from " << filename;

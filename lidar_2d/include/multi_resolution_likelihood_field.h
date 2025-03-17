@@ -10,6 +10,7 @@
 namespace sad {
 /// @brief 多分辨率的似然场陪准方法
 class MRLikelihoodField {
+public:
   /// 2D 场的模板，在设置target scan或map的时候生成
   struct ModelPoint {
     ModelPoint(int dx, int dy, float res) : dx_(dx), dy_(dy), residual_(res) {}
@@ -61,7 +62,7 @@ private:
 
   void buildModel();
 
-  SE2 poses;
+  SE2 pose_;
 
   Scan2d::Ptr source_ = nullptr;
 

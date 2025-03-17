@@ -15,10 +15,10 @@ struct Frame {
   Frame(Scan2d::Ptr scan) : scan_(scan) {}
 
   /// 将当前帧存入文本文件以供离线调用
-  void Dump(const std::string &filename);
+  void dump(const std::string &filename);
 
   /// 从文件读取frame数据
-  void Load(const std::string &filename);
+  void load(const std::string &filename);
 
   size_t id_ = 0;              // scan id
   size_t keyframe_id_ = 0;     // 关键帧 id
