@@ -19,7 +19,9 @@
                 "/usr/local/include/gtsam",
                 "/opt/ros/noetic/include"
             ],
-            "defines": [],
+            "defines": [
+                "ROS_CATKIN"
+            ],
             "compilerPath": "/usr/bin/gcc",
             "cStandard": "c17",
             "cppStandard": "gnu++14",
