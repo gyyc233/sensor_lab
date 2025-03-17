@@ -67,18 +67,18 @@ bool Mapping2D::processScan(Scan2d::Ptr scan) {
               "keyframes " + std::to_string(current_submap_->numFrames()),
               cv::Point2f(20, 50), cv::FONT_HERSHEY_COMPLEX, 0.5,
               cv::Scalar(0, 255, 0));
-  cv::imshow("occupancy map", occu_image);
+  // cv::imshow("occupancy map", occu_image);
 
   auto field_image = current_submap_->getLikelihood().getFieldImage();
   Visualize2DScan(current_frame_->scan_, current_frame_->pose_, field_image,
                   Vec3b(0, 0, 255), 1000, 20.0f, current_submap_->getPose());
-  cv::imshow("likelihood", field_image);
+  // cv::imshow("likelihood", field_image);
 
   // show global map
   if (is_kf) {
-    cv::imshow("global map", showGlobalMap());
+  //   cv::imshow("global map", showGlobalMap());
   }
-  cv::waitKey(10);
+  // cv::waitKey(10);
 
   if (last_frame_) {
     // calculate delta pose
@@ -225,7 +225,6 @@ cv::Mat Mapping2D::showGlobalMap(int max_size) {
     Vec2d pw = (Vec2d(x, y) - center_image) / global_map_resolution + c;
 
     for (auto &m : all_submaps_) {
-      LOG(INFO) << "pw: " << pw;
       // TODO: check at first outside loop, pw was [0,0]
       Vec2d ps = m->getPose().inverse() * pw; // in submap
       // 转换为像素

@@ -31,6 +31,6 @@ int main(int argc, char **argv) {
           "/pavo_scan_bottom",
           [&](Scan2d::Ptr scan) { return mapping.processScan(scan); })
       .Go();
-  cv::imwrite("./data/ch6/global_map.png", mapping.showGlobalMap(2000));
+  cv::imwrite("./data/2dmapping/global_map.png", mapping.showGlobalMap(2000));
   return 0;
 }
