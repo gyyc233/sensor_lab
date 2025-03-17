@@ -27,28 +27,31 @@ class Mapping2D {
 public:
   bool init(bool with_loop_closing = false);
 
-  /// 单回波的scan 建图
+  /// @brief 单回波的scan 建图
+  /// @param scan
+  /// @return
   bool processScan(Scan2d::Ptr scan);
 
   /// 多回波的scan
   /// 暂时没用到
   // bool processScan(MultiScan2d::Ptr scan);
 
-  /**
-   * 显示全局地图
-   * @param max_size 全局地图最大长宽(pixels)
-   * @return 全局地图图像
-   */
+  /// @brief 显示全局地图
+  /// @param max_size 全局地图最大长宽(pixels)
+  /// @return 全局地图图像
   cv::Mat showGlobalMap(int max_size = 500);
 
 private:
-  /// 判定当前帧是否为关键帧
+  /// @brief 判定当前帧是否为关键帧
+  /// @return
   bool isKeyFrame();
 
-  /// 增加一个关键帧
+  /// @brief 增加一个关键帧
+  /// @return
   void addKeyFrame();
 
-  /// 扩展新的submap
+  /// @brief 扩展新的submap
+  /// @return
   void expandSubmap();
 
   /// 数据成员

@@ -59,6 +59,12 @@ add_library(mapping_2d STATIC src/mapping_2d.cc)
 target_include_directories(mapping_2d PUBLIC include)
 target_link_libraries(mapping_2d likelihood_field occupancy_map_2d submap_2d lidar_2d_utils ${PCL_LIBRARIES} ${OpenCV_LIBS} ${Sophus_LIBRARIES} ${catkin_LIBRARIES} glog::glog gflags)
 
+add_library(multi_resolution_likelihood_field STATIC src/multi_resolution_likelihood_field.cc)
+target_include_directories(multi_resolution_likelihood_field PUBLIC include)
+target_link_libraries(multi_resolution_likelihood_field ${PCL_LIBRARIES} ${OpenCV_LIBS} ${Sophus_LIBRARIES} ${catkin_LIBRARIES} glog::glog gflags ${G2O_CORE_LIBRARY} ${G2O_STUFF_LIBRARY})
+
+# TEST
+
 add_executable(2dlidar_io_test test/2dlidar_io_test.cc)
 add_executable(2d_icp_s2s_test test/2d_icp_s2s_test.cc)
 add_executable(likelihood_field_icp_test test/likelihood_field_icp_test.cc)

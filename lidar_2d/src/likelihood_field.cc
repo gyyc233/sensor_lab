@@ -237,6 +237,7 @@ bool LikelihoodField::alignG2O(SE2 &init_pose) {
   optimizer.optimize(10);
 
   init_pose = v->estimate();
+  pose_ = v->estimate();
   return true;
 }
 
