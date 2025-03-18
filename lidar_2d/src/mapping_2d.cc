@@ -76,7 +76,7 @@ bool Mapping2D::processScan(Scan2d::Ptr scan) {
 
   // show global map
   if (is_kf) {
-  //   cv::imshow("global map", showGlobalMap());
+    //   cv::imshow("global map", showGlobalMap());
   }
   // cv::waitKey(10);
 
