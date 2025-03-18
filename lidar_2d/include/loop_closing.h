@@ -1,6 +1,6 @@
 #ifndef LIDAR_2D_LOOP_CLOSING_H
 #define LIDAR_2D_LOOP_CLOSING_H
-#define ROS_CATKIN
+#ifdef ROS_CATKIN
 
 #include "eigen_type/eigen_types.h"
 #include "multi_resolution_likelihood_field.h"

@@ -92,7 +92,7 @@ void LoopClosing::matchInHistorySubmaps() {
 
     auto submap = submaps_[can];
     SE2 pose_in_target_submap =
-        submap->GetPose().inverse() * current_frame_->pose_; // T_S1_C
+        submap->getPose().inverse() * current_frame_->pose_; // T_S1_C
 
     if (mr->alignG2O(pose_in_target_submap)) {
       // set constraints from current submap to target submap
@@ -101,19 +101,19 @@ void LoopClosing::matchInHistorySubmaps() {
                        submaps_[last_submap_id_]->getPose();
       loop_constraints_.emplace(
           std::pair<size_t, size_t>(can, last_submap_id_),
-          loopConstraints(can, last_submap_id_, T_this_cur));
+          LoopConstraints(can, last_submap_id_, T_this_cur));
       LOG(INFO) << "adding loop from submap " << can << " to "
                 << last_submap_id_;
 
       /// 可视化显示
-      auto occu_image = submap->getOccuMap().getOccupancyGridBlackWhite();
+      auto occu_image = submap->getOccupancyMap().getOccupancyGridBlackWhite();
       Visualize2DScan(current_frame_->scan_, pose_in_target_submap, occu_image,
                       Vec3b(0, 0, 255), 1000, 20.0, SE2());
-      cv::putText(occu_image, "loop submap " + std::to_string(submap->GetId()),
+      cv::putText(occu_image, "loop submap " + std::to_string(submap->getId()),
                   cv::Point2f(20, 20), cv::FONT_HERSHEY_COMPLEX, 0.5,
                   cv::Scalar(0, 255, 0));
       cv::putText(occu_image,
-                  "keyframes " + std::to_string(submap->NumFrames()),
+                  "keyframes " + std::to_string(submap->numFrames()),
                   cv::Point2f(20, 50), cv::FONT_HERSHEY_COMPLEX, 0.5,
                   cv::Scalar(0, 255, 0));
       cv::imshow("loop closure", occu_image);
@@ -130,7 +130,7 @@ void LoopClosing::matchInHistorySubmaps() {
   current_candidates_.clear();
 }
 
-void LoopClosing::Optimize() {
+void LoopClosing::optimize() {
   // 1. create LinearSolver
   // 每个误差项优化变量维度为3，误差值维度为1
   typedef g2o::BlockSolver<g2o::BlockSolverTraits<3, 1>> Block;
@@ -167,8 +167,8 @@ void LoopClosing::Optimize() {
     EdgeSE2 *e = new EdgeSE2();
     e->setVertex(0, optimizer.vertex(i));
     e->setVertex(1, optimizer.vertex(i + 1));
-    e->setMeasurement(first_submap->GetPose().inverse() *
-                      next_submap->GetPose());
+    e->setMeasurement(first_submap->getPose().inverse() *
+                      next_submap->getPose());
     e->setInformation(Mat3d::Identity() * 1e4);
 
     optimizer.addEdge(e);

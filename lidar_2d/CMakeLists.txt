@@ -63,6 +63,10 @@ add_library(multi_resolution_likelihood_field STATIC src/multi_resolution_likeli
 target_include_directories(multi_resolution_likelihood_field PUBLIC include)
 target_link_libraries(multi_resolution_likelihood_field ${PCL_LIBRARIES} ${OpenCV_LIBS} ${Sophus_LIBRARIES} ${catkin_LIBRARIES} glog::glog gflags ${G2O_CORE_LIBRARY} ${G2O_STUFF_LIBRARY})
 
+add_library(loop_closing STATIC src/loop_closing.cc)
+target_include_directories(loop_closing PUBLIC include)
+target_link_libraries(loop_closing ${PCL_LIBRARIES} ${OpenCV_LIBS} ${Sophus_LIBRARIES} ${catkin_LIBRARIES} glog::glog gflags ${G2O_CORE_LIBRARY} ${G2O_STUFF_LIBRARY} multi_resolution_likelihood_field submap_2d)
+
 # TEST mr_likelihood_field_test
 
 add_executable(2dlidar_io_test test/2dlidar_io_test.cc)
