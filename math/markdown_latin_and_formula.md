@@ -68,3 +68,36 @@ x & 0<x<1 \\
 - \times, \pm, \div: 分别表示乘号、正负号、除号 $\pm (a \times b + c \div d) $
 - \limits （$$）: 限制上下标的位置，一般用于求和、求积、积分等符号
   -  $\sum\limits_{i=1}^n a_i$
+
+# 角标
+
+|角标|latex|
+|----|----|
+|左上与右下|$^{w}p_{i}$|
+|右上与左下|$_{w}p^{i}$|
+
+# matrix
+
+$$
+\begin{bmatrix}
+{a_{11}}&{a_{12}}&{\cdots}&{a_{1n}}\\
+{a_{21}}&{a_{22}}&{\cdots}&{a_{2n}}\\
+{\vdots}&{\vdots}&{\ddots}&{\vdots}\\
+{a_{m1}}&{a_{m2}}&{\cdots}&{a_{mn}}\\
+\end{bmatrix}
+$$
+
+- pmatrix：小括号边框
+- bmatrix：中括号边框
+- Bmatrix：大括号边框
+- vmatrix：单竖线边框
+- Vmatrix：双竖线边框
+
+## equation
+
+$$\begin{cases}
+a_1x+b_1y+c_1z=d_1\\
+a_2x+b_2y+c_2z=d_2\\
+a_3x+b_3y+c_3z=d_3\\
+\end{cases}
+$$
