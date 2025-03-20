@@ -5,7 +5,7 @@
             "name": "(gdb) Launch",
             "type": "cppdbg",
             "request": "launch",
-            "program": "${workspaceFolder}/build/lidar_2d/occupancy_grid_test",
+            "program": "${workspaceFolder}/build/lidar_3d/icp_3d_test",
             "args": [],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}/build",

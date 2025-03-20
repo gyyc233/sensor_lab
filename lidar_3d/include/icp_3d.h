@@ -3,7 +3,7 @@
 #ifdef ROS_CATKIN
 
 #include "eigen_type/eigen_types.h"
-#include "pcl_test/include/kd_tree.h"
+#include "include/kd_tree.h"
 #include "point_cloud/point_types.h"
 #include <memory>
 
@@ -29,7 +29,7 @@ public:
     bool use_initial_translation_ = false; // 是否使用初始位姿中的平移估计
   };
 
-  ICP_3D() = delate;
+  ICP_3D();
 
   ICP_3D(Options optional);
 

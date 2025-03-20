@@ -27,6 +27,7 @@ include_directories (${G2O_INCLUDE_DIRS})
 include_directories(${EIGEN3_INCLUDE_DIRS})
 include_directories(${OpenCV_INCLUDE_DIRS})
 include_directories(${PROJECT_SOURCE_DIR}/common)
+include_directories(${PROJECT_SOURCE_DIR}/pcl_test)
 include_directories(${PROJECT_SOURCE_DIR}/third_party)
 
 if(ROS_CATKIN)
@@ -34,3 +35,10 @@ else()
 message("lidar_3d module need `-DROS_CATKIN=ON` optional")
     return()
 endif()
+
+add_library(icp_3d STATIC src/icp_3d.cc ${PROJECT_SOURCE_DIR}/common/navigation_and_mapping/io_utils.cc)
+target_include_directories(icp_3d PUBLIC include)
+target_link_libraries(icp_3d ${PCL_LIBRARIES} ${OpenCV_LIBS} ${Sophus_LIBRARIES} ${catkin_LIBRARIES} pthread glog::glog gflags nearest_neighbour_search)
+
+add_executable(icp_3d_test test/icp_3d_test.cc)
+target_link_libraries(icp_3d_test icp_3d)
