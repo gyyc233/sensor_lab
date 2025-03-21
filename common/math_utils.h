@@ -163,7 +163,8 @@ bool FitLine(std::vector<Eigen::Matrix<S, 3, 1>> &data,
   }
 
   Eigen::JacobiSVD<Eigen::MatrixXd> svd(Y, Eigen::ComputeFullV);
-  // 取最大的右奇异向量
+  // 直接对Ｙ矩阵做svd分解
+  // 取最大的右奇异向量(V矩阵)为直线方向向量，最小右奇异向量为其法向量
   dir = svd.matrixV().col(0);
 
   // check eps

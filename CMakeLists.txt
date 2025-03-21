@@ -11,18 +11,6 @@ set(CMAKE_CXX_FLAGS_RELEASE "$ENV{CXXFLAGS} -O3 -Wall")
 
 project(sensor_lab LANGUAGES CXX)
 
-# =============== add ROS =====================
-option(ROS_CATKIN "ros catkin" OFF)
-
-if(ROS_CATKIN)
-  message(STATUS "ros catkin was ON")
-  add_definitions(-DROS_CATKIN)
-  include(cmake/find_ros.cmake)
-  add_subdirectory(lidar_2d)
-  add_subdirectory(lidar_3d)
-endif()
-# =============== add ROS =====================
-
 # for basic CI/CD
 option(ONLY_CPP_TEST "Only Cpp test" OFF)
 if(ONLY_CPP_TEST)
@@ -46,6 +34,18 @@ else()
   add_subdirectory(imu_and_gnss)
   add_subdirectory(gtsam_test)
 endif()
+
+# =============== add ROS =====================
+option(ROS_CATKIN "ros catkin" OFF)
+
+if(ROS_CATKIN)
+  message(STATUS "ros catkin was ON")
+  add_definitions(-DROS_CATKIN)
+  include(cmake/find_ros.cmake)
+  add_subdirectory(lidar_2d)
+  add_subdirectory(lidar_3d)
+endif()
+# =============== add ROS =====================
 
 # copy floder to install path
 set(build_data_include ${CMAKE_CURRENT_SOURCE_DIR}/build)

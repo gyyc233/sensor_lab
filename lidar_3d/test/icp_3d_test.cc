@@ -54,7 +54,7 @@ int main(int argc, char **argv) {
         SE3 pose;
         success = icp.AlignP2P(pose);
         if (success) {
-          LOG(INFO) << "icp p2 align success, pose: (quaternion (x,y,z,w)) "
+          LOG(INFO) << "icp p2p align success, pose: (quaternion (x,y,z,w)) "
                     << pose.so3().unit_quaternion().coeffs().transpose()
                     << ", (translation): " << pose.translation().transpose();
 
@@ -94,6 +94,61 @@ int main(int argc, char **argv) {
         LOG(INFO) << "ICP PCL pose error: " << pose_error;
       },
       "ICP PCL", 1);
+
+  // P2L icp
+  sad::evaluate_and_call(
+      [&]() {
+        sad::ICP_3D icp;
+        icp.setSource(source);
+        icp.setTarget(target);
+        icp.setGroundTruth(gt_pose);
+
+        SE3 pose;
+        success = icp.AlignP2Line(pose);
+        if (success) {
+          LOG(INFO) << "icp p2l align success, pose: (quaternion (x,y,z,w)) "
+                    << pose.so3().unit_quaternion().coeffs().transpose()
+                    << ", (translation): " << pose.translation().transpose();
+
+          sad::CloudPtr source_trans(new sad::PointCloudType);
+          // pcl::transformPointCloud 是右乘变换
+          pcl::transformPointCloud(*source, *source_trans,
+                                   pose.matrix().cast<float>());
+          pcl::io::savePCDFileASCII("./data/mapping_3d/icp_trans.pcd",
+                                    *source_trans);
+        } else {
+          LOG(ERROR) << "align error";
+        }
+      },
+      "ICP P2L optimize", 1);
+
+  // P2Plane icp
+  sad::evaluate_and_call(
+      [&]() {
+        sad::ICP_3D icp;
+        icp.setSource(source);
+        icp.setTarget(target);
+        icp.setGroundTruth(gt_pose);
+
+        SE3 pose;
+        success = icp.AlignP2Plane(pose);
+        if (success) {
+          LOG(INFO)
+              << "icp P2Plane align success, pose: (quaternion (x,y,z,w)) "
+              << pose.so3().unit_quaternion().coeffs().transpose()
+              << ", (translation): " << pose.translation().transpose();
+
+          sad::CloudPtr source_trans(new sad::PointCloudType);
+          // pcl::transformPointCloud 是右乘变换
+          pcl::transformPointCloud(*source, *source_trans,
+                                   pose.matrix().cast<float>());
+          pcl::io::savePCDFileASCII("./data/mapping_3d/icp_trans.pcd",
+                                    *source_trans);
+        } else {
+          LOG(ERROR) << "align error";
+        }
+      },
+      "ICP P2Plane optimize", 1);
 
   return 0;
 }
