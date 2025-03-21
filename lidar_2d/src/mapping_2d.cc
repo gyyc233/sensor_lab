@@ -194,11 +194,9 @@ cv::Mat Mapping2D::showGlobalMap(int max_size) {
   }
 
   Vec2d c = global_center;
-  // 全局地图中心 cx cy
+  // 全局地图图像中心
   int c_x = global_center[0] * global_map_resolution;
   int c_y = global_center[1] * global_map_resolution;
-  global_center = Vec2d(c_x / global_map_resolution,
-                        c_y / global_map_resolution); // 全局地图图像中心
 
   // 计算全局地图像素大小
   int width =
