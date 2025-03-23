@@ -232,6 +232,7 @@ bool ICP_3D::AlignP2Line(SE3 &init_pose) {
 
         // build residual
         Eigen::Matrix<double, 3, 6> J;
+        // 这里仍使用对右乘扰动求导，与点到点一样，只是左边多了SO3::hat(d)这项
         J.block<3, 3>(0, 0) = -SO3::hat(d) * pose.so3().matrix() * SO3::hat(q);
         J.block<3, 3>(0, 3) = SO3::hat(d);
 
@@ -346,6 +347,7 @@ bool ICP_3D::AlignP2Plane(SE3 &init_pose) {
         effect_pts[idx] = true;
 
         // build residual
+        // 这里与点到线的计算jacobian一样
         Eigen::Matrix<double, 1, 6> J;
         J.block<1, 3>(0, 0) =
             -n.head<3>().transpose() * pose.so3().matrix() * SO3::hat(q);
