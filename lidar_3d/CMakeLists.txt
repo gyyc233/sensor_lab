@@ -42,3 +42,6 @@ target_link_libraries(icp_3d ${PCL_LIBRARIES} ${OpenCV_LIBS} ${Sophus_LIBRARIES}
 
 add_executable(icp_3d_test test/icp_3d_test.cc)
 target_link_libraries(icp_3d_test icp_3d)
+
+add_executable(run_gen_simu_data test/run_gen_simu_data.cc src/gen_simu_data.cc)
+target_link_libraries(run_gen_simu_data icp_3d)
