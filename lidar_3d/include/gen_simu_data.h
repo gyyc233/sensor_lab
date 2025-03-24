@@ -29,7 +29,7 @@ public:
   };
 
   GenSimuData();
-  GenSimuData(Options options = Options());
+  explicit GenSimuData(Options options);
   ~GenSimuData();
 
   /// @brief 生成target和source点云

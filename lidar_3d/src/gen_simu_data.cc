@@ -9,8 +9,6 @@ GenSimuData::GenSimuData(Options options) : options_(options) {}
 
 GenSimuData::~GenSimuData() {}
 
-void GenSimuData::genData() {}
-
 void GenSimuData::genTarget() {
   cv::RNG rng;
 
@@ -40,11 +38,12 @@ void GenSimuData::genTarget() {
     target_->points.emplace_back(ToPointType(pt));
   }
 
+  target_->height = 1;
   target_->width = options_.num_points_;
 }
 
 void GenSimuData::genData() {
-  genData();
+  genTarget();
 
   // generate pose and source
   cv::RNG rng;
@@ -63,6 +62,7 @@ void GenSimuData::genData() {
     source_->points.emplace_back(
         ToPointType(gt_pose_ * ToVec3d(target_->points[i])));
   }
+  source_->height = 1;
   source_->width = source_->size();
 }
 

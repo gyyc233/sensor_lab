@@ -1,5 +1,6 @@
 file(GLOB_RECURSE srcs CONFIGURE_DEPENDS src/*.cc include/*.h)
 
+# sudo cp libpcl_* /usr/local/lib/ to move pcl *.so
 find_package(PCL 1.10 REQUIRED)
 find_package(glog 0.6.0 REQUIRED)
 find_package(Eigen3 REQUIRED)
