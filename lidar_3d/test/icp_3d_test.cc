@@ -180,5 +180,34 @@ int main(int argc, char **argv) {
       },
       "NDT", 1);
 
+  /// PCL NDT 作为备选
+  sad::evaluate_and_call(
+      [&]() {
+        pcl::NormalDistributionsTransform<sad::PointType, sad::PointType>
+            ndt_pcl;
+        ndt_pcl.setInputSource(source);
+        ndt_pcl.setInputTarget(target);
+        ndt_pcl.setResolution(0.5);
+        sad::CloudPtr output_pcl(new sad::PointCloudType);
+        ndt_pcl.align(*output_pcl);
+        Eigen::Matrix<float, 4, 4> rt = ndt_pcl.getFinalTransformation();
+        Eigen::Matrix3d r = rt.block<3, 3>(0, 0).cast<double>();
+        Eigen::Vector3d t = rt.block<3, 1>(0, 3).cast<double>();
+        SE3 T = SE3(r, t);
+
+        LOG(INFO) << "pose from ndt pcl: "
+                  << T.so3().unit_quaternion().coeffs().transpose() << ", "
+                  << T.translation().transpose()
+                  << ", trans: " << ndt_pcl.getTransformationProbability();
+        pcl::io::savePCDFileASCII("./data/mapping_3d/pcl_ndt_trans.pcd",
+                                  *output_pcl);
+        LOG(INFO) << "score: " << ndt_pcl.getTransformationProbability();
+
+        // 计算GT pose差异
+        double pose_error = (gt_pose.inverse() * T).log().norm();
+        LOG(INFO) << "NDT PCL pose error: " << pose_error;
+      },
+      "NDT PCL", 1);
+
   return 0;
 }
