@@ -9,21 +9,21 @@
 namespace sad {
 
 NDT_3D::NDT_3D() {
-  options_.inv_voxel_size_ = 1.0 / options_.inv_voxel_size_;
+  options_.inv_voxel_size_ = 1.0 / options_.voxel_size_;
   generateNearbyGrids();
 }
 
-NDT_3D(Options options) : options_(options) {
-  options_.inv_voxel_size_ = 1.0 / options_.inv_voxel_size_;
+NDT_3D::NDT_3D(Options options) : options_(options) {
+  options_.inv_voxel_size_ = 1.0 / options_.voxel_size_;
   generateNearbyGrids();
 }
 
 NDT_3D::~NDT_3D() {}
 
 void NDT_3D::generateNearbyGrids() {
-  if (options_.nearby_type_ == NearbyTYpe::CENTER) {
+  if (options_.nearby_type_ == NearbyType::CENTER) {
     nearby_grids_.emplace_back(KeyType::Zero());
-  } else if (options_.nearby_type_ == NearbyTYpe::NEARBY6) {
+  } else if (options_.nearby_type_ == NearbyType::NEARBY6) {
     nearby_grids_ = {KeyType(0, 0, 0), KeyType(-1, 0, 0), KeyType(1, 0, 0),
                      KeyType(0, 1, 0), KeyType(0, -1, 0), KeyType(0, 0, -1),
                      KeyType(0, 0, 1)};
@@ -102,8 +102,8 @@ void NDT_3D::buildVoxels() {
           [this](const size_t &idx) { return ToVec3d(target_->points[idx]); });
       // SVD 检查最大与最小奇异值，限制最小奇异值
 
-      Eigen::JacobiSVD svd(v.second.sigma_,
-                           Eigen::ComputeFullU | Eigen::ComputeFullV);
+      Eigen::JacobiSVD<Eigen::Matrix3d> svd(
+          v.second.sigma_, Eigen::ComputeFullU | Eigen::ComputeFullV);
       Vec3d lambda = svd.singularValues();
       if (lambda[1] < lambda[0] * 1e-3) {
         lambda[1] = lambda[0] * 1e-3;

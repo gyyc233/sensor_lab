@@ -13,7 +13,7 @@ namespace sad {
  */
 class NDT_3D {
 public:
-  enum class NearbyTYpe {
+  enum class NearbyType {
     CENTER,  // 只考虑中心
     NEARBY6, // 上下左右前后
   };

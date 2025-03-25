@@ -7,13 +7,15 @@
 #include <pcl/registration/ndt.h>
 
 #include "icp_3d.h"
+#include "ndt_3d.h"
 #include "sys_utils.h"
 
 #include "sophus/se3.h"
 #include "sophus/so3.h"
 
-DEFINE_string(source, "./data/mapping_3d/milk.pcd", "第1个点云路径");
-DEFINE_string(target, "./data/mapping_3d/milk.pcd", "第2个点云路径");
+// 点云文件可通过run_gen_simu_data生成
+DEFINE_string(source, "./data/mapping_3d/sim_source.pcd", "第1个点云路径");
+DEFINE_string(target, "./data/mapping_3d/sim_target.pcd", "第2个点云路径");
 DEFINE_string(ground_truth_file, "./data/mapping_3d/kneeling_lady_pose.txt",
               "真值Pose");
 
@@ -149,6 +151,34 @@ int main(int argc, char **argv) {
         }
       },
       "ICP P2Plane optimize", 1);
+
+  // NDT
+  sad::evaluate_and_call(
+      [&]() {
+        sad::NDT_3D::Options options;
+        options.voxel_size_ = 0.5;
+        options.remove_centroid_ = true;
+        options.nearby_type_ = sad::NDT_3D::NearbyType::CENTER;
+        sad::NDT_3D ndt(options);
+        ndt.setSource(source);
+        ndt.setTarget(target);
+        ndt.setGtPose(gt_pose);
+        SE3 pose;
+        success = ndt.alignNewtonGaussianNdt(pose);
+        if (success) {
+          LOG(INFO) << "ndt align success, pose: "
+                    << pose.so3().unit_quaternion().coeffs().transpose() << ", "
+                    << pose.translation().transpose();
+          sad::CloudPtr source_trans(new sad::PointCloudType);
+          pcl::transformPointCloud(*source, *source_trans,
+                                   pose.matrix().cast<float>());
+          pcl::io::savePCDFileASCII("./data/mapping_3d/ndt_trans.pcd",
+                                    *source_trans);
+        } else {
+          LOG(ERROR) << "align failed.";
+        }
+      },
+      "NDT", 1);
 
   return 0;
 }
