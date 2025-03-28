@@ -53,6 +53,7 @@ add_executable(undistortion test/undistortion_test.cc)
 add_executable(tsai_lenz_eye_in_hand test/tsai_lenz_eye_in_hand.cc)
 add_executable(mahalanobis_distance_test test/mahalanobis_distance_test.cc)
 add_executable(cv_gl_projection_test test/cv_gl_projection_test.cc)
+add_executable(tps_test test/tps_test.cc)
 
 target_link_libraries(cubic_spline_test algorithm glog::glog)
 target_link_libraries(dlt_camera_calibration_test algorithm glog::glog)
@@ -62,6 +63,7 @@ target_link_libraries(undistortion algorithm glog::glog matplotlib_cpp)
 target_link_libraries(tsai_lenz_eye_in_hand algorithm glog::glog matplotlib_cpp)
 target_link_libraries(mahalanobis_distance_test algorithm glog::glog)
 target_link_libraries(cv_gl_projection_test algorithm)
+target_link_libraries(tps_test algorithm)
 
 # INSTALL
 install(
