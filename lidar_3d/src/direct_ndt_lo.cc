@@ -76,7 +76,7 @@ bool Direct_NDT_LO::isKeyFrame(const SE3 &current_pose) {
 
 void Direct_NDT_LO::saveMap(const std::string &map_path) {
   if (local_map_->points.size() > 0) {
-    pcl::io::savePCDFileASCII("map_path", *local_map_);
+    pcl::io::savePCDFileASCII(map_path, *local_map_);
     LOG(INFO) << "save map to: " << map_path;
   } else {
     LOG(INFO) << "map was empty";
