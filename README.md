@@ -10,6 +10,9 @@ A repository of implementations and notes that provide services for the math, co
 - [Feature Detect](#feature-detect)
 - [Pose Estimation](#pose-estimation)
 - [Kalman Filter](#kalman-filter)
+- [imu\_and\_gnss](#imu_and_gnss)
+- [Lidar\_2d](#lidar_2d)
+- [Lidar\_3d](#lidar_3d)
 - [pcl\_test](#pcl_test)
 - [cere\_test](#cere_test)
 - [g2o\_test](#g2o_test)
@@ -49,9 +52,31 @@ this module summarizes some methods for tradition image process, hand-eye calibr
 
 ## Feature Detect
 
+- based orb operator match
+
+![orb_image_good_match](./support_files/image/feature_detect/orb_image_good_match.png)
+
 ## Pose Estimation
 
 ## Kalman Filter
+
+## imu_and_gnss
+
+eskf gins (imu+gnss+odom)
+
+![imu_and_gnss](./support_files/image/imu_and_gnss/imu_and_gnss.png)
+
+## Lidar_2d
+
+lidar 2d mapping global map
+
+![2d_mapping_global_map](./support_files/image/lidar_2d/2d_mapping_global_map.png)
+
+## Lidar_3d
+
+direct NDT LO mapping and without loop closure
+
+![direct_ndt_lo](./support_files/image/lidar_3d/direct_ndt_lo.png)
 
 ## pcl_test
 
