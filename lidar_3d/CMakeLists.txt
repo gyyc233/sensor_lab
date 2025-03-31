@@ -5,6 +5,7 @@ find_package(PCL 1.10 REQUIRED)
 find_package(Eigen3 REQUIRED)
 find_package(OpenCV REQUIRED)
 
+set(CMAKE_CXX_FLAGS "-fopenmp")
 set(Sophus_DIR /home/V01/uids0025/src/Sophus/build)
 # set(Sophus_DIR /home/bot/src/Sophus/build) # 改为自己的安装路径
 
