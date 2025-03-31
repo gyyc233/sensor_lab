@@ -51,8 +51,8 @@ struct FullPointType {
   PCL_ADD_POINT4D;
   float range = 0;
   float radius = 0;
-  uint8_t intensity = 0;
-  uint8_t ring = 0;
+  uint8_t intensity = 0; // 反射强度
+  uint8_t ring = 0;      // 探头数量
   uint8_t angle = 0;
   double time = 0;
   float height = 0;

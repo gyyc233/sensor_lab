@@ -49,6 +49,10 @@ add_library(direct_ndt_lo STATIC src/direct_ndt_lo.cc ${PROJECT_SOURCE_DIR}/comm
 target_include_directories(direct_ndt_lo PUBLIC include)
 target_link_libraries(direct_ndt_lo ndt_3d)
 
+add_library(feature_extraction STATIC src/feature_extraction.cc)
+target_include_directories(feature_extraction PUBLIC include)
+target_link_libraries(feature_extraction ${PCL_LIBRARIES} glog::glog)
+
 add_executable(icp_3d_test test/icp_3d_test.cc ${PROJECT_SOURCE_DIR}/common/navigation_and_mapping/io_utils.cc ${PROJECT_SOURCE_DIR}/pcl_test/src/kd_tree.cc)
 target_link_libraries(icp_3d_test icp_3d ndt_3d)
 
