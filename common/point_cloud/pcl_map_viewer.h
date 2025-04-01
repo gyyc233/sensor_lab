@@ -41,12 +41,12 @@ public:
     voxel_filter_.filter(*local_map_);
 
     if (viewer_ != nullptr) {
-      viewer_->removePointCloud("local_map");
+      viewer_->removePointCloud("local_map_");
       viewer_->removeCoordinateSystem("vehicle");
 
       pcl::visualization::PointCloudColorHandlerGenericField<PointType>
           fieldColor(local_map_, "z");
-      viewer_->addPointCloud<PointType>(local_map_, fieldColor, "local_map");
+      viewer_->addPointCloud<PointType>(local_map_, fieldColor, "local_map_");
 
       Eigen::Affine3f T;
       T.matrix() = pose.matrix().cast<float>();
@@ -65,8 +65,8 @@ public:
   void SaveMap(std::string path) {
     if (local_map_->size() > 0) {
       local_map_->height = 1;
-      local_map->width = local_map.size();
-      pcl::io::savePCDFileASCII(path, *local_map);
+      local_map_->width = local_map_->size();
+      pcl::io::savePCDFileASCII(path, *local_map_);
       LOG(INFO) << "save map to " << path;
     } else {
       LOG(INFO) << "map empty" << path;
