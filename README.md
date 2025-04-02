@@ -40,6 +40,7 @@ A repository of implementations and notes that provide services for the math, co
 - gtsam 4.2.0, currently learning how to use it
 - Pangolin, installed but rarely used
 - Python 3.8.10. I use the features of `matplotlibcpp` and run some python scripts
+- yaml-cpp use .yaml
 - ROS noetic
 
 ## Algorithm
