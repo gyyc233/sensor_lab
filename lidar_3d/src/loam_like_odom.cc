@@ -11,7 +11,7 @@ LoamLikeOdom::LoamLikeOdom(LoamLikeOdom::Options options)
     : options_(options), feature_extraction_(new FeatureExtraction),
       global_map_(new PointCloudType()) {
   if (options_.display_realtime_cloud_) {
-    viewer_ = std::make_shared<PCLMapViewer>(0.1);
+    // viewer_ = std::make_shared<PCLMapViewer>(0.1);
   }
 
   kdtree_edge_.SetEnableANN();
@@ -102,9 +102,9 @@ void LoamLikeOdom::processPointCloud(FullCloudPtr full_cloud) {
   LOG(INFO) << "current pose: " << pose.translation().transpose() << ", "
             << pose.so3().unit_quaternion().coeffs().transpose();
 
-  if (viewer_ != nullptr) {
-    viewer_->SetPoseAndCloud(pose, scan_world);
-  }
+  // if (viewer_ != nullptr) {
+  //   viewer_->SetPoseAndCloud(pose, scan_world);
+  // }
 }
 
 bool LoamLikeOdom::isKeyframe(const SE3 &current_pose) {

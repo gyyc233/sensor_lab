@@ -55,7 +55,7 @@ target_link_libraries(feature_extraction ${PCL_LIBRARIES} glog::glog)
 
 add_library(loam_like_odom STATIC src/loam_like_odom.cc)
 target_include_directories(loam_like_odom PUBLIC include)
-target_link_libraries(loam_like_odom feature_extraction icp_3d)
+target_link_libraries(loam_like_odom feature_extraction icp_3d nearest_neighbour_search)
 
 add_executable(icp_3d_test test/icp_3d_test.cc ${PROJECT_SOURCE_DIR}/common/navigation_and_mapping/io_utils.cc ${PROJECT_SOURCE_DIR}/pcl_test/src/kd_tree.cc)
 target_link_libraries(icp_3d_test icp_3d ndt_3d)
@@ -67,5 +67,5 @@ target_link_libraries(run_gen_simu_data icp_3d)
 add_executable(direct_ndt_lo_test test/direct_ndt_lo_test.cc)
 target_link_libraries(direct_ndt_lo_test direct_ndt_lo)
 
-add_executable(loam_like_lo_test test/loam_like_lo_test.cc)
-target_link_libraries(loam_like_lo_test loam_like_odom)
+add_executable(loam_like_lo_test test/loam_like_lo_test.cc ${PROJECT_SOURCE_DIR}/pcl_test/src/kd_tree.cc)
+target_link_libraries(loam_like_lo_test loam_like_odom  icp_3d)

@@ -31,7 +31,7 @@ int main(int argc, char **argv) {
   //                        })
   //     .Go();
 
-  lo.SaveMap("./data/ch7/loam_map.pcd");
+  lo.saveMap("./data/ch7/loam_map.pcd");
 
   return 0;
 }

@@ -5,8 +5,9 @@
 #include "eigen_type/eigen_types.h"
 #include "icp_3d.h"
 #include "include/kd_tree.h"
-#include "point_cloud/pcl_map_viewer.h"
+// #include "point_cloud/pcl_map_viewer.h"
 #include "point_cloud/point_types.h"
+#include <pcl/common/transforms.h>
 
 namespace sad {
 class FeatureExtraction;
@@ -77,7 +78,7 @@ private:
 
   std::shared_ptr<FeatureExtraction> feature_extraction_ = nullptr;
 
-  std::shared_ptr<PCLMapViewer> viewer_ = nullptr;
+  // std::shared_ptr<PCLMapViewer> viewer_ = nullptr;
   KdTree kdtree_edge_;
   KdTree kdtree_surf_;
 };
