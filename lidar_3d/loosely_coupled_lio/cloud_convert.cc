@@ -104,7 +104,7 @@ void CloudConvert::oust64Handler(
   }
 }
 
-void CloudConvert::VelodyneHandler(
+void CloudConvert::velodyneHandler(
     const sensor_msgs::PointCloud2::ConstPtr &msg) {
   cloud_out_.clear();
   cloud_full_.clear();

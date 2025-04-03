@@ -45,7 +45,7 @@ bool MessageSync::sync() {
   return true;
 }
 
-void MessageSync::init(const std::string &yaml) { conv_->LoadFromYAML(yaml); }
+void MessageSync::init(const std::string &yaml) { conv_->loadFromYAML(yaml); }
 
 } // namespace sad
 

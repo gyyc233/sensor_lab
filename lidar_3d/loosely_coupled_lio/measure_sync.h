@@ -5,6 +5,8 @@
 #include "cloud_convert.h"
 #include "navigation_and_mapping/imu.h"
 #include "point_cloud/point_types.h"
+#include <livox_ros_driver/CustomMsg.h>
+#include <pcl_conversions/pcl_conversions.h>
 
 #include <deque>
 #include <glog/logging.h>
@@ -56,7 +58,7 @@ public:
     }
 
     FullCloudPtr cloud(new FullPointCloudType());
-    conv_->Process(msg, cloud);
+    conv_->process(msg, cloud);
     lidar_buffer_.push_back(cloud);
     time_buffer_.push_back(msg->header.stamp.toSec());
     last_timestamp_lidar_ = msg->header.stamp.toSec();
@@ -73,7 +75,7 @@ public:
 
     last_timestamp_lidar_ = msg->header.stamp.toSec();
     FullCloudPtr ptr(new FullPointCloudType());
-    conv_->Process(msg, ptr);
+    conv_->process(msg, ptr);
 
     if (ptr->empty()) {
       return;
@@ -90,11 +92,11 @@ private:
   bool sync();
 
   Callback callback_; // 同步数据后的回调函数
-  std::shared_ptr<sad::CloudConvert> conv_ = nullptr; // 点云转换
-  std::deque<FullCloudPtr> lidar_buffer_;             // 雷达数据缓冲
-  std::deque<IMUPtr> imu_buffer_;                     // imu数据缓冲
-  double last_timestamp_imu_ = -1.0;                  // 最近imu时间
-  double last_timestamp_lidar_ = 0;                   // 最近lidar时间
+  std::shared_ptr<CloudConvert> conv_ = nullptr; // 点云转换
+  std::deque<FullCloudPtr> lidar_buffer_;        // 雷达数据缓冲
+  std::deque<IMUPtr> imu_buffer_;                // imu数据缓冲
+  double last_timestamp_imu_ = -1.0;             // 最近imu时间
+  double last_timestamp_lidar_ = 0;              // 最近lidar时间
   std::deque<double> time_buffer_;
   bool lidar_pushed_ = false;
   MeasureGroup measures_;

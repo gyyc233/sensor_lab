@@ -25,11 +25,16 @@ find_package(G2O REQUIRED)
 include_directories (${G2O_INCLUDE_DIRS})
 # g2o
 
+# yaml-cpp
+find_package(yaml-cpp REQUIRED)
+include_directories(${yaml-cpp_INCLUDE_DIRS})
+
 include_directories(${EIGEN3_INCLUDE_DIRS})
 include_directories(${OpenCV_INCLUDE_DIRS})
 include_directories(${PROJECT_SOURCE_DIR}/common)
 include_directories(${PROJECT_SOURCE_DIR}/pcl_test)
 include_directories(${PROJECT_SOURCE_DIR}/third_party)
+include_directories(${PROJECT_SOURCE_DIR}/imu_and_gnss)
 
 if(ROS_CATKIN)
 else()
@@ -56,6 +61,12 @@ target_link_libraries(feature_extraction ${PCL_LIBRARIES} glog::glog)
 add_library(loam_like_odom STATIC src/loam_like_odom.cc)
 target_include_directories(loam_like_odom PUBLIC include)
 target_link_libraries(loam_like_odom feature_extraction icp_3d nearest_neighbour_search)
+
+add_library(loosely_lio STATIC 
+    loosely_coupled_lio/measure_sync.cc 
+    loosely_coupled_lio/cloud_convert.cc)
+target_include_directories(loosely_lio PUBLIC include)
+target_link_libraries(loosely_lio ${PCL_LIBRARIES} ${OpenCV_LIBS} ${Sophus_LIBRARIES} ${catkin_LIBRARIES} glog::glog gflags)
 
 add_executable(icp_3d_test test/icp_3d_test.cc ${PROJECT_SOURCE_DIR}/common/navigation_and_mapping/io_utils.cc ${PROJECT_SOURCE_DIR}/pcl_test/src/kd_tree.cc)
 target_link_libraries(icp_3d_test icp_3d ndt_3d)
