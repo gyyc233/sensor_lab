@@ -1,5 +1,6 @@
 #ifndef LIDAR_3D_FASTER_LIO_LASER_MAPPING_H
 #define LIDAR_3D_FASTER_LIO_LASER_MAPPING_H
+#ifdef ROS_CATKIN
 
 #include <livox_ros_driver/CustomMsg.h>
 #include <pcl/filters/voxel_grid.h>
@@ -14,7 +15,7 @@
 namespace sad {
 
 /**
- * 7.5 节实现的松耦合LIO程序
+ * eskf+ndt松耦合LIO程序
  * 使用imu_and_gnss的ekf, 增量NDT里程计来实现
  * 事先从YAML中读取必要参数
  *
@@ -37,6 +38,7 @@ public:
 
   /// 点云回调函数
   void PCLCallBack(const sensor_msgs::PointCloud2::ConstPtr &msg);
+
   void LivoxPCLCallBack(const livox_ros_driver::CustomMsg::ConstPtr &msg);
 
   /// IMU回调函数
@@ -72,7 +74,7 @@ private:
 
   /// point clouds data
   FullCloudPtr scan_undistort_{
-      new FullPointCloudType()}; // scan after undistortion
+      new FullPointCloudType()}; // scan after undistorted
   SE3 pose_of_lo_;
 
   Options options_;
@@ -87,10 +89,9 @@ private:
   std::vector<NavStated> imu_states_; // ESKF预测期间的状态
   ESKFD eskf_;                        // ESKF
   SE3 TIL_;                           // Lidar与IMU之间外参
-
-  std::shared_ptr<ui::PangolinWindow> ui_ = nullptr;
 };
 
 } // namespace sad
 
+#endif
 #endif // FASTER_LIO_LASER_MAPPING_H
