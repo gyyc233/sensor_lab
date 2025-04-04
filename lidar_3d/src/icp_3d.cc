@@ -2,6 +2,7 @@
 
 #include "icp_3d.h"
 #include "math_utils.h"
+#include <omp.h>
 
 namespace sad {
 
@@ -72,45 +73,47 @@ bool ICP_3D::AlignP2P(SE3 &init_pose) {
   std::vector<Vec3d> errors(index.size());
 
   for (int iter = 0; iter < options_.max_iteration_; ++iter) {
-    // gauss-newton
-    std::for_each(index.begin(), index.end(), [&](int idx) {
-      auto q = source_->points[idx].getVector3fMap().cast<double>();
-      Vec3d qs = pose * q; // 使用初始位姿进行转换
-      // knn
-      std::vector<int> nn;
-      kd_tree_->GetClosestPoint(ToPointType(qs), nn, 1);
+// gauss-newton
+#pragma omp parallel
+    {
+      std::for_each(index.begin(), index.end(), [&](int idx) {
+        auto q = source_->points[idx].getVector3fMap().cast<double>();
+        Vec3d qs = pose * q; // 使用初始位姿进行转换
+        // knn
+        std::vector<int> nn;
+        kd_tree_->GetClosestPoint(ToPointType(qs), nn, 1);
 
-      if (!nn.empty()) {
-        // target中的p是 qs(source)的最邻近点
-        Vec3d p = ToVec3d(target_->points[nn[0]]);
-        double dis2 = (p - qs).squaredNorm();
-        if (dis2 > options_.max_nn_distance_) {
+        if (!nn.empty()) {
+          // target中的p是 qs(source)的最邻近点
+          Vec3d p = ToVec3d(target_->points[nn[0]]);
+          double dis2 = (p - qs).squaredNorm();
+          if (dis2 > options_.max_nn_distance_) {
+            effect_pts[idx] = false;
+            return; // std::for_each
+                    // 初衷就是把这段区间都执行完，否则你就用for代替for_each
+          }
+          effect_pts[idx] = true;
+
+          // build residual
+          Vec3d e = p - qs;
+          // 因为假设是source经过rt变换到target 问题描述为
+          // e = |p_t - (R*p_s + T)|取最小
+          // e分别对位姿的旋转和平移部分求偏导 则jacobian为 3*6 使用右乘扰动模型
+          Eigen::Matrix<double, 3, 6> J;
+          J.block<3, 3>(0, 0) =
+              -pose.so3().matrix() *
+              SO3::hat(q); // 对旋转求导，右乘扰动项旋转部分导数 -R(q^)
+          J.block<3, 3>(0, 3) =
+              Mat3d::Identity(); // 对平移求导，右乘扰动项平移部分导数 I
+          J = -1 * J;
+
+          jacobians[idx] = J;
+          errors[idx] = e;
+        } else {
           effect_pts[idx] = false;
-          return; // std::for_each
-                  // 初衷就是把这段区间都执行完，否则你就用for代替for_each
         }
-        effect_pts[idx] = true;
-
-        // build residual
-        Vec3d e = p - qs;
-        // 因为假设是source经过rt变换到target 问题描述为
-        // e = |p_t - (R*p_s + T)|取最小
-        // e分别对位姿的旋转和平移部分求偏导 则jacobian为 3*6 使用右乘扰动模型
-        Eigen::Matrix<double, 3, 6> J;
-        J.block<3, 3>(0, 0) =
-            -pose.so3().matrix() *
-            SO3::hat(q); // 对旋转求导，右乘扰动项旋转部分导数 -R(q^)
-        J.block<3, 3>(0, 3) =
-            Mat3d::Identity(); // 对平移求导，右乘扰动项平移部分导数 I
-        J = -1 * J;
-
-        jacobians[idx] = J;
-        errors[idx] = e;
-      } else {
-        effect_pts[idx] = false;
-      }
-    });
-
+      });
+    }
     //累加hessian & error
     double total_res = 0;
     int effective_num = 0;
@@ -192,56 +195,60 @@ bool ICP_3D::AlignP2Line(SE3 &init_pose) {
   std::vector<Vec3d> errors(index.size());
 
   for (int iter = 0; iter < options_.max_iteration_; ++iter) {
-    // gauss-newton 迭代
-    std::for_each(index.begin(), index.end(), [&](int idx) {
-      auto q = ToVec3d(source_->points[idx]);
-      Vec3d qs = pose * q; // 转换之后的q
-      std::vector<int> nn;
-      kd_tree_->GetClosestPoint(ToPointType(qs), nn, 5); // 这里取5个最近邻
-      if (nn.size() == 5) {
-        // convert to eigen
-        std::vector<Vec3d> nn_eigen;
-        for (int i = 0; i < 5; ++i) {
-          nn_eigen.emplace_back(ToVec3d(target_->points[nn[i]]));
-        }
+// gauss-newton 迭代
+#pragma omp parallel
+    {
+      std::for_each(index.begin(), index.end(), [&](int idx) {
+        auto q = ToVec3d(source_->points[idx]);
+        Vec3d qs = pose * q; // 转换之后的q
+        std::vector<int> nn;
+        kd_tree_->GetClosestPoint(ToPointType(qs), nn, 5); // 这里取5个最近邻
+        if (nn.size() == 5) {
+          // convert to eigen
+          std::vector<Vec3d> nn_eigen;
+          for (int i = 0; i < 5; ++i) {
+            nn_eigen.emplace_back(ToVec3d(target_->points[nn[i]]));
+          }
 
-        Vec3d d, p0; // p0 数据中心, d空间直线方向向量
-        if (!math::FitLine(nn_eigen, p0, d, options_.max_line_distance_)) {
-          // 失败的不要
+          Vec3d d, p0; // p0 数据中心, d空间直线方向向量
+          if (!math::FitLine(nn_eigen, p0, d, options_.max_line_distance_)) {
+            // 失败的不要
+            effect_pts[idx] = false;
+            return;
+          }
+
+          // 点到直线距离 A x B 等价与 (A^) * B
+          Vec3d err = SO3::hat(d) * (qs - p0);
+          // LOG(INFO) << "err: " << err;
+
+          // 叉乘计算点到直线距离
+          // Vec3d test_p = qs - p0;
+          // Vec3d test_d_norm = d.normalized();
+          // Vec3d test_err = test_d_norm.cross(test_p);
+          // LOG(INFO) << "test_err: " << test_err;
+
+          if (err.norm() > options_.max_line_distance_) {
+            // 点离的太远了不要
+            effect_pts[idx] = false;
+            return;
+          }
+
+          effect_pts[idx] = true;
+
+          // build residual
+          Eigen::Matrix<double, 3, 6> J;
+          // 这里仍使用对右乘扰动求导，与点到点一样，只是左边多了SO3::hat(d)这项
+          J.block<3, 3>(0, 0) =
+              -SO3::hat(d) * pose.so3().matrix() * SO3::hat(q);
+          J.block<3, 3>(0, 3) = SO3::hat(d);
+
+          jacobians[idx] = J;
+          errors[idx] = err;
+        } else {
           effect_pts[idx] = false;
-          return;
         }
-
-        // 点到直线距离 A x B 等价与 (A^) * B
-        Vec3d err = SO3::hat(d) * (qs - p0);
-        // LOG(INFO) << "err: " << err;
-
-        // 叉乘计算点到直线距离
-        // Vec3d test_p = qs - p0;
-        // Vec3d test_d_norm = d.normalized();
-        // Vec3d test_err = test_d_norm.cross(test_p);
-        // LOG(INFO) << "test_err: " << test_err;
-
-        if (err.norm() > options_.max_line_distance_) {
-          // 点离的太远了不要
-          effect_pts[idx] = false;
-          return;
-        }
-
-        effect_pts[idx] = true;
-
-        // build residual
-        Eigen::Matrix<double, 3, 6> J;
-        // 这里仍使用对右乘扰动求导，与点到点一样，只是左边多了SO3::hat(d)这项
-        J.block<3, 3>(0, 0) = -SO3::hat(d) * pose.so3().matrix() * SO3::hat(q);
-        J.block<3, 3>(0, 3) = SO3::hat(d);
-
-        jacobians[idx] = J;
-        errors[idx] = err;
-      } else {
-        effect_pts[idx] = false;
-      }
-    });
+      });
+    }
 
     // 累加Hessian和error,计算dx
     // 原则上可以用reduce并发，写起来比较麻烦，这里写成accumulate
@@ -317,48 +324,51 @@ bool ICP_3D::AlignP2Plane(SE3 &init_pose) {
   std::vector<double> errors(index.size());
 
   for (int iter = 0; iter < options_.max_iteration_; ++iter) {
-    // gauss-newton 迭代
-    std::for_each(index.begin(), index.end(), [&](int idx) {
-      auto q = ToVec3d(source_->points[idx]);
-      Vec3d qs = pose * q; // 转换之后的q
-      std::vector<int> nn;
-      kd_tree_->GetClosestPoint(ToPointType(qs), nn, 5); // 这里取5个最近邻
-      if (nn.size() > 3) {
-        // convert to eigen
-        std::vector<Vec3d> nn_eigen;
-        for (int i = 0; i < nn.size(); ++i) {
-          nn_eigen.emplace_back(ToVec3d(target_->points[nn[i]]));
-        }
+// gauss-newton 迭代
+#pragma omp parallel
+    {
+      std::for_each(index.begin(), index.end(), [&](int idx) {
+        auto q = ToVec3d(source_->points[idx]);
+        Vec3d qs = pose * q; // 转换之后的q
+        std::vector<int> nn;
+        kd_tree_->GetClosestPoint(ToPointType(qs), nn, 5); // 这里取5个最近邻
+        if (nn.size() > 3) {
+          // convert to eigen
+          std::vector<Vec3d> nn_eigen;
+          for (int i = 0; i < nn.size(); ++i) {
+            nn_eigen.emplace_back(ToVec3d(target_->points[nn[i]]));
+          }
 
-        Vec4d n; // 平面法向量
-        if (!math::FitPlane(nn_eigen, n)) {
-          // 失败的不要
+          Vec4d n; // 平面法向量
+          if (!math::FitPlane(nn_eigen, n)) {
+            // 失败的不要
+            effect_pts[idx] = false;
+            return;
+          }
+          // 点到平面距离，把点带入平面方程
+          double dis = n.head<3>().dot(qs) + n[3];
+          if (fabs(dis) > options_.max_plane_distance_) {
+            // 点离的太远了不要
+            effect_pts[idx] = false;
+            return;
+          }
+
+          effect_pts[idx] = true;
+
+          // build residual
+          // 这里与点到线的计算jacobian一样
+          Eigen::Matrix<double, 1, 6> J;
+          J.block<1, 3>(0, 0) =
+              -n.head<3>().transpose() * pose.so3().matrix() * SO3::hat(q);
+          J.block<1, 3>(0, 3) = n.head<3>().transpose();
+
+          jacobians[idx] = J;
+          errors[idx] = dis;
+        } else {
           effect_pts[idx] = false;
-          return;
         }
-        // 点到平面距离，把点带入平面方程
-        double dis = n.head<3>().dot(qs) + n[3];
-        if (fabs(dis) > options_.max_plane_distance_) {
-          // 点离的太远了不要
-          effect_pts[idx] = false;
-          return;
-        }
-
-        effect_pts[idx] = true;
-
-        // build residual
-        // 这里与点到线的计算jacobian一样
-        Eigen::Matrix<double, 1, 6> J;
-        J.block<1, 3>(0, 0) =
-            -n.head<3>().transpose() * pose.so3().matrix() * SO3::hat(q);
-        J.block<1, 3>(0, 3) = n.head<3>().transpose();
-
-        jacobians[idx] = J;
-        errors[idx] = dis;
-      } else {
-        effect_pts[idx] = false;
-      }
-    });
+      });
+    }
 
     // 累加Hessian和error,计算dx
     // 原则上可以用reduce并发，写起来比较麻烦，这里写成accumulate

@@ -4,6 +4,7 @@
 #include "navigation_and_mapping/lidar_utils.h"
 
 #include <glog/logging.h>
+#include <omp.h>
 #include <set>
 
 namespace sad {
@@ -17,7 +18,7 @@ IncrementalNdt3D::IncrementalNdt3D(Options options) : options_(options) {
   generateNearbyGrids();
 }
 
-int IncrementalNdt3D::numGrids() const { return grid_.size(); }
+int IncrementalNdt3D::numGrids() const { return grids_.size(); }
 
 void IncrementalNdt3D::generateNearbyGrids() {
   if (options_.nearby_type_ == NearbyType::CENTER) {
@@ -41,9 +42,9 @@ void IncrementalNdt3D::addCloud(CloudPtr cloud_world) {
     if (find_voxel_id == grids_.end()) {
       // 该栅格不存在
       data_.push_front({key, {pt}});
-      grids_.insert(key, data_.begin());
+      grids_.insert({key, data_.begin()});
 
-      if (data_.size() >= options_.capacity) {
+      if (data_.size() >= options_.capacity_) {
         // 删除一个尾部数据
         grids_.erase(data_.back().first); // 把该栅格内的所有点删除
         data_.pop_back();
@@ -62,9 +63,13 @@ void IncrementalNdt3D::addCloud(CloudPtr cloud_world) {
     active_voxels.emplace(key);
   }
 
-  // 更新active_voxels
-  std::for_each(active_voxels.begin(), active_voxels.end(),
-                [this](const auto &key) { updateVoxel(grids_[key]->second); });
+// 更新active_voxels
+#pragma omp parallel
+  {
+    std::for_each(
+        active_voxels.begin(), active_voxels.end(),
+        [this](const auto &key) { updateVoxel(grids_[key]->second); });
+  }
   flag_first_scan_ = false;
 }
 
@@ -93,7 +98,7 @@ void IncrementalNdt3D::updateVoxel(VoxelData &v) {
     return;
   }
 
-  if (!v.ndt_estimated_ && v.pts_.size() > options_.min_pts_in_voxel) {
+  if (!v.ndt_estimated_ && v.pts_.size() > options_.min_pts_in_voxel_) {
     // 新增的voxel
     math::ComputeMeanAndCov(v.pts_, v.mu_, v.sigma_,
                             [this](const Vec3d &p) { return p; });
@@ -116,7 +121,8 @@ void IncrementalNdt3D::updateVoxel(VoxelData &v) {
     v.pts_.clear();
 
     // check info
-    Eigen::JacobiSVD svd(v.sigma_, Eigen::ComputeFullU | Eigen::ComputeFullV);
+    Eigen::JacobiSVD<Eigen::MatrixXd> svd(v.sigma_, Eigen::ComputeFullU |
+                                                        Eigen::ComputeFullV);
     Vec3d lambda = svd.singularValues();
     if (lambda[1] < lambda[0] * 1e-3) {
       lambda[1] = lambda[0] * 1e-3;
@@ -158,44 +164,47 @@ bool IncrementalNdt3D::alignNdt(SE3 &init_pose) {
     std::vector<Vec3d> errors(total_size);
     std::vector<Mat3d> infos(total_size);
 
-    // gauss-newton 迭代
-    std::for_each(index.begin(), index.end(), [&](int idx) {
-      auto q = ToVec3d(source_->points[idx]);
-      Vec3d qs = pose * q; // 转换之后的q
+// gauss-newton 迭代
+#pragma omp parallel
+    {
+      std::for_each(index.begin(), index.end(), [&](int idx) {
+        auto q = ToVec3d(source_->points[idx]);
+        Vec3d qs = pose * q; // 转换之后的q
 
-      // 计算qs所在的栅格以及它的最近邻栅格
-      Vec3i key = CastToInt(Vec3d(qs * options_.inv_voxel_size_));
+        // 计算qs所在的栅格以及它的最近邻栅格
+        Vec3i key = CastToInt(Vec3d(qs * options_.inv_voxel_size_));
 
-      for (int i = 0; i < nearby_grids_.size(); ++i) {
-        Vec3i real_key = key + nearby_grids_[i];
-        auto it = grids_.find(real_key);
-        int real_idx = idx * num_residual_per_point + i;
-        /// 这里要检查高斯分布是否已经估计
-        if (it != grids_.end() && it->second->second.ndt_estimated_) {
-          auto &v = it->second->second; // voxel
-          Vec3d e = qs - v.mu_;
+        for (int i = 0; i < nearby_grids_.size(); ++i) {
+          Vec3i real_key = key + nearby_grids_[i];
+          auto it = grids_.find(real_key);
+          int real_idx = idx * num_residual_per_point + i;
+          /// 这里要检查高斯分布是否已经估计
+          if (it != grids_.end() && it->second->second.ndt_estimated_) {
+            auto &v = it->second->second; // voxel
+            Vec3d e = qs - v.mu_;
 
-          // check chi2 th
-          double res = e.transpose() * v.info_ * e;
-          if (std::isnan(res) || res > options_.res_outlier_th_) {
+            // check chi2 th
+            double res = e.transpose() * v.info_ * e;
+            if (std::isnan(res) || res > options_.res_outlier_th_) {
+              effect_pts[real_idx] = false;
+              continue;
+            }
+
+            // build residual
+            Eigen::Matrix<double, 3, 6> J;
+            J.block<3, 3>(0, 0) = -pose.so3().matrix() * SO3::hat(q);
+            J.block<3, 3>(0, 3) = Mat3d::Identity();
+
+            jacobians[real_idx] = J;
+            errors[real_idx] = e;
+            infos[real_idx] = v.info_;
+            effect_pts[real_idx] = true;
+          } else {
             effect_pts[real_idx] = false;
-            continue;
           }
-
-          // build residual
-          Eigen::Matrix<double, 3, 6> J;
-          J.block<3, 3>(0, 0) = -pose.so3().matrix() * SO3::hat(q);
-          J.block<3, 3>(0, 3) = Mat3d::Identity();
-
-          jacobians[real_idx] = J;
-          errors[real_idx] = e;
-          infos[real_idx] = v.info_;
-          effect_pts[real_idx] = true;
-        } else {
-          effect_pts[real_idx] = false;
         }
-      }
-    });
+      });
+    }
 
     // 累加Hessian和error,计算dx
     double total_res = 0;
@@ -243,7 +252,7 @@ bool IncrementalNdt3D::alignNdt(SE3 &init_pose) {
   return true;
 }
 
-void IncrementalNdt3D::computeResidualAndJacobians(const SE3 &pose,
+void IncrementalNdt3D::computeResidualAndJacobians(const SE3 &input_pose,
                                                    Mat18d &HTVH, Vec18d &HTVr) {
   assert(grids_.empty() == false);
   SE3 pose = input_pose;
@@ -266,46 +275,49 @@ void IncrementalNdt3D::computeResidualAndJacobians(const SE3 &pose,
   std::vector<Vec3d> errors(total_size);
   std::vector<Mat3d> infos(total_size);
 
-  // gauss-newton 迭代
-  // 最近邻，可以并发
-  std::for_each(index.begin(), index.end(), [&](int idx) {
-    auto q = ToVec3d(source_->points[idx]);
-    Vec3d qs = pose * q; // 转换之后的q
+// gauss-newton 迭代
+// 最近邻，可以并发
+#pragma omp parallel
+  {
+    std::for_each(index.begin(), index.end(), [&](int idx) {
+      auto q = ToVec3d(source_->points[idx]);
+      Vec3d qs = pose * q; // 转换之后的q
 
-    // 计算qs所在的栅格以及它的最近邻栅格
-    Vec3i key = CastToInt(Vec3d(qs * options_.inv_voxel_size_));
+      // 计算qs所在的栅格以及它的最近邻栅格
+      Vec3i key = CastToInt(Vec3d(qs * options_.inv_voxel_size_));
 
-    for (int i = 0; i < nearby_grids_.size(); ++i) {
-      Vec3i real_key = key + nearby_grids_[i];
-      auto it = grids_.find(real_key);
-      int real_idx = idx * num_residual_per_point + i;
-      /// 这里要检查高斯分布是否已经估计
-      if (it != grids_.end() && it->second->second.ndt_estimated_) {
-        auto &v = it->second->second; // voxel
-        Vec3d e = qs - v.mu_;
+      for (int i = 0; i < nearby_grids_.size(); ++i) {
+        Vec3i real_key = key + nearby_grids_[i];
+        auto it = grids_.find(real_key);
+        int real_idx = idx * num_residual_per_point + i;
+        /// 这里要检查高斯分布是否已经估计
+        if (it != grids_.end() && it->second->second.ndt_estimated_) {
+          auto &v = it->second->second; // voxel
+          Vec3d e = qs - v.mu_;
 
-        // check chi2 th
-        double res = e.transpose() * v.info_ * e;
-        if (std::isnan(res) || res > options_.res_outlier_th_) {
+          // check chi2 th
+          double res = e.transpose() * v.info_ * e;
+          if (std::isnan(res) || res > options_.res_outlier_th_) {
+            effect_pts[real_idx] = false;
+            continue;
+          }
+
+          // build residual
+          Eigen::Matrix<double, 3, 18> J;
+          J.setZero();
+          J.block<3, 3>(0, 0) = Mat3d::Identity();                  // 对p
+          J.block<3, 3>(0, 6) = -pose.so3().matrix() * SO3::hat(q); // 对R
+
+          jacobians[real_idx] = J;
+          errors[real_idx] = e;
+          infos[real_idx] = v.info_;
+          effect_pts[real_idx] = true;
+        } else {
           effect_pts[real_idx] = false;
-          continue;
         }
-
-        // build residual
-        Eigen::Matrix<double, 3, 18> J;
-        J.setZero();
-        J.block<3, 3>(0, 0) = Mat3d::Identity();                  // 对p
-        J.block<3, 3>(0, 6) = -pose.so3().matrix() * SO3::hat(q); // 对R
-
-        jacobians[real_idx] = J;
-        errors[real_idx] = e;
-        infos[real_idx] = v.info_;
-        effect_pts[real_idx] = true;
-      } else {
-        effect_pts[real_idx] = false;
       }
-    }
-  });
+    });
+  }
 
   // 累加Hessian和error,计算dx
   double total_res = 0;

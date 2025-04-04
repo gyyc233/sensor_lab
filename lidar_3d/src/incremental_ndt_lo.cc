@@ -1,6 +1,7 @@
 #ifdef ROS_CATKIN
 #include "incremental_ndt_lo.h"
 #include "math_utils.h"
+#include <pcl/common/transforms.h>
 
 namespace sad {
 
@@ -9,16 +10,16 @@ void IncrementalNDTLO::addCloud(CloudPtr scan, SE3 &pose, bool use_guess) {
     // 第一个帧，直接加入local map
     pose = SE3();
     last_kf_pose_ = pose;
-    ndt_.AddCloud(scan);
+    ndt_.addCloud(scan);
     first_frame_ = false;
     return;
   }
 
   // 此时local map位于NDT内部，直接配准即可
   SE3 guess;
-  ndt_.SetSource(scan);
+  ndt_.setSource(scan);
   if (estimated_poses_.size() < 2) {
-    ndt_.AlignNdt(guess);
+    ndt_.alignNdt(guess);
   } else {
     if (!use_guess) {
       // 从最近两个pose来推断
@@ -29,7 +30,7 @@ void IncrementalNDTLO::addCloud(CloudPtr scan, SE3 &pose, bool use_guess) {
       guess = pose;
     }
 
-    ndt_.AlignNdt(guess);
+    ndt_.alignNdt(guess);
   }
 
   pose = guess;
@@ -38,16 +39,13 @@ void IncrementalNDTLO::addCloud(CloudPtr scan, SE3 &pose, bool use_guess) {
   CloudPtr scan_world(new PointCloudType);
   pcl::transformPointCloud(*scan, *scan_world, guess.matrix().cast<float>());
 
-  if (IsKeyframe(pose)) {
+  if (isKeyframe(pose)) {
     last_kf_pose_ = pose;
     cnt_frame_ = 0;
     // 放入ndt内部的local map
-    ndt_.AddCloud(scan_world);
+    ndt_.addCloud(scan_world);
   }
 
-  if (viewer_ != nullptr) {
-    viewer_->SetPoseAndCloud(pose, scan_world);
-  }
   cnt_frame_++;
 }
 

@@ -5,6 +5,7 @@
 
 #include <Eigen/SVD>
 #include <glog/logging.h>
+#include <omp.h>
 
 namespace sad {
 
@@ -93,37 +94,42 @@ void NDT_3D::buildVoxels() {
     }
   }
 
-  /// 计算每个体素中的均值和协方差
-  std::for_each(grids_.begin(), grids_.end(), [this](auto &v) {
-    // 该体素内超过３个点
-    if (v.second.idx_.size() > options_.min_pts_in_voxel_) {
-      math::ComputeMeanAndCov(
-          v.second.idx_, v.second.mu_, v.second.sigma_,
-          [this](const size_t &idx) { return ToVec3d(target_->points[idx]); });
-      // SVD 检查最大与最小奇异值，限制最小奇异值
+/// 计算每个体素中的均值和协方差
+#pragma omp parallel
+  {
+    std::for_each(grids_.begin(), grids_.end(), [this](auto &v) {
+      // 该体素内超过３个点
+      if (v.second.idx_.size() > options_.min_pts_in_voxel_) {
+        math::ComputeMeanAndCov(v.second.idx_, v.second.mu_, v.second.sigma_,
+                                [this](const size_t &idx) {
+                                  return ToVec3d(target_->points[idx]);
+                                });
+        // SVD 检查最大与最小奇异值，限制最小奇异值
 
-      Eigen::JacobiSVD<Eigen::Matrix3d> svd(
-          v.second.sigma_, Eigen::ComputeFullU | Eigen::ComputeFullV);
-      Vec3d lambda = svd.singularValues();
-      if (lambda[1] < lambda[0] * 1e-3) {
-        lambda[1] = lambda[0] * 1e-3;
+        Eigen::JacobiSVD<Eigen::Matrix3d> svd(
+            v.second.sigma_, Eigen::ComputeFullU | Eigen::ComputeFullV);
+        Vec3d lambda = svd.singularValues();
+        if (lambda[1] < lambda[0] * 1e-3) {
+          lambda[1] = lambda[0] * 1e-3;
+        }
+
+        if (lambda[2] < lambda[0] * 1e-3) {
+          lambda[2] = lambda[0] * 1e-3;
+        }
+
+        // asDiagonal() 将数组转为对角阵
+        Mat3d inv_lambda =
+            Vec3d(1.0 / lambda[0], 1.0 / lambda[1], 1.0 / lambda[2])
+                .asDiagonal();
+
+        // v.second.info_ = (v.second.sigma_ + Mat3d::Identity() *
+        // 1e-3).inverse();  // 避免出nan
+
+        // 计算协方差矩阵的逆
+        v.second.info_ = svd.matrixV() * inv_lambda * svd.matrixU().transpose();
       }
-
-      if (lambda[2] < lambda[0] * 1e-3) {
-        lambda[2] = lambda[0] * 1e-3;
-      }
-
-      // asDiagonal() 将数组转为对角阵
-      Mat3d inv_lambda =
-          Vec3d(1.0 / lambda[0], 1.0 / lambda[1], 1.0 / lambda[2]).asDiagonal();
-
-      // v.second.info_ = (v.second.sigma_ + Mat3d::Identity() *
-      // 1e-3).inverse();  // 避免出nan
-
-      // 计算协方差矩阵的逆
-      v.second.info_ = svd.matrixV() * inv_lambda * svd.matrixU().transpose();
-    }
-  });
+    });
+  }
 }
 
 bool NDT_3D::alignNewtonGaussianNdt(SE3 &init_pose) {
@@ -155,46 +161,49 @@ bool NDT_3D::alignNewtonGaussianNdt(SE3 &init_pose) {
     std::vector<Vec3d> errors(total_size);
     std::vector<Mat3d> infos(total_size);
 
-    // gauss-newton
-    std::for_each(index.begin(), index.end(), [&](int idx) {
-      auto q = ToVec3d(source_->points[idx]);
-      // source点q转到target附近，寻找他对应的体素id
-      Vec3d qs = pose * q;
+// gauss-newton
+#pragma omp parallel
+    {
+      std::for_each(index.begin(), index.end(), [&](int idx) {
+        auto q = ToVec3d(source_->points[idx]);
+        // source点q转到target附近，寻找他对应的体素id
+        Vec3d qs = pose * q;
 
-      // 计算qs所在的栅格以及它的最近邻栅格
-      Vec3i key = CastToInt(Vec3d(qs * options_.inv_voxel_size_));
+        // 计算qs所在的栅格以及它的最近邻栅格
+        Vec3i key = CastToInt(Vec3d(qs * options_.inv_voxel_size_));
 
-      for (int i = 0; i < nearby_grids_.size(); ++i) {
-        auto key_off = key + nearby_grids_[i]; // 获取同一体素内的点
-        auto it = grids_.find(key_off);
-        int real_idx = idx * num_residual_per_point + i;
-        if (it != grids_.end()) {
+        for (int i = 0; i < nearby_grids_.size(); ++i) {
+          auto key_off = key + nearby_grids_[i]; // 获取同一体素内的点
+          auto it = grids_.find(key_off);
+          int real_idx = idx * num_residual_per_point + i;
+          if (it != grids_.end()) {
 
-          auto &v = it->second; // voxel
-          // 使用体素均值计算残差
-          Vec3d e = qs - v.mu_;
+            auto &v = it->second; // voxel
+            // 使用体素均值计算残差
+            Vec3d e = qs - v.mu_;
 
-          // check chi2 th
-          double res = e.transpose() * v.info_ * e;
-          if (std::isnan(res) || res > options_.res_outlier_th_) {
+            // check chi2 th
+            double res = e.transpose() * v.info_ * e;
+            if (std::isnan(res) || res > options_.res_outlier_th_) {
+              effect_pts[real_idx] = false;
+              continue;
+            }
+
+            // build residual
+            Eigen::Matrix<double, 3, 6> J;
+            J.block<3, 3>(0, 0) = -pose.so3().matrix() * SO3::hat(q);
+            J.block<3, 3>(0, 3) = Mat3d::Identity();
+
+            jacobians[real_idx] = J;
+            errors[real_idx] = e;
+            infos[real_idx] = v.info_;
+            effect_pts[real_idx] = true;
+          } else {
             effect_pts[real_idx] = false;
-            continue;
           }
-
-          // build residual
-          Eigen::Matrix<double, 3, 6> J;
-          J.block<3, 3>(0, 0) = -pose.so3().matrix() * SO3::hat(q);
-          J.block<3, 3>(0, 3) = Mat3d::Identity();
-
-          jacobians[real_idx] = J;
-          errors[real_idx] = e;
-          infos[real_idx] = v.info_;
-          effect_pts[real_idx] = true;
-        } else {
-          effect_pts[real_idx] = false;
         }
-      }
-    });
+      });
+    }
 
     // 累加Hessian和error,计算dx
     double total_res = 0;
