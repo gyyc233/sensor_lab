@@ -58,7 +58,7 @@ public:
     }
 
     FullCloudPtr cloud(new FullPointCloudType());
-    conv_->process(msg, cloud);
+    conv_->process(msg, cloud); // 处理message中的全量点云
     lidar_buffer_.push_back(cloud);
     time_buffer_.push_back(msg->header.stamp.toSec());
     last_timestamp_lidar_ = msg->header.stamp.toSec();
@@ -100,7 +100,7 @@ private:
   std::deque<double> time_buffer_;
   bool lidar_pushed_ = false;
   MeasureGroup measures_;
-  double lidar_end_time_ = 0;
+  double lidar_end_time_ = 0; // scans中最后一点的时间
 };
 
 } // namespace sad

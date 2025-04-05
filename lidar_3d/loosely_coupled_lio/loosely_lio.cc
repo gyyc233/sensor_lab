@@ -85,7 +85,7 @@ void LooselyLIO::predict() {
   imu_states_.clear();
   imu_states_.emplace_back(eskf_.GetNominalState());
 
-  // 对imu状态进行预测
+  // 对两帧scans之间的imu状态进行预测
   for (auto &imu : measures_.imu_) {
     eskf_.Predict(*imu);
     imu_states_.emplace_back(eskf_.GetNominalState());
@@ -93,7 +93,7 @@ void LooselyLIO::predict() {
 }
 
 void LooselyLIO::tryInitIMU() {
-  for (auto imu : measures_.imu_) {
+  for (auto &imu : measures_.imu_) {
     imu_init_.AddIMU(*imu);
   }
 
@@ -177,6 +177,7 @@ void LooselyLIO::align() {
     return;
   }
 
+  // 松耦合：将eskf的结果作为ndt的初始位姿输入
   /// 从EKF中获取预测pose，放入LO，获取LO位姿，最后合入EKF
   SE3 pose_predict = eskf_.GetNominalSE3();
   inc_ndt_lo_->addCloud(current_scan_filter, pose_predict, true);
