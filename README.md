@@ -75,9 +75,9 @@ lidar 2d mapping global map
 
 ## Lidar_3d
 
-direct NDT LO mapping and without loop closure
+incremental NDT LO mapping and without loop closure
 
-![direct_ndt_lo](./support_files/image/lidar_3d/direct_ndt_lo.png)
+![incremental_ndt_lo](./support_files/image/lidar_3d/incremental_ndt_lo.png)
 
 ## pcl_test
 
