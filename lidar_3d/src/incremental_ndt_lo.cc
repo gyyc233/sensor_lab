@@ -46,6 +46,10 @@ void IncrementalNDTLO::addCloud(CloudPtr scan, SE3 &pose, bool use_guess) {
     ndt_.addCloud(scan_world);
   }
 
+  if (viewer_ != nullptr) {
+    viewer_->SetPoseAndCloud(pose, scan_world);
+  }
+
   cnt_frame_++;
 }
 
@@ -60,7 +64,9 @@ bool IncrementalNDTLO::isKeyframe(const SE3 &current_pose) {
 }
 
 void IncrementalNDTLO::saveMap(const std::string &map_path) {
-  // TODO:
+  if (viewer_) {
+    viewer_->SaveMap(map_path);
+  }
 }
 
 } // namespace sad

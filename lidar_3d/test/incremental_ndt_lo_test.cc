@@ -7,7 +7,7 @@
 #include "ndt_3d.h"
 #include "sys_utils.h"
 
-DEFINE_string(bag_path, "./data/mapping_3d/test.bag", "path to rosbag");
+DEFINE_string(bag_path, "./data/mapping_3d/ulhk_test2.bag", "path to rosbag");
 DEFINE_string(dataset_type, "ULHK", "NCLT/ULHK/KITTI/WXB_3D"); // 数据集类型
 DEFINE_bool(use_pcl_ndt, false, "use pcl ndt to align?");
 DEFINE_bool(use_ndt_nearby_6, false, "use ndt nearby 6?");
@@ -30,23 +30,22 @@ int main(int argc, char **argv) {
   sad::IncrementalNDTLO ndt_lo(options);
 
   rosbag_io
-      .AddAutoPointCloudHandle(
-          [&ndt_lo](sensor_msgs::PointCloud2::Ptr msg) -> bool {
-            sad::evaluate_and_call(
-                [&]() {
-                  SE3 pose;
-                  ndt_lo.addCloud(
-                      sad::VoxelCloud(sad::PointCloud2ToCloudPtr(msg)), pose);
-                },
-                "NDT registration", 1);
-            return true;
-          })
+      .AddAutoPointCloudHandle([&ndt_lo](
+                                   sensor_msgs::PointCloud2::Ptr msg) -> bool {
+        sad::evaluate_and_call(
+            [&]() {
+              SE3 pose;
+              ndt_lo.addCloud(
+                  sad::VoxelCloud(sad::PointCloud2ToCloudPtr(msg), 0.2), pose);
+            },
+            "NDT registration", 1);
+        return true;
+      })
       .Go();
 
   if (FLAGS_display_map) {
     // 把地图存下来
-        ndt_lo.saveMap("./data/mapping_3d/incremental_ndt
-        _lo_map.pcd");
+    ndt_lo.saveMap("./data/mapping_3d/incremental_ndt_lo_map.pcd");
   }
 
   return 0;

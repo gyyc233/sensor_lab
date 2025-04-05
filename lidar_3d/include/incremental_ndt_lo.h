@@ -4,6 +4,7 @@
 
 #include "eigen_type/eigen_types.h"
 #include "incremental_ndt.h"
+#include "point_cloud/pcl_map_viewer.h"
 #include "point_cloud/point_types.h"
 
 namespace sad {
@@ -49,6 +50,7 @@ private:
   int cnt_frame_ = 0;
 
   IncrementalNdt3D ndt_;
+  std::shared_ptr<PCLMapViewer> viewer_ = nullptr;
 };
 
 } // namespace sad

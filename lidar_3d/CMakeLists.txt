@@ -56,7 +56,7 @@ target_link_libraries(direct_ndt_lo ndt_3d)
 
 add_library(incremental_ndt_lo STATIC src/incremental_ndt_lo.cc src/incremental_ndt.cc ${PROJECT_SOURCE_DIR}/common/navigation_and_mapping/io_utils.cc)
 target_include_directories(incremental_ndt_lo PUBLIC include)
-target_link_libraries(incremental_ndt_lo ndt_3d)
+target_link_libraries(incremental_ndt_lo ndt_3d ${G2O_CORE_LIBRARY} ${G2O_STUFF_LIBRARY})
 
 add_library(feature_extraction STATIC src/feature_extraction.cc)
 target_include_directories(feature_extraction PUBLIC include)
@@ -82,6 +82,9 @@ target_link_libraries(run_gen_simu_data icp_3d)
 
 add_executable(direct_ndt_lo_test test/direct_ndt_lo_test.cc)
 target_link_libraries(direct_ndt_lo_test direct_ndt_lo)
+
+add_executable(incremental_ndt_lo_test test/incremental_ndt_lo_test.cc)
+target_link_libraries(incremental_ndt_lo_test incremental_ndt_lo)
 
 add_executable(loam_like_lo_test test/loam_like_lo_test.cc ${PROJECT_SOURCE_DIR}/pcl_test/src/kd_tree.cc)
 target_link_libraries(loam_like_lo_test loam_like_odom  icp_3d)
