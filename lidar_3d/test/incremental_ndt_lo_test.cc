@@ -36,7 +36,7 @@ int main(int argc, char **argv) {
             [&]() {
               SE3 pose;
               ndt_lo.addCloud(
-                  sad::VoxelCloud(sad::PointCloud2ToCloudPtr(msg), 0.2), pose);
+                  sad::VoxelCloud(sad::PointCloud2ToCloudPtr(msg), 1.0), pose);
             },
             "NDT registration", 1);
         return true;

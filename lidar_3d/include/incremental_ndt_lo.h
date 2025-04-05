@@ -24,6 +24,9 @@ public:
   };
 
   IncrementalNDTLO(Options options = Options()) : options_(options) {
+    if (options_.display_realtime_cloud_) {
+      viewer_ = std::make_shared<PCLMapViewer>(0.5);
+    }
     ndt_ = IncrementalNdt3D(options_.ndt3d_options_);
   }
 
