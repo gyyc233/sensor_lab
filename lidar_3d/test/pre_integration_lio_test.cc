@@ -36,7 +36,6 @@ int main(int argc, char **argv) {
       .Go();
 
   lio.Finish();
-  sad::common::Timer::PrintAll();
   LOG(INFO) << "done.";
 
   return 0;

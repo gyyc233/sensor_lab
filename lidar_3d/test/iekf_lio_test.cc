@@ -20,7 +20,8 @@ int main(int argc, char **argv) {
   sad::RosbagIO rosbag_io(fLS::FLAGS_bag_path,
                           sad::Str2DatasetType(FLAGS_dataset_type));
 
-  sad::IEKF_LIO lio;
+  sad::IEKF_LIO::Options options;
+  sad::IEKF_LIO lio(options);
   lio.Init(FLAGS_config);
 
   rosbag_io
@@ -36,7 +37,6 @@ int main(int argc, char **argv) {
       .Go();
 
   lio.Finish();
-  sad::common::Timer::PrintAll();
   LOG(INFO) << "done.";
 
   return 0;
