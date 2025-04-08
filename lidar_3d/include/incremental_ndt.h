@@ -88,8 +88,8 @@ public:
 
   /**
    * 根据估计的NDT建立edges
-   * @param v
-   * @param edges
+   * @param v 输入参数，位姿顶点
+   * @param edges 输出参数，全部的有效的NDT残差边
    */
   void buildNDTEdges(VertexPose *v, std::vector<EdgeNDT *> &edges);
 
