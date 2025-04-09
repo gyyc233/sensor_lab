@@ -1,4 +1,3 @@
-
 - [newton method](#newton-method)
   - [一维牛顿法](#一维牛顿法)
   - [二维牛顿法](#二维牛顿法)

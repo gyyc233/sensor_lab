@@ -1,3 +1,14 @@
+- [imu \& camera 时间戳同步](#imu--camera-时间戳同步)
+  - [Online Temporal Calibration for Monocular Visual-Inertial Systems](#online-temporal-calibration-for-monocular-visual-inertial-systems)
+    - [假设传感器之间的时间偏移是一个常数](#假设传感器之间的时间偏移是一个常数)
+    - [引入用于建模和补偿时间错位的特征速度](#引入用于建模和补偿时间错位的特征速度)
+    - [Vision Factor with Time Offset 具有时间偏移的视觉因素](#vision-factor-with-time-offset-具有时间偏移的视觉因素)
+      - [3D Position Parameterization](#3d-position-parameterization)
+      - [Depth Parameterization 逆深度参数化](#depth-parameterization-逆深度参数化)
+      - [OPtimization with td 携带时间偏移的优化](#optimization-with-td-携带时间偏移的优化)
+      - [Compensation of time offset 时间偏移补偿](#compensation-of-time-offset-时间偏移补偿)
+      - [实验](#实验)
+  - [参考文章](#参考文章)
 
 # imu & camera 时间戳同步
 

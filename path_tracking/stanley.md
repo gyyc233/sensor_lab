@@ -1,3 +1,5 @@
+- [Stanley 前轮反馈控制(Front wheel feedback)](#stanley-前轮反馈控制front-wheel-feedback)
+  - [与pure pursuit比较](#与pure-pursuit比较)
 
 ## Stanley 前轮反馈控制(Front wheel feedback)
 

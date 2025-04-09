@@ -1,6 +1,10 @@
+- [std::bind](#stdbind)
+  - [std::function](#stdfunction)
+    - [为什么C++中有函数指针还需要std::function](#为什么c中有函数指针还需要stdfunction)
+    - [std::function](#stdfunction-1)
 - [std::function \& function pointer](#stdfunction--function-pointer)
 
-## std::bind
+# std::bind
 
 - bind可以适配任意的可调用对象，包括函数指针、函数引用、成员函数指针和函数对象。
 - bind接受的第一个参数必须是一个可调用的对象f,可以是函数、函数指针、函数对象和成员函数指针，之后接受的参数的数量必须与f的参数数量相等，这些参数将被传递给f作为入参。

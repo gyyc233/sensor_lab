@@ -1,4 +1,4 @@
-
+- [B-Spline Curve](#b-spline-curve)
 
 ## B-Spline Curve
 

@@ -1,3 +1,8 @@
+- [bresenham‘s line algorithm 布雷森汉姆直线算法](#bresenhams-line-algorithm-布雷森汉姆直线算法)
+  - [推导](#推导)
+  - [不同方向直线情况的判定原则](#不同方向直线情况的判定原则)
+  - [各种情况](#各种情况)
+  - [reference](#reference)
 
 # bresenham‘s line algorithm 布雷森汉姆直线算法
 

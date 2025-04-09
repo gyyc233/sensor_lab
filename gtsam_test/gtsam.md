@@ -1,3 +1,9 @@
+- [GTSAM](#gtsam)
+  - [install gtsam](#install-gtsam)
+    - [my gtsam build](#my-gtsam-build)
+    - [visualization](#visualization)
+    - [uninstall](#uninstall)
+  - [参考文章](#参考文章)
 
 # GTSAM
 
@@ -44,7 +50,7 @@ sudo cp /usr/local/lib/libmetis-gtsam.so /usr/lib
 - 在我的机器上gtsam 4.2.0可以编译，但是使用时崩溃，试了很多办法，幸运的是，最后我使用上述编译选项终于过了，它们来自`.github/scripts/unix.sh`
 - `{CMAKE_CXX_FLAGS}`设置`set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14 -pthread")` 设立删除了`-mfma`(原本用于加速Eigen计算),否则gtsam会崩溃
 - `-march=native`原本用于CPU优化代码，但是会影响程序的可移植性，所依赖的项目也要使用这个标志，否则会导致gtsam出现segfault, 这里disable
-- Eigen版本问题，单独使用`-DGTSAM_USE_SYSTEM_EIGEN=ON`并不会把gtsan指定到系统`eigen`,项目主页issus好多人反馈了．还要同时指定`-DEigen3_DIR=/usr/include/`或者直接改make list
+- Eigen版本问题，单独使用`-DGTSAM_USE_SYSTEM_EIGEN=ON`并不会把gtsam指定到系统`eigen`,项目主页issus好多人反馈了．还要同时指定`-DEigen3_DIR=/usr/include/`或者直接改make list
 
 ### visualization
 

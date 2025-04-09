@@ -1,3 +1,12 @@
+- [LQR Linear Quadratic Regulator](#lqr-linear-quadratic-regulator)
+  - [连续系统](#连续系统)
+  - [设计代价函数，寻找最优的k](#设计代价函数寻找最优的k)
+  - [MATLAB LQR 问题实践](#matlab-lqr-问题实践)
+  - [前向欧拉法将连续系统离散化](#前向欧拉法将连续系统离散化)
+  - [小结](#小结)
+- [基于LQR控制和汽车运动学模型的路径跟踪](#基于lqr控制和汽车运动学模型的路径跟踪)
+  - [连续系统实践](#连续系统实践)
+  - [离散系统实践](#离散系统实践)
 
 ## LQR Linear Quadratic Regulator
 

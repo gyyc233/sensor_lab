@@ -1,3 +1,9 @@
+- [特征值和特征向量](#特征值和特征向量)
+  - [finding all eigenvalues](#finding-all-eigenvalues)
+  - [finding all eigenvectors](#finding-all-eigenvectors)
+  - [矩阵的迹和行列式](#矩阵的迹和行列式)
+  - [OpenCV 计算特征值和特征矩阵](#opencv-计算特征值和特征矩阵)
+  - [Eigen 计算特征值和特征向量](#eigen-计算特征值和特征向量)
 
 # 特征值和特征向量
 
