@@ -27,9 +27,9 @@ MU直接可以得到运动主体自身的角速度、加速度的测量数据，
 
 在imu中考虑５个变量，旋转R 平移p 角速度w 线速度v 加速度a,状态方程如下(旋转使用SO(3))
 
-![](./img/imu_preintegration/img1.png)
+![](./img/imu_preintegration_1/img1.png)
 
-![](./img/imu_preintegration/img2.png)
+![](./img/imu_preintegration_2/img2.png)
 
 在构建图优化时，可以把零偏和噪声加入到优化中，以获得更准确的结果，而每次优化，零偏和噪声都会更新，进而需要重新对imu积分．为了节省计算资源，Christian Forster提出了预积分的方法
 
