@@ -50,6 +50,7 @@ bool StaticIMUInit::TryInit() {
   // 计算均值和方差
   Vec3d mean_gyro, mean_acce;
   // 计算陀螺仪均值和对角协方差
+  // 1. gyro bias = mean_gyro
   math::ComputeMeanAndCovDiag(init_imu_deque_, mean_gyro, cov_gyro_,
                               [](const IMU &imu) { return imu.gyro_; });
   // 计算加速度计均值和对角协方差
@@ -62,10 +63,13 @@ bool StaticIMUInit::TryInit() {
   LOG(INFO) << "estimate gyro cov: " << cov_gyro_.transpose();
 
   // 以acce均值为方向，取9.8长度为重力
+  // 2. get gravity
   gravity_ = -mean_acce / mean_acce.norm() * options_.gravity_norm;
   LOG(INFO) << "estimate gravity: " << gravity_.transpose();
 
   // 重新计算加计的协方差
+  // 去掉重力的影响
+  // 3. 此时 acce bias = mean_acce
   math::ComputeMeanAndCovDiag(
       init_imu_deque_, mean_acce, cov_acce_,
       [this](const IMU &imu) { return imu.acce_ + gravity_; });
@@ -73,7 +77,7 @@ bool StaticIMUInit::TryInit() {
   LOG(INFO) << "second estimate acce mean: " << mean_acce.transpose();
   LOG(INFO) << "second estimate acce cov: " << cov_acce_.transpose();
 
-  // 检查IMU噪声
+  // 5. 检查IMU噪声 协方差矩阵
   // cov_gyro_ 中每个元素的平方之和再开方
   LOG(INFO) << "gyro noise (cov normalized): " << cov_gyro_.norm();
   if (cov_gyro_.norm() > options_.max_static_gyro_var) {

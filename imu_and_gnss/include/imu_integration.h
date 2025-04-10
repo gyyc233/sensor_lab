@@ -8,6 +8,10 @@
 namespace sad {
 class IMUIntegration {
 public:
+  /// @brief imu direct integration
+  /// @param gravity
+  /// @param bg bias gyro
+  /// @param ba bias acce
   IMUIntegration(const Vec3d &gravity, const Vec3d &bg, const Vec3d &ba);
 
   void addIMU(const sad::IMU &imu);

@@ -11,7 +11,7 @@
 namespace sad {
 
 /**
- * 书本第3章介绍的误差卡尔曼滤波器
+ * ESKF误差状态卡尔曼滤波器
  * 可以指定观测GNSS的读数，GNSS应该事先转换到车体坐标系
  *
  * 本书使用18维的ESKF，标量类型可以由S指定，默认取double
@@ -172,11 +172,12 @@ private:
 
     g_ += dx_.template block<3, 1>(15, 0);
 
+    // 重置ESKF的均值和协方差矩阵
     ProjectCov();
     dx_.setZero();
   }
 
-  /// @brief 对P阵进行投影，参考式(3.63)
+  /// @brief 对P阵进行投影，把一个切空间中的高斯分布投影到另一个切空间
   void ProjectCov() {
     Mat18T J = Mat18T::Identity();
     J.template block<3, 3>(6, 6) =
@@ -240,6 +241,7 @@ template <typename S> bool ESKF<S>::Predict(const IMU &imu) {
   // 其余状态维度不变
 
   // error state 递推
+  // 计算误差状态变量运动过程
   // 计算运动过程雅可比矩阵 F，见(3.47)
   // F实际上是稀疏矩阵，也可以不用矩阵形式进行相乘而是写成散装形式，这里为了教学方便，使用矩阵形式
   Mat18T F = Mat18T::Identity();                         // 主对角线
@@ -252,9 +254,12 @@ template <typename S> bool ESKF<S>::Predict(const IMU &imu) {
       SO3::exp(-(imu.gyro_ - bg_) * dt).matrix(); // theta 对 theta 李代数转李群
   F.template block<3, 3>(6, 9) = -Mat3T::Identity() * dt; // theta 对 bg
 
+  // ESKF update
   // mean and cov prediction
   // 下行其实没必要算，dx_在重置之后应该为零，因此这步可以跳过，但F需要参与Cov部分计算，所以保留
   dx_ = F * dx_;
+  // 在Eigen中，当变量同时出现在左值和右值，赋值操作可能会带来混淆问题。
+  // Eigen需要把右值赋值为一个临时matrix/array，然后再将临时值赋值给左值，便可以解决混淆。eval()函数实现了这个功能，可以解决混淆问题。
   cov_ = F * cov_.eval() * F.transpose() + Q_;
   current_time_ = imu.timestamp_;
   return true;
@@ -344,6 +349,8 @@ bool ESKF<S>::ObserveSE3(const SE3 &pose, double trans_noise,
   dx_ = K * innov;
   cov_ = (Mat18T::Identity() - K * H) * cov_;
 
+  // 后续处理
+  // 将误差状态归入名义状态
   UpdateAndReset();
 
   // RTK读数主要是在观测阶段通过卡尔曼增益作用于误差状态变量中
