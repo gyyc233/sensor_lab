@@ -8,6 +8,11 @@
 
 预积分模型构建了关键帧i到关键帧j之间的一种约束
 
+- 用i时刻，j时刻的状态变量值与预积分观测值做差，得到残差的定义公式
+- 残差表面上关联两个时刻的旋转，平移，线速度，但是由于预积分观测内部含有imu零偏，所以也和i时刻的两个零偏有关，在优化过程中如果对i时刻零偏进行更新，那么预积分观测量也应该线性发生改变，从而影响残差值，所以预积分因子需要约束imu的随机游走
+
+![](./img/imu_preintegration_3/pre_integration_1.png)
+
 ![](./img/imu_preintegration_3/img1.png)
 
 or
@@ -18,11 +23,17 @@ or
 
 我们来讨论预积分相比于状态变量的雅可比矩阵。预积分测量已经归纳了IMU在短时间内的读数
 
-![](./img/imu_preintegration_3/img3.png)
+旋转部分的残差与状态变量$R_i$ $R_j$ $b_{g,i}$有关
 
-![](./img/imu_preintegration_3/img4.png)
+![](./img/imu_preintegration_3/pre_integration_2.png)
 
-![](./img/imu_preintegration_3/img5.png)
+速度部分残差与状态变量$R_i$ $V_i$ $V_j$ $b_{g,i}$ $b_{a,i}$有关
+
+![](./img/imu_preintegration_3/pre_integration_3.png)
+
+平移部分残差与状态变量$R_i$ $V_i$ $P_i$ $P_j$ $b_{g,i}$ $b_{a,i}$有关
+
+![](./img/imu_preintegration_3/pre_integration_4.png)
 
 至此，推导了预积分观测量对所有状态变量的导数形式　(高博太强了)
 
