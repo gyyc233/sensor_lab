@@ -80,6 +80,8 @@ int main(int argc, char **argv) {
         // 噪声由初始化器估计
         options.gyro_var = sqrt(imu_init.GetCovGyro()[0]);
         options.acce_var = sqrt(imu_init.GetCovAcce()[0]);
+
+        // 初始化各类信息矩阵
         eskf.SetInitialConditions(options, imu_init.GetInitBg(),
                                   imu_init.GetInitBa(), imu_init.GetGravity());
         imu_inited = true;

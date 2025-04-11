@@ -73,8 +73,8 @@ target_include_directories(based_imu_pre_integration_gins PUBLIC include)
 target_link_libraries(based_imu_pre_integration_gins imu_preintegration ${G2O_CORE_LIBRARY} ${G2O_STUFF_LIBRARY})
 
 # gtest example
-add_executable(gtest_preintegration test/gtest_preintegration.cc)
-target_link_libraries(gtest_preintegration gtest pthread glog gflags imu_preintegration based_imu_pre_integration_gins ${G2O_CORE_LIBRARY} ${G2O_STUFF_LIBRARY})
+add_executable(gtest_preintegration test/gtest_preintegration.cc src/g2o_preintegration_types.cc)
+target_link_libraries(gtest_preintegration gtest pthread glog gflags imu_preintegration gnss based_imu_pre_integration_gins ${G2O_CORE_LIBRARY} ${G2O_STUFF_LIBRARY})
 
 # INSTALL
 install(

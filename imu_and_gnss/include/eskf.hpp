@@ -65,7 +65,7 @@ public:
   ESKF(Options option = Options()) : options_(option) { BuildNoise(option); }
 
   /**
-   * 设置初始条件
+   * 初始化各类信息矩阵
    * @param options 噪声项配置
    * @param init_bg 初始零偏 陀螺
    * @param init_ba 初始零偏 加计
@@ -141,6 +141,7 @@ private:
     double eg2 = eg; // * eg;
     double ea2 = ea; // * ea;
 
+    // 设置imu初始噪声协方差矩阵
     // 设置过程噪声
     Q_.diagonal() << 0, 0, 0, ev2, ev2, ev2, et2, et2, et2, eg2, eg2, eg2, ea2,
         ea2, ea2, 0, 0, 0;

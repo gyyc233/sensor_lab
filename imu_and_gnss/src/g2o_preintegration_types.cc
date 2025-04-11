@@ -84,7 +84,7 @@ void EdgeInertial::linearizeOplus() {
   const SO3 dR = preint_->GetDeltaRotation(bg);
   const SO3 eR = SO3(dR).inverse() * R1T * R2;
   const Vec3d er = eR.log();
-  const Mat3d invJr = preint_->jr_inv_test(eR); // SO3右扰动
+  const Mat3d invJr = preint_->jr_inv_test(er); // SO3右扰动
 
   /// 雅可比矩阵
   /// 注意有3个index, 顶点的，自己误差的，顶点内部变量的
@@ -124,7 +124,8 @@ void EdgeInertial::linearizeOplus() {
   _jacobianOplus[2].setZero();
   // dR/dbg1, 4.45
   _jacobianOplus[2].block<3, 3>(0, 0) =
-      -invJr * eR.inverse().matrix() * SO3::jr((dR_dbg * dbg).eval()) * dR_dbg;
+      -invJr * eR.inverse().matrix() *
+      preint_->jr_inv_test((dR_dbg * dbg).eval()) * dR_dbg;
   // dv/dbg1
   _jacobianOplus[2].block<3, 3>(3, 0) = -dv_dbg;
   // dp/dbg1
