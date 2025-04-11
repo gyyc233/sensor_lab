@@ -164,13 +164,47 @@ public:
 class EdgePriorPoseNavState : public g2o::BaseMultiEdge<15, Vec15d> {
 public:
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
-  EdgePriorPoseNavState(const NavStated &state, const Mat15d &info);
-
+  EdgePriorPoseNavState(const NavStated &state, const Mat15d &info) {
+    resize(4);
+    state_ = state;
+    setInformation(info);
+  }
   virtual bool read(std::istream &is) { return false; }
   virtual bool write(std::ostream &os) const { return false; }
 
-  void computeError();
-  virtual void linearizeOplus();
+  void computeError() override {
+    auto *vp = dynamic_cast<const VertexPose *>(_vertices[0]);
+    auto *vv = dynamic_cast<const VertexVelocity *>(_vertices[1]);
+    auto *vg = dynamic_cast<const VertexGyroBias *>(_vertices[2]);
+    auto *va = dynamic_cast<const VertexAccBias *>(_vertices[3]);
+
+    const Vec3d er =
+        SO3(state_.R_.matrix().transpose() * vp->estimate().so3().matrix())
+            .log();
+    const Vec3d ep = vp->estimate().translation() - state_.p_;
+    const Vec3d ev = vv->estimate() - state_.v_;
+    const Vec3d ebg = vg->estimate() - state_.bg_;
+    const Vec3d eba = va->estimate() - state_.ba_;
+
+    _error << er, ep, ev, ebg, eba;
+  }
+  virtual void linearizeOplus() override {
+    const auto *vp = dynamic_cast<const VertexPose *>(_vertices[0]);
+    const Vec3d er =
+        SO3(state_.R_.matrix().transpose() * vp->estimate().so3().matrix())
+            .log();
+
+    /// 注意有3个index, 顶点的，自己误差的，顶点内部变量的
+    _jacobianOplus[0].setZero();
+    _jacobianOplus[0].block<3, 3>(0, 0) = jr_inv_test(er);   // dr/dr
+    _jacobianOplus[0].block<3, 3>(3, 3) = Mat3d::Identity(); // dp/dp
+    _jacobianOplus[1].setZero();
+    _jacobianOplus[1].block<3, 3>(6, 0) = Mat3d::Identity(); // dv/dv
+    _jacobianOplus[2].setZero();
+    _jacobianOplus[2].block<3, 3>(9, 0) = Mat3d::Identity(); // dbg/dbg
+    _jacobianOplus[3].setZero();
+    _jacobianOplus[3].block<3, 3>(12, 0) = Mat3d::Identity(); // dba/dba
+  }
 
   Eigen::Matrix<double, 15, 15> GetHessian() {
     linearizeOplus();
@@ -180,6 +214,35 @@ public:
     J.block<15, 3>(0, 9) = _jacobianOplus[2];
     J.block<15, 3>(0, 12) = _jacobianOplus[3];
     return J.transpose() * information() * J;
+  }
+
+  Eigen::Matrix3d jr_inv_test(const Eigen::Vector3d &omega) {
+    double theta = omega.norm();
+    if (theta < 1e-6) {
+      return Eigen::Matrix3d::Identity();
+    }
+
+    Eigen::Vector3d a = omega;
+    a.normalize();
+
+    double cot_half_theta = cos(0.5 * theta) / sin(0.5 * theta);
+    Eigen::Matrix3d ret =
+        0.5 * theta * cot_half_theta * Eigen::Matrix3d ::Identity() +
+        (1 - 0.5 * theta * cot_half_theta) * a * a.transpose() -
+        0.5 * theta * hat_test(a);
+
+    return ret;
+  }
+
+  Eigen::Matrix3d hat_test(const Eigen::Vector3d &omega) {
+    Eigen::Matrix3d Omega;
+    // clang-format off
+  Omega <<
+      0.0, -omega[2],  omega[1],
+        omega[2], 0.0, -omega[0],
+      -omega[1],  omega[0], 0.0;
+    // clang-format on
+    return Omega;
   }
 
   NavStated state_;
@@ -210,8 +273,9 @@ public:
     // jacobian 6x6
     _jacobianOplusXi.setZero();
 
-    Eigen::MatrixXd mat =
-        _measurement.so3().inverse().matrix() * v->estimate().so3().matrix();
+    Vec3d mat = SO3(_measurement.so3().inverse().matrix() *
+                    v->estimate().so3().matrix())
+                    .log();
 
     _jacobianOplusXi.block<3, 3>(0, 0) = jr_inv_test(mat);  // dR/dR
     _jacobianOplusXi.block<3, 3>(3, 3) = Mat3d::Identity(); // dp/dp

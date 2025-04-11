@@ -68,9 +68,12 @@ add_executable(run_eskf_gins test/run_eskf_gins.cc)
 target_link_libraries(run_eskf_gins eskf)
 
 # based on imu preintegration gins
-add_library(based_imu_pre_integration_gins STATIC src/based_imu_pre_integration_gins.cc)
+add_library(based_imu_pre_integration_gins STATIC src/based_imu_pre_integration_gins.cc src/g2o_preintegration_types.cc)
 target_include_directories(based_imu_pre_integration_gins PUBLIC include)
 target_link_libraries(based_imu_pre_integration_gins imu_preintegration ${G2O_CORE_LIBRARY} ${G2O_STUFF_LIBRARY})
+
+add_executable(run_gins_pre_integ test/run_gins_pre_integ.cc  src/g2o_preintegration_types.cc)
+target_link_libraries(run_gins_pre_integ gtest pthread glog::glog gflags imu_preintegration gnss based_imu_pre_integration_gins ${G2O_CORE_LIBRARY} ${G2O_STUFF_LIBRARY})
 
 # gtest example
 add_executable(gtest_preintegration test/gtest_preintegration.cc src/g2o_preintegration_types.cc)
