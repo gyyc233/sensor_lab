@@ -32,6 +32,7 @@ void GinsImuPreIntegration::SetOptions(
   double gh2 = options_.gnss_height_noise * options_.gnss_height_noise;
   double ga2 = options_.gnss_ang_noise * options_.gnss_ang_noise;
 
+  // 初始化gnss信息矩阵
   options_.gnss_info.diagonal() << 1.0 / ga2, 1.0 / ga2, 1.0 / ga2, 1.0 / gp2,
       1.0 / gp2, 1.0 / gh2;
 
@@ -39,6 +40,7 @@ void GinsImuPreIntegration::SetOptions(
 
   // add odom var
   double o2 = 1.0 / (options_.odom_var * options_.odom_var);
+  // 初始化odom信息矩阵
   options_.odom_info.diagonal() << o2, o2, o2;
 
   prior_info_.block<6, 6>(9, 9) = Mat6d ::Identity() * 1e6;
@@ -71,6 +73,9 @@ void GinsImuPreIntegration::AddGnss(const GNSS &gnss) {
     }
 
     // 首个gnss信号，将初始pose设置为该gnss信号
+    // 当首个带姿态的 GNSS
+    // 数据到来时，使用该数据初始化初始位姿，初始速度为0，初始的零偏等于预积分类中的零偏（即
+    // IMU 静止初始化得到的零偏）
     this_frame_->timestamp_ = gnss.unix_time_;
     this_frame_->p_ = gnss.utm_pose_.translation();
     this_frame_->R_ = gnss.utm_pose_.so3();
@@ -88,11 +93,13 @@ void GinsImuPreIntegration::AddGnss(const GNSS &gnss) {
   }
 
   // 积分到GNSS时刻
+  // 在 GNSS 数据到达时，先使用 last_imu_ 数据预积分到 GNSS 时刻
   pre_integ_->Integrate(last_imu_, gnss.unix_time_ - current_time_);
 
   current_time_ = gnss.unix_time_;
   *this_frame_ = pre_integ_->Predict(*last_frame_, options_.gravity);
 
+  // 执行优化
   Optimize();
 
   last_frame_ = this_frame_;

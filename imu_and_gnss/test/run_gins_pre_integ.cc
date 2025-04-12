@@ -73,10 +73,13 @@ int main(int argc, char **argv) {
       /// 需要IMU初始化
       if (!imu_inited) {
         // 读取初始零偏，设置GINS
+        // 使用静止初始化得到的零偏和重力 来初始化预计分类的零偏和重力
         sad::GinsImuPreIntegration::Options options;
         options.preinteg_options.init_bg_ = imu_init.GetInitBg();
         options.preinteg_options.init_ba_ = imu_init.GetInitBa();
         options.gravity = imu_init.GetGravity();
+
+        // 设置信息矩阵与先验因子
         gins.SetOptions(options);
         imu_inited = true;
         return;
@@ -88,8 +91,10 @@ int main(int argc, char **argv) {
       }
 
       /// GNSS 也接收到之后，再开始进行预测
+      /// 初始化完成后接受imu data
       gins.AddImu(imu);
 
+      // 预测
       auto state = gins.GetState();
       save_result(fout, state);
     })

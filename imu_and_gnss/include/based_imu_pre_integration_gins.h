@@ -80,7 +80,7 @@ private:
   std::shared_ptr<IMUPreintegration> pre_integ_ = nullptr;
   std::shared_ptr<NavStated> last_frame_ = nullptr; // 上一个时刻状态
   std::shared_ptr<NavStated> this_frame_ = nullptr; // 当前时刻状态
-  Mat15d prior_info_ = Mat15d::Identity() * 1e2;    // 当前时刻先验
+  Mat15d prior_info_ = Mat15d::Identity() * 1e2; // 当前时刻先验因子的信息矩阵
 
   /// 两帧GNSS观测
   GNSS last_gnss_;
