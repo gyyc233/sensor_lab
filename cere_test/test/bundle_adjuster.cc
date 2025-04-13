@@ -20,7 +20,7 @@
 // clang-format off
 
 DEFINE_string(input, "", "Input File name");
-DEFINE_string(initial_ply, "output_source.ply", "Export the BAL file data as a PLY file.");
+DEFINE_string(initial_ply, "./data/cere_test/output_source.ply", "Export the BAL file data as a PLY file.");
 
 // solver option params
 DEFINE_int32(num_iterations, 20, "Number of ceres solver max iterations.");
@@ -30,11 +30,11 @@ DEFINE_double(eta, 1e-2, "Default value for eta. Eta determines the "
               "Changing this parameter can affect solve performance."); // 线性求解器中牛顿截断步长的精度
 DEFINE_double(max_solver_time, 1e32, "Maximum solve time in seconds.");
 
-DEFINE_string(final_ply, "output_target.ply", "Export the refined BAL file data as a PLY "
+DEFINE_string(final_ply, "./data/cere_test/output_target.ply", "Export the refined BAL file data as a PLY "
               "file.");
-DEFINE_string(output_ref_txt, "output_ref.txt", "Export the BAL reference file data as a TXT "
+DEFINE_string(output_ref_txt, "./data/cere_test/output_ref.txt", "Export the BAL reference file data as a TXT "
               "file.");
-DEFINE_string(output_txt, "output.txt", "Export the BAL file data as a TXT "
+DEFINE_string(output_txt, "./data/cere_test/output.txt", "Export the BAL file data as a TXT "
               "file.");
 // clang-format on
 
