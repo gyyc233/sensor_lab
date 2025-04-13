@@ -25,7 +25,7 @@ A repository of implementations and notes that provide services for the math, co
 
 ### Prerequisites
 
-- Ubuntu 20.04; ROS noetic
+- Ubuntu 20.04 (virtual machine); ROS noetic
 - C++14; OpenCV 4.2.0; Eigen 3.3.7; PCL 1.10.0
 - Sophus, commit SHA `a621ff` [local build](./task/local_build_sophus.md), support SO(3) and SE(3) operator
 - glog; gflags; gtest build gtest and `sudo cp libgtest*.a /usr/local/lib`
@@ -59,7 +59,11 @@ this module summarizes some methods for tradition image process, hand-eye calibr
 
 eskf gins (imu+gnss+odom)
 
+in the image below, the left shows the ESKF and the right side uses IMU pre-integration
+
+
 ![imu_and_gnss](./support_files/image/imu_and_gnss/imu_and_gnss.png)
+
 
 ## Lidar_2d
 
@@ -76,6 +80,14 @@ incremental NDT LO mapping and without loop closure
 ## pcl_test
 
 ## cere_test
+
+the below image show the easy use of the ceres optimization library
+
+- left image was source BAL data
+- right image use ceres for BA optimize,reduce some noise(running in virtual machine, low performance)
+
+![ceres_test](./support_files/image/ceres_test/ceres_1.png)
+
 
 ## g2o_test
 
