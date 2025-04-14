@@ -95,34 +95,37 @@ the below image show the easy use of the ceres optimization library
 
 this module conclude some common tips and knowledge in global or local path plan. 
 
-**Dijkstra global path plan**
-![Dijkstra](./support_files/image/path_plan/dijkstra_demo.png)
+<table>
+    <tr>
+        <td ><center><img src="./support_files/image/path_plan/dijkstra_demo.png" >Dijkstra global path plan </center></td>
+        <td ><center><img src="./support_files/image/path_plan/astar_demo.png"  >A star global path plan</center></td>
+    </tr>
+</table>
 
-**A star global path plan**
+<table>
+    <tr>
+        <td ><center><img src="./support_files/image/path_plan/dwa_demo.png" >DWA local path plan </center></td>
+        <td ><center><img src="./support_files/image/path_plan/rrt_star_demo.png"  >RRT* sample based local path plan</center></td>
+    </tr>
+</table>
 
-![A*](./support_files/image/path_plan/astar_demo.png)
+**Bezier Curve local path plan and B spline curve local path plan**
 
-**DWA local path plan**
-
-![dwa](./support_files/image/path_plan/dwa_demo.png)
-
-**RRT* sample based local path plan**
-
-![RRT*](./support_files/image/path_plan/rrt_star_demo.png)
-
-**Bezier Curve local path plan**
-
-![bezier curve](./support_files/image/path_plan/bezier_curve.png)
-
-**B spline curve local path plan**
-
-![b spline curve](./support_files/image/path_plan/b_spline_demo.png)
+<table>
+    <tr>
+        <td ><center><img src="./support_files/image/path_plan/bezier_curve.png" >Bezier Curve </center></td>
+        <td ><center><img src="./support_files/image/path_plan/b_spline_demo.png"  >B spline curve </center></td>
+    </tr>
+</table>
 
 **Dubins Curve path plan**
 
-![dubins curve LSR](./support_files/image/path_plan/dubins_curve_1.png)
-
-![dubins curve LSL](./support_files/image/path_plan/dubins_curve_2.png)
+<table>
+    <tr>
+        <td ><center><img src="./support_files/image/path_plan/dubins_curve_1.png" >dubins curve LSR </center></td>
+        <td ><center><img src="./support_files/image/path_plan/dubins_curve_2.png"  >dubins curve LSL</center></td>
+    </tr>
+</table>
 
 **Reeds-Shepp**
 
