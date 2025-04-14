@@ -138,6 +138,7 @@ bool polynomialCurveFit(std::vector<Point2F>& key_point, int n, cv::Mat& A) {
   }
 
   A = cv::Mat::zeros(n + 1, 1, CV_64FC1);
+  // XA=Y,求解Ａ cv::solve返回Ａ向量
   return cv::solve(X, Y, A, cv::DECOMP_SVD);;
 }
 
