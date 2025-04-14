@@ -135,7 +135,19 @@ TODO:
 
 **PID Controller**
 
-![PID Controller](./support_files/image/path_tracking/pid_demo.png)
+<table>
+    <tr>
+        <td ><center><img src="./support_files/image/path_tracking/pid_demo.png" >PID controller </center></td>
+        <td ><center><img src="./support_files/image/path_tracking/lqr_demo.png"  >LQR controller</center></td>
+    </tr>
+</table>
+
+<table>
+    <tr>
+        <td ><center><img src="./support_files/image/path_tracking/pure_pursuit_1.png" >pure pursuit controller </center></td>
+        <td ><center><img src="./support_files/image/path_tracking/stanley_1.png"  >stanley controller</center></td>
+    </tr>
+</table>
 
 ## task
 
