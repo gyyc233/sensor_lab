@@ -10,12 +10,12 @@
 ## path plan
 
 ### global path plan
-．
+
 基于图搜索的路径规划算法，主要用于低维度空间的路径规划，需要对环境进行完整的建模．
 
 - Dijkstra算法
-- A*启发式算法．
-．
+- A*启发式算法
+
 ### local path plan
 
 - DWA算法(Dynamic Window Approaches, DWA), DWA)动态窗口法，基于预测控制理论的局部路径规划算法
