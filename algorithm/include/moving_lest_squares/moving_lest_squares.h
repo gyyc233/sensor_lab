@@ -62,7 +62,7 @@ public:
 //
 //--------------------------------------------------------------------------------------------------
 
-/// @brief 曲面MLS拟合
+/// @brief 曲线MLS拟合
 class MLSCurvedSurface : public MLS {
 public:
   MLSCurvedSurface();

@@ -6,19 +6,23 @@ A repository of implementations and notes that provide services for the math, co
 
 - [Getting Started](#getting-started)
   - [Prerequisites](#prerequisites)
-- [Algorithm](#algorithm)
-- [Feature Detect](#feature-detect)
-- [Pose Estimation](#pose-estimation)
-- [Kalman Filter](#kalman-filter)
-- [imu\_and\_gnss](#imu_and_gnss)
-- [Lidar\_2d](#lidar_2d)
-- [Lidar\_3d](#lidar_3d)
-- [pcl\_test](#pcl_test)
-- [cere\_test](#cere_test)
-- [g2o\_test](#g2o_test)
-- [Path Plan](#path-plan)
-- [Path Tracking](#path-tracking)
-- [task](#task)
+- [Modules Introduction](#modules-introduction)
+  - [cpp\_test](#cpp_test)
+  - [Algorithm](#algorithm)
+  - [Feature Detect](#feature-detect)
+  - [Pose Estimation](#pose-estimation)
+  - [Kalman Filter](#kalman-filter)
+  - [imu\_and\_gnss](#imu_and_gnss)
+  - [Lidar\_2d](#lidar_2d)
+  - [Lidar\_3d](#lidar_3d)
+  - [pcl\_test](#pcl_test)
+  - [cere\_test](#cere_test)
+  - [g2o\_test](#g2o_test)
+  - [gtsam\_test](#gtsam_test)
+  - [se\_sync\_test](#se_sync_test)
+  - [Path Plan](#path-plan)
+  - [Path Tracking](#path-tracking)
+  - [task](#task)
 - [Usage](#usage)
 
 ## Getting Started
@@ -37,49 +41,87 @@ A repository of implementations and notes that provide services for the math, co
 - Python 3.8.10. I use the features of `matplotlibcpp` and run some python scripts
 - yaml-cpp use .yaml
 
-## Algorithm
+## Modules Introduction
 
-this module summarizes some methods for tradition image process, hand-eye calibration, curve fit etc.
+attention: some test data comes from the network public dataset
 
-**image undistortion**
+### cpp_test
+
+including some cpp feature test
+
+### Algorithm
+
+this module summarizes some methods for tradition image process
+
+- dlt camera calibration
+- image undistortion
+- based on Tsai-Lenz of hand-eye calibration (eye in hand)
+- least square polynomial curve fit and move least square
+- cubic spline interpolation curve fit
+- thin plate spline
+
+**image undistortion result**
 
 ![](./support_files/image/algorithm/img1.png)
 
-## Feature Detect
+### Feature Detect
 
 - based orb operator match
 
 ![orb_image_good_match](./support_files/image/feature_detect/orb_image_good_match.png)
 
-## Pose Estimation
+- LK option flow apply
 
-## Kalman Filter
+### Pose Estimation
 
-## imu_and_gnss
+- sfm: epipolar constrainc and triansgulation
+- 3D points ICP
+- gaussian-newton estimate images pose
 
-eskf gins (imu+gnss+odom)
+### Kalman Filter
+
+- direct kalman filter point estimate
+- extend kalman filter test
+
+### imu_and_gnss
+
+- static imu initialization
+- tradition imu integration
+- imu pre-integration
+- gnss data convert to utm
+- eskf gins
+- eskf gins with imu pre-integration optimize
 
 in the image below, the left shows the ESKF and the right side uses IMU pre-integration
 
-
 ![imu_and_gnss](./support_files/image/imu_and_gnss/imu_and_gnss.png)
 
+### Lidar_2d
 
-## Lidar_2d
-
-lidar 2d mapping global map
+- 2d lidar scans ICP (point to point & point to plane distance)
+- scan to occupancy grid map 
+- lidar 2d mapping global map
 
 ![2d_mapping_global_map](./support_files/image/lidar_2d/2d_mapping_global_map.png)
 
-## Lidar_3d
+### Lidar_3d
+
+- point cloud ICP registration
+- point cloud NDT registration
+- direct NDT lidar odom
+- incremental NDT LO
 
 incremental NDT LO mapping and without loop closure
 
 ![incremental_ndt_lo](./support_files/image/lidar_3d/incremental_ndt_lo.png)
 
-## pcl_test
+### pcl_test
 
-## cere_test
+- point cloud linear fit
+- point cloud data convert
+- nearest neighbor search
+
+### cere_test
 
 the below image show the easy use of the ceres optimization library
 
@@ -89,9 +131,19 @@ the below image show the easy use of the ceres optimization library
 ![ceres_test](./support_files/image/ceres_test/ceres_1.png)
 
 
-## g2o_test
+### g2o_test
 
-## Path Plan
+g2o optimize library test
+
+### gtsam_test
+
+gtsam optimize library test
+
+### se_sync_test
+
+SE_Sync optimize library note
+
+### Path Plan
 
 this module conclude some common tips and knowledge in global or local path plan. 
 
@@ -127,13 +179,7 @@ this module conclude some common tips and knowledge in global or local path plan
     </tr>
 </table>
 
-**Reeds-Shepp**
-
-TODO: 
-
-## Path Tracking
-
-**PID Controller**
+### Path Tracking
 
 <table>
     <tr>
@@ -149,7 +195,9 @@ TODO:
     </tr>
 </table>
 
-## task
+### task
+
+including some easy and common test
 
 ## Usage
 
@@ -158,6 +206,5 @@ mkdir build && cd build
 
 # enable debug
 cmake ..
-make -j4
-make install
+make -j8
 ```
