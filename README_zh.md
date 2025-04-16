@@ -53,7 +53,6 @@
 
 ### Algorithm
 
-this module summarizes some methods for tradition image process
 该模块记录了一些传统图像处理与数据拟合，数据插值的方法
 
 - 基于DLT相机标定
