@@ -104,7 +104,6 @@ int main() {
     std::cout << "Sample Standard Deviation RZ :"
               << error.RZ_error_SampleStdDeviation << std::endl;
   }
-  // 看了下结果，感觉误差有点大...
 
   return 0;
 }

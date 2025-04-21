@@ -105,10 +105,10 @@ void EyeInHand::tsaiLenzHandEye(cv::Mat &Hcg, std::vector<cv::Mat> Hgij,
   // 组装成齐次矩阵
   Rcg.copyTo(Hcg(cv::Rect(0, 0, 3, 3)));
   Tcg.copyTo(Hcg(cv::Rect(3, 0, 1, 3)));
-  Hcg.at<double>(3, 0) = 0.0;
-  Hcg.at<double>(3, 1) = 0.0;
-  Hcg.at<double>(3, 2) = 0.0;
-  Hcg.at<double>(3, 3) = 1.0;
+  // Hcg.at<double>(3, 0) = 0.0;
+  // Hcg.at<double>(3, 1) = 0.0;
+  // Hcg.at<double>(3, 2) = 0.0;
+  // Hcg.at<double>(3, 3) = 1.0;
 }
 
 cv::Mat EyeInHand::skew(const cv::Mat input_matrix) {
