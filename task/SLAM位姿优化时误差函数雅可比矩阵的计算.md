@@ -16,6 +16,7 @@
 - [视觉SLAM 十四讲——3D-2D:PnP求解——BA](https://www.cnblogs.com/bokeyuan-dlam/articles/15078888.html)
 - [视觉SLAM位姿优化时误差函数雅克比矩阵的计算](https://blog.csdn.net/u011178262/article/details/85016981)
 - [SLAM优化位姿时，误差函数的雅可比矩阵的推导。](https://blog.csdn.net/zhubaohua_bupt/article/details/74011005)
+- [Bundle Adjustment 重投影误差模型及相应雅克比公式推导](https://zhuanlan.zhihu.com/p/482540286)
 
 ## 位姿优化误差函数介绍
 
@@ -100,7 +101,7 @@ $$
 
 ### J<sub>2</sub>
 
-将归一化坐标对世界坐标系坐标求导
+将归一化坐标对相机坐标系坐标求导
 
 ![](./img/SLAM位姿优化时误差函数雅可比矩阵的计算/image10.png)
 
