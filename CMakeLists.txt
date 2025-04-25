@@ -45,6 +45,7 @@ if(ROS_CATKIN)
   include(cmake/third_party.cmake)
   add_subdirectory(lidar_2d)
   add_subdirectory(lidar_3d)
+  add_subdirectory(feature_tracker)
 endif()
 # =============== add ROS =====================
 

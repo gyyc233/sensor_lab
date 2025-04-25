@@ -13,11 +13,16 @@
 #include "odom.h"
 
 #ifdef ROS_CATKIN
+#include <cv_bridge/cv_bridge.h>
+#include <opencv2/opencv.hpp>
 #include <rosbag/bag.h>
 #include <rosbag/view.h>
+#include <sensor_msgs/CompressedImage.h>
+#include <sensor_msgs/Image.h>
 #include <sensor_msgs/Imu.h>
 #include <sensor_msgs/LaserScan.h>
 #include <sensor_msgs/NavSatFix.h>
+#include <sensor_msgs/image_encodings.h>
 #endif
 
 namespace sad {
@@ -79,6 +84,8 @@ public:
   using Scan2DHandle = std::function<bool(sensor_msgs::LaserScanPtr)>;
   using MultiScan2DHandle = std::function<bool(MultiScan2d::Ptr)>;
   using PointCloud2Handle = std::function<bool(sensor_msgs::PointCloud2::Ptr)>; 
+  using ImageHandle=std::function<bool(const sensor_msgs::Image::Ptr&)>;
+
   using FullPointCloudHandle = std::function<bool(FullCloudPtr)>;
   using ImuHandle = std::function<bool(IMUPtr)>;
   using GNSSHandle = std::function<bool(GNSSPtr)>;
@@ -93,6 +100,17 @@ public:
                       MessageProcessFunction func) {
     process_func_.emplace(topic_name, func);
     return *this;
+  }
+
+  /// 处理普通图像消息
+  RosbagIO &AddImageHandle(const std::string &topic_name, ImageHandle f) {
+    return AddHandle(topic_name, [f](const rosbag::MessageInstance &m) -> bool {
+      auto msg = m.instantiate<sensor_msgs::Image>();
+      if (msg == nullptr) {
+        return false;
+      }
+      return f(msg);
+    });
   }
 
   /// 2D激光处理, topic_name: ros topic name;

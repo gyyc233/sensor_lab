@@ -11,12 +11,13 @@ namespace sad {
 /// 枚举本书用到的一些数据集
 enum class DatasetType {
   UNKNOWN = -1,
-  NCLT = 0,  // NCLT: http://robots.engin.umich.edu/nclt/
-  KITTI = 1, // Kitti:
-  ULHK = 3,  // https://github.com/weisongwen/UrbanLoco
-  UTBM = 4,  // https://epan-utbm.github.io/utbm_robocar_dataset/
-  AVIA = 5,  // https://epan-utbm.github.io/utbm_robocar_dataset/
-  WXB_3D,    // 3d wxb
+  NCLT = 0,   // NCLT: http://robots.engin.umich.edu/nclt/
+  KITTI = 1,  // Kitti:
+  ULHK = 3,   // https://github.com/weisongwen/UrbanLoco
+  UTBM = 4,   // https://epan-utbm.github.io/utbm_robocar_dataset/
+  AVIA = 5,   // https://epan-utbm.github.io/utbm_robocar_dataset/
+  WXB_3D = 6, // 3d wxb
+  IMAGES = 7,
 };
 
 inline DatasetType Str2DatasetType(const std::string &name) {
@@ -37,6 +38,9 @@ inline DatasetType Str2DatasetType(const std::string &name) {
   }
   if (name == "AVIA") {
     return DatasetType::AVIA;
+  }
+  if (name == "IMAGES") {
+    return DatasetType::IMAGES;
   }
 
   return DatasetType::UNKNOWN;
