@@ -34,8 +34,13 @@ public:
                    const std::vector<double> &intrinsics,
                    const std::vector<double> &distortion_params);
 
+  void inputParams(const cv::Mat &image, const std::vector<double> &intrinsics,
+                   const std::vector<double> &distortion_params);
+
   bool run();
 
   void output(cv::Mat &undistorted_image, cv::Mat &distorted_image);
+
+  cv::Mat getOutput();
 };
 } // namespace Algorithm

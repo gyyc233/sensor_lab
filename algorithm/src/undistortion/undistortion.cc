@@ -27,6 +27,27 @@ void Undistortion::inputParams(const std::string &image_path,
   p2_ = distortion_params[4];
 }
 
+void Undistortion::inputParams(const cv::Mat &image,
+                               const std::vector<double> &intrinsics,
+                               const std::vector<double> &distortion_params) {
+  input_image_ = image;
+  assert(input_image_.rows != 0);
+  undistortion_image_ = cv::Mat(input_image_.rows, input_image_.cols, CV_8UC1);
+
+  assert(intrinsics.size() == 4);
+  fx_ = intrinsics[0];
+  fy_ = intrinsics[1];
+  cx_ = intrinsics[2];
+  cy_ = intrinsics[3];
+
+  assert(distortion_params.size() == 5);
+  k1_ = distortion_params[0];
+  k2_ = distortion_params[1];
+  k3_ = distortion_params[2];
+  p1_ = distortion_params[3];
+  p2_ = distortion_params[4];
+}
+
 bool Undistortion::run() {
   for (size_t v = 0; v < undistortion_image_.rows; v++) {
     for (size_t u = 0; u < undistortion_image_.cols; u++) {
@@ -69,5 +90,7 @@ void Undistortion::output(cv::Mat &undistorted_image,
   undistorted_image = undistortion_image_;
   distorted_image = input_image_;
 }
+
+cv::Mat Undistortion::getOutput() { return undistortion_image_; }
 
 }; // namespace Algorithm

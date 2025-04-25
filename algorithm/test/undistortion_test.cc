@@ -14,8 +14,8 @@ int main() {
       std::make_unique<Undistortion>();
   std::string image_path = "./data/distorted.png";
   std::vector<double> camera_intrinsics = {458.654, 457.296, 367.215, 248.375};
-  std::vector<double> distortion_params = {-0.28340811, 0.07395907, 0,
-                                           0.00019359, 1.76187114e-05};
+  std::vector<double> distortion_params = {-2.917e-01, 8.228e-02, 0, 0.00019359,
+                                           1.76187114e-05};
   undistortion_ptr->inputParams(image_path, camera_intrinsics,
                                 distortion_params);
   undistortion_ptr->run();
