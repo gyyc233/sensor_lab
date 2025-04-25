@@ -31,9 +31,9 @@ message("lidar_3d module need `-DROS_CATKIN=ON` optional")
     return()
 endif()
 
-# add_library(feature_tracker STATIC ${srcs})
-# target_include_directories(feature_tracker PUBLIC include)
-# target_link_libraries(feature_tracker ${OpenCV_LIBS} ${PCL_LIBRARIES})
+add_library(feature_tracker STATIC ${srcs})
+target_include_directories(feature_tracker PUBLIC include)
+target_link_libraries(feature_tracker ${OpenCV_LIBS} ${PCL_LIBRARIES} ${Sophus_LIBRARIES} ${catkin_LIBRARIES} glog::glog gflags yaml-cpp algorithm)
 
 add_executable(check_rosbag_images test/check_rosbag_images.cc ${PROJECT_SOURCE_DIR}/common/navigation_and_mapping/io_utils.cc)
 target_link_libraries(check_rosbag_images ${OpenCV_LIBS} ${PCL_LIBRARIES} ${Sophus_LIBRARIES} ${catkin_LIBRARIES} glog::glog gflags yaml-cpp algorithm)
