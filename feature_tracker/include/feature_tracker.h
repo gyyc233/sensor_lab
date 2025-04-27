@@ -1,5 +1,5 @@
-#ifndef FEATURE_TRACKER_H_
-#define FEATURE_TRACKER_H_
+#ifndef FEATURE_TRACKER_H
+#define FEATURE_TRACKER_H
 
 #include <csignal>
 #include <execinfo.h>

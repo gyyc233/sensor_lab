@@ -5,6 +5,7 @@ find_package(PCL 1.10 REQUIRED)
 find_package(glog 0.6.0 REQUIRED)
 find_package(Eigen3 REQUIRED)
 find_package(OpenCV REQUIRED)
+find_package(Ceres REQUIRED)
 
 set(Sophus_DIR /home/V01/uids0025/src/Sophus/build)
 find_package(Sophus REQUIRED)
