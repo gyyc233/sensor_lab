@@ -64,7 +64,7 @@ void Camera::estimateExtrinsics(const std::vector<cv::Point3f> &object_points,
   for (size_t i = 0; i < Ms.size(); ++i) {
     // 投影到归一化平面
     Eigen::Vector3d P;
-    liftProjective(Eigen::Vector2d(imagePoints.at(i).x, imagePoints.at(i).y),
+    liftProjective(Eigen::Vector2d(image_points.at(i).x, image_points.at(i).y),
                    P);
 
     P /= P(2);
@@ -106,7 +106,7 @@ double Camera::reprojectionError(
   }
 
   for (int i = 0; i < image_count; ++i) {
-    size_t point_count = image_count.at(i).size();
+    size_t point_count = image_points.at(i).size();
     points_so_far += point_count;
 
     // world frame points to image points [u,v]
@@ -174,7 +174,7 @@ void Camera::projectPoints(const std::vector<cv::Point3f> &object_points,
     Eigen::Vector2d p;
     spaceToPlane(P, p);
 
-    imagePoints.push_back(cv::Point2f(p(0), p(1)));
+    image_points.push_back(cv::Point2f(p(0), p(1)));
   }
 }
 

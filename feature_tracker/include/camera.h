@@ -8,8 +8,7 @@
 
 namespace sensor_lab {
 class Camera {
-public
-  ;
+public:
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
   enum ModelType { KANNALA_BRANDT, MEI, PINHOLE, SCARAMUZZA };
 
@@ -34,8 +33,7 @@ public
 
     int nIntrinsics(void) const;
 
-    virtual bool readFromYamlFile(const std::string &filename) = 0;
-    virtual void writeToYamlFile(const std::string &filename) const = 0;
+    virtual bool setParams(const std::vector<double> &params) = 0;
 
   protected:
     ModelType model_type_;
@@ -106,15 +104,6 @@ public
                           float fy = -1.0f, cv::Size imageSize = cv::Size(0, 0),
                           float cx = -1.0f, float cy = -1.0f,
                           cv::Mat rmat = cv::Mat::eye(3, 3, CV_32F)) const = 0;
-
-  virtual int parameterCount(void) const = 0;
-
-  virtual void readParameters(const std::vector<double> &parameters) = 0;
-  virtual void writeParameters(std::vector<double> &parameters) const = 0;
-
-  virtual void writeParametersToYamlFile(const std::string &filename) const = 0;
-
-  virtual std::string parametersToString(void) const = 0;
 
   /// @brief calculates the reprojection distance between points
   /// @param P1
