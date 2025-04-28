@@ -5,10 +5,7 @@ namespace sensor_lab {
 using namespace std;
 using namespace Eigen;
 
-FeatureTracker::FeatureTracker() {
-  image_rows = 480;
-  image_cols = 752;
-}
+FeatureTracker::FeatureTracker() { max_corners_count_ = 200; }
 
 FeatureTracker::~FeatureTracker() {}
 
@@ -34,6 +31,7 @@ void FeatureTracker::readImage(const cv::Mat &_img, double _cur_time) {
   if (cur_pts.size() > 0) {
     vector<uchar> status;
     vector<float> err;
+    // 对两帧各自的特征点 cur_pts forw_pts 进行稀疏光流计算
     cv::calcOpticalFlowPyrLK(cur_img, forw_img, cur_pts, forw_pts, status, err,
                              cv::Size(21, 21), 3);
 
@@ -51,7 +49,7 @@ void FeatureTracker::readImage(const cv::Mat &_img, double _cur_time) {
 
   rejectWithF();
   setMask();
-  int n_max_cnt = 200 - static_cast<int>(forw_pts.size());
+  int n_max_cnt = max_corners_count_ - static_cast<int>(forw_pts.size());
   if (n_max_cnt > 0) {
     if (mask.empty())
       cout << "mask is empty " << endl;
@@ -59,8 +57,10 @@ void FeatureTracker::readImage(const cv::Mat &_img, double _cur_time) {
       cout << "mask type wrong " << endl;
     if (mask.size() != forw_img.size())
       cout << "wrong size " << endl;
-    cv::goodFeaturesToTrack(forw_img, n_pts, 200 - forw_pts.size(), 0.01, 20,
-                            mask);
+
+    // 检测 shi-tomas 角点
+    cv::goodFeaturesToTrack(
+        forw_img, n_pts, max_corners_count_ - forw_pts.size(), 0.01, 20, mask);
   } else {
     n_pts.clear();
   }
@@ -114,131 +114,53 @@ void FeatureTracker::setMask() {
   }
 }
 
-void FeatureTracker::rejectWithF() {}
+void FeatureTracker::rejectWithF() {
+  if (forw_pts.size() >= 8) {
+    TicToc t_f;
+    vector<cv::Point2f> un_cur_pts(cur_pts.size());
+    vector<cv::Point2f> un_forw_pts(forw_pts.size());
 
-void FeatureTracker::liftProjective(const Eigen::Vector2d &p,
-                                    Eigen::Vector3d &P) {
-  double mx_d, my_d, mx2_d, mxy_d, my2_d, mx_u, my_u;
-  double rho2_d, rho4_d, radDist_d, Dx_d, Dy_d, inv_denom_d;
+    for (unsigned int i = 0; i < cur_pts.size(); i++) {
+      // 分别将 cur_pts 与 forw_pts 中的对应点对转到像素坐标系
+      Eigen::Vector3d tmp_p;
+      camera_ptr_->liftProjective(Eigen::Vector2d(cur_pts[i].x, cur_pts[i].y),
+                                  tmp_p);
+      tmp_p.x() = camera_ptr_->getParameters().focal() * tmp_p.x() / tmp_p.z() +
+                  camera_ptr_->imageWidth() / 2.0;
+      tmp_p.y() = camera_ptr_->getParameters().focal() * tmp_p.y() / tmp_p.z() +
+                  camera_ptr_->imageHeight() / 2.0;
+      un_cur_pts[i] = cv::Point2f(tmp_p.x(), tmp_p.y());
 
-  // Lift points to normalised plane
-  mx_d = camera_K[0] * p(0) + camera_K[2];
-  my_d = camera_K[1] * p(1) + camera_K[3];
+      camera_ptr_->liftProjective(Eigen::Vector2d(forw_pts[i].x, forw_pts[i].y),
+                                  tmp_p);
+      tmp_p.x() = camera_ptr_->getParameters().focal() * tmp_p.x() / tmp_p.z() +
+                  camera_ptr_->imageWidth() / 2.0;
+      tmp_p.y() = camera_ptr_->getParameters().focal() * tmp_p.y() / tmp_p.z() +
+                  camera_ptr_->imageHeight() / 2.0;
+      un_forw_pts[i] = cv::Point2f(tmp_p.x(), tmp_p.y());
+    }
 
-  // 无畸变
-  // mx_u = mx_d;
-  // my_u = my_d;
+    // 应用到对极约束
+    vector<uchar> status;
+    cv::findFundamentalMat(un_cur_pts, un_forw_pts, cv::FM_RANSAC, 1.0, 0.99,
+                           status);
+    int size_a = cur_pts.size();
 
-  // 传统多项式畸变
-  if (0) {
-    double k1 = distortion_param[0];
-    double k2 = distortion_param[1];
-    double p1 = distortion_param[3];
-    double p2 = distortion_param[4];
+    reduceVector(prev_pts, status);
+    reduceVector(cur_pts, status);
+    reduceVector(forw_pts, status);
+    reduceVector(cur_un_pts, status);
+    reduceVector(ids, status);
+    reduceVector(track_cnt, status);
 
-    // Apply inverse distortion model
-    // proposed by Heikkila
-    mx2_d = mx_d * mx_d;
-    my2_d = my_d * my_d;
-    mxy_d = mx_d * my_d;
-    rho2_d = mx2_d + my2_d;
-    rho4_d = rho2_d * rho2_d;
-    radDist_d = k1 * rho2_d + k2 * rho4_d;
-    Dx_d = mx_d * radDist_d + p2 * (rho2_d + 2 * mx2_d) + 2 * p1 * mxy_d;
-    Dy_d = my_d * radDist_d + p1 * (rho2_d + 2 * my2_d) + 2 * p2 * mxy_d;
-    inv_denom_d = 1 / (1 + 4 * k1 * rho2_d + 6 * k2 * rho4_d + 8 * p1 * my_d +
-                       8 * p2 * mx_d);
+    double check_rate = 1.0 * forw_pts.size() / size_a;
 
-    // 逆向畸变矫正，计算出归一化平面坐标
-    mx_u = mx_d - inv_denom_d * Dx_d;
-    my_u = my_d - inv_denom_d * Dy_d;
-  } else {
-    // 迭代畸变矫正
-    int n = 6;
-    Eigen::Vector2d d_u;
-    distortion(Eigen::Vector2d(mx_d, my_d), d_u);
-    // Approximate value
-    mx_u = mx_d - d_u(0);
-    my_u = my_d - d_u(1);
-
-    for (int i = 1; i < n; ++i) {
-      distortion(Eigen::Vector2d(mx_u, my_u), d_u);
-      mx_u = mx_d - d_u(0);
-      my_u = my_d - d_u(1);
+    if (check_rate <= 0.9) {
+      std::cout << "FM ransac: " << size_a << " -> " << forw_pts.size() << ": "
+                << 1.0 * forw_pts.size() / size_a << std::endl;
+      std::cout << "FM ransac costs: " << t_f.toc() << "ms" << std::endl;
     }
   }
-
-  // Obtain a projective ray
-  // double xi = mParameters.xi();
-  double xi = 1.0;
-  if (xi == 1.0) // 等距投影,作为深度
-  {
-    P << mx_u, my_u, (1.0 - mx_u * mx_u - my_u * my_u) / 2.0;
-  } else // 折反射投影，作为深度
-  {
-    // Reuse variable
-    rho2_d = mx_u * mx_u + my_u * my_u;
-    P << mx_u, my_u,
-        1.0 - xi * (rho2_d + 1.0) / (xi + sqrt(1.0 + (1.0 - xi * xi) * rho2_d));
-  }
-}
-
-void FeatureTracker::setDistortionParams(const vector<double> &params) {
-  distortion_param = params;
-}
-
-void FeatureTracker::setCameraKMatrix(const vector<double> &camera_k) {
-  camera_K = camera_k;
-}
-
-void FeatureTracker::undistortionDistortion(const Eigen::Vector2d &p_u,
-                                            Eigen::Vector2d &d_u,
-                                            Eigen::Matrix2d &J) {
-  double k1 = distortion_param[0];
-  double k2 = distortion_param[1];
-  double p1 = distortion_param[3];
-  double p2 = distortion_param[4];
-
-  double mx2_u, my2_u, mxy_u, rho2_u, rad_dist_u;
-
-  mx2_u = p_u(0) * p_u(0);
-  my2_u = p_u(1) * p_u(1);
-  mxy_u = p_u(0) * p_u(1);
-  rho2_u = mx2_u + my2_u;
-  rad_dist_u = k1 * rho2_u + k2 * rho2_u * rho2_u;
-  d_u << p_u(0) * rad_dist_u + 2.0 * p1 * mxy_u + p2 * (rho2_u + 2.0 * mx2_u),
-      p_u(1) * rad_dist_u + 2.0 * p2 * mxy_u + p1 * (rho2_u + 2.0 * my2_u);
-
-  double dxdmx = 1.0 + rad_dist_u + k1 * 2.0 * mx2_u +
-                 k2 * rho2_u * 4.0 * mx2_u + 2.0 * p1 * p_u(1) +
-                 6.0 * p2 * p_u(0);
-  double dydmx = k1 * 2.0 * p_u(0) * p_u(1) +
-                 k2 * 4.0 * rho2_u * p_u(0) * p_u(1) + p1 * 2.0 * p_u(0) +
-                 2.0 * p2 * p_u(1);
-  double dxdmy = dydmx;
-  double dydmy = 1.0 + rad_dist_u + k1 * 2.0 * my2_u +
-                 k2 * rho2_u * 4.0 * my2_u + 6.0 * p1 * p_u(1) +
-                 2.0 * p2 * p_u(0);
-
-  J << dxdmx, dxdmy, dydmx, dydmy;
-}
-
-void FeatureTracker::distortion(const Eigen::Vector2d &p_u,
-                                Eigen::Vector2d &d_u) const {
-  double k1 = distortion_param[0];
-  double k2 = distortion_param[1];
-  double p1 = distortion_param[3];
-  double p2 = distortion_param[4];
-
-  double mx2_u, my2_u, mxy_u, rho2_u, rad_dist_u;
-
-  mx2_u = p_u(0) * p_u(0);
-  my2_u = p_u(1) * p_u(1);
-  mxy_u = p_u(0) * p_u(1);
-  rho2_u = mx2_u + my2_u;
-  rad_dist_u = k1 * rho2_u + k2 * rho2_u * rho2_u;
-  d_u << p_u(0) * rad_dist_u + 2.0 * p1 * mxy_u + p2 * (rho2_u + 2.0 * mx2_u),
-      p_u(1) * rad_dist_u + 2.0 * p2 * mxy_u + p1 * (rho2_u + 2.0 * my2_u);
 }
 
 void FeatureTracker::undistortedPoints() {
@@ -248,7 +170,7 @@ void FeatureTracker::undistortedPoints() {
   for (unsigned int i = 0; i < cur_pts.size(); i++) {
     Eigen::Vector2d a(cur_pts[i].x, cur_pts[i].y);
     Eigen::Vector3d b;
-    liftProjective(a, b);
+    camera_ptr_->liftProjective(a, b);
     cur_un_pts.push_back(cv::Point2f(b.x() / b.z(), b.y() / b.z()));
     cur_un_pts_map.insert(
         make_pair(ids[i], cv::Point2f(b.x() / b.z(), b.y() / b.z())));
@@ -296,6 +218,16 @@ void FeatureTracker::reduceVector(vector<cv::Point2f> &v,
     if (status[i])
       v[j++] = v[i];
   v.resize(j);
+}
+
+void FeatureTracker::setMaxCornersCount(int max_corners_count) {
+  max_corners_count_ = max_corners_count;
+}
+
+void FeatureTracker::setCamera(sensor_lab::PinholeCameraPtr camera_ptr) {
+  camera_ptr_ = camera_ptr;
+  image_rows = camera_ptr_->imageHeight();
+  image_cols = camera_ptr_->imageWidth();
 }
 
 } // namespace sensor_lab

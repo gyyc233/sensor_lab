@@ -6,6 +6,8 @@
 #include <iostream>
 #include <queue>
 
+#include "pinhole_camera.h"
+#include "tic_toc.h"
 #include <eigen3/Eigen/Dense>
 #include <opencv2/opencv.hpp>
 
@@ -31,31 +33,6 @@ public:
 
   void addPoints();
 
-  /// @brief set camera distortion params
-  /// @param params [k1,k2,k3,p1,p2]
-  void setDistortionParams(const vector<double> &params);
-
-  /// @brief set camera intrinsic matrix
-  /// @param camera_k [f_x,f_y,c_x,x_y]
-  void setCameraKMatrix(const vector<double> &camera_k);
-
-  /// @brief 将2D图像像素坐标 p 转换为3D归一化射线向量 P（单位球面上的方向向量）
-  /// @param p image coordinates
-  /// @param P coordinates of the projective ray
-  void liftProjective(const Eigen::Vector2d &p, Eigen::Vector3d &P);
-
-  /// @brief 将畸变应用于归一化平面坐标b并计算jacobian
-  /// @param p_u 归一化平面坐标x
-  /// @param d_u 归一化平面坐标y
-  /// @param J
-  void undistortionDistortion(const Eigen::Vector2d &p_u, Eigen::Vector2d &d_u,
-                              Eigen::Matrix2d &J);
-
-  /// @brief Apply distortion to input point (from the normalised plane)
-  /// @param p_u
-  /// @param d_u
-  void distortion(const Eigen::Vector2d &p_u, Eigen::Vector2d &d_u) const;
-
   /// @brief 计算特征点速度
   void undistortedPoints();
 
@@ -65,6 +42,12 @@ public:
   void reduceVector(vector<int> &v, vector<uchar> status);
 
   void reduceVector(vector<cv::Point2f> &v, vector<uchar> status);
+
+  /// @brief set max feature points number
+  /// @param max_corners_count
+  void setMaxCornersCount(int max_corners_count);
+
+  void setCamera(sensor_lab::PinholeCameraPtr camera_ptr);
 
   vector<cv::Point2f> n_pts;
   vector<cv::Point2f> prev_pts, cur_pts, forw_pts; // 像素坐标
@@ -85,9 +68,9 @@ public:
   cv::Mat mask; // 特征检测掩码，控制特征检测区域（避免在边缘或无效区域检测）
   int image_rows;
   int image_cols;
+  int max_corners_count_;
 
-  vector<double> distortion_param; // [k1,k2,k3,p1,p2]
-  vector<double> camera_K;         // [f_x,f_y,c_x,x_y]
+  sensor_lab::PinholeCameraPtr camera_ptr_;
 };
 
 } // namespace sensor_lab

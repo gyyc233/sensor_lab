@@ -105,6 +105,8 @@ public:
                           float cx = -1.0f, float cy = -1.0f,
                           cv::Mat rmat = cv::Mat::eye(3, 3, CV_32F)) const = 0;
 
+  virtual const Parameters &getParameters(void) const = 0;
+
   /// @brief calculates the reprojection distance between points
   /// @param P1
   /// @param P2

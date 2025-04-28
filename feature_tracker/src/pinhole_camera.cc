@@ -10,14 +10,14 @@
 namespace sensor_lab {
 PinholeCamera::Parameters::Parameters()
     : Camera::Parameters(PINHOLE), k1_(0.0), k2_(0.0), p1_(0.0), p2_(0.0),
-      fx_(0.0), fy_(0.0), cx_(0.0), cy_(0.0) {}
+      fx_(0.0), fy_(0.0), cx_(0.0), cy_(0.0), focal_(0.0) {}
 
 PinholeCamera::Parameters::Parameters(const std::string &cameraName, int w,
                                       int h, double k1, double k2, double p1,
                                       double p2, double fx, double fy,
-                                      double cx, double cy)
+                                      double cx, double cy, double focal)
     : Camera::Parameters(PINHOLE, cameraName, w, h), k1_(k1), k2_(k2), p1_(p1),
-      p2_(p2), fx_(fx), fy_(fy), cx_(cx), cy_(cy) {}
+      p2_(p2), fx_(fx), fy_(fy), cx_(cx), cy_(cy), focal_(focal) {}
 
 double &PinholeCamera::Parameters::k1(void) { return k1_; }
 
@@ -35,6 +35,8 @@ double &PinholeCamera::Parameters::cx(void) { return cx_; }
 
 double &PinholeCamera::Parameters::cy(void) { return cy_; }
 
+double &PinholeCamera::Parameters::focal(void) { return focal_; }
+
 double PinholeCamera::Parameters::k1(void) const { return k1_; }
 
 double PinholeCamera::Parameters::k2(void) const { return k2_; }
@@ -51,6 +53,8 @@ double PinholeCamera::Parameters::cx(void) const { return cx_; }
 
 double PinholeCamera::Parameters::cy(void) const { return cy_; }
 
+double PinholeCamera::Parameters::focal(void) const { return focal_; }
+
 bool PinholeCamera::Parameters::setParams(const std::vector<double> &params) {
   k1_ = params[0];
   k2_ = params[1];
@@ -61,6 +65,7 @@ bool PinholeCamera::Parameters::setParams(const std::vector<double> &params) {
   fy_ = params[5];
   cx_ = params[6];
   cy_ = params[7];
+  focal_ = params[8];
 
   return true;
 }
@@ -82,6 +87,7 @@ operator=(const Parameters &other) {
     fy_ = other.fy_;
     cx_ = other.cx_;
     cy_ = other.cy_;
+    focal_ = other.focal_;
   }
 
   return *this;
@@ -109,7 +115,8 @@ std::ostream &operator<<(std::ostream &out,
   out << "            fx " << params.fx_ << std::endl
       << "            fy " << params.fy_ << std::endl
       << "            cx " << params.cx_ << std::endl
-      << "            cy " << params.cy_ << std::endl;
+      << "            cy " << params.cy_ << std::endl
+      << "      focal " << params.focal_ << std::endl;
 
   return out;
 }
@@ -121,9 +128,9 @@ PinholeCamera::PinholeCamera()
 PinholeCamera::PinholeCamera(const std::string &camera_name, int image_width,
                              int image_height, double k1, double k2, double p1,
                              double p2, double fx, double fy, double cx,
-                             double cy)
+                             double cy, double focal)
     : parameters_(camera_name, image_width, image_height, k1, k2, p1, p2, fx,
-                  fy, cx, cy) {
+                  fy, cx, cy, focal) {
   if ((parameters_.k1() == 0.0) && (parameters_.k2() == 0.0) &&
       (parameters_.p1() == 0.0) && (parameters_.p2() == 0.0)) {
     no_distortion_ = true;

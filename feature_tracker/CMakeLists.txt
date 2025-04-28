@@ -40,7 +40,7 @@ target_include_directories(feature_tracker PUBLIC include)
 target_link_libraries(feature_tracker feature_tracker_camera)
 
 add_executable(check_rosbag_images test/check_rosbag_images.cc ${PROJECT_SOURCE_DIR}/common/navigation_and_mapping/io_utils.cc)
-target_link_libraries(check_rosbag_images ${OpenCV_LIBS} ${PCL_LIBRARIES} ${Sophus_LIBRARIES} ${catkin_LIBRARIES} glog::glog gflags yaml-cpp feature_tracker)
+target_link_libraries(check_rosbag_images feature_tracker_camera feature_tracker)
 
 # INSTALL
 install(

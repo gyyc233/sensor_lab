@@ -17,7 +17,7 @@ public:
     Parameters();
     Parameters(const std::string &cameraName, int w, int h, double k1,
                double k2, double p1, double p2, double fx, double fy, double cx,
-               double cy);
+               double cy, double focal);
 
     double &k1(void);
     double &k2(void);
@@ -27,6 +27,7 @@ public:
     double &fy(void);
     double &cx(void);
     double &cy(void);
+    double &focal(void);
 
     double xi(void) const;
     double k1(void) const;
@@ -37,9 +38,10 @@ public:
     double fy(void) const;
     double cx(void) const;
     double cy(void) const;
+    double focal(void) const;
 
     /// @brief
-    /// @param params [k1,k2,p1,p2,fx,fy,cx,cy]
+    /// @param params [k1,k2,p1,p2,fx,fy,cx,cy,focal]
     /// @return
     virtual bool setParams(const std::vector<double> &params);
 
@@ -56,6 +58,7 @@ public:
     double fy_;
     double cx_;
     double cy_;
+    double focal_;
   };
 
   PinholeCamera();
@@ -65,7 +68,7 @@ public:
    */
   PinholeCamera(const std::string &cameraName, int imageWidth, int imageHeight,
                 double k1, double k2, double p1, double p2, double fx,
-                double fy, double cx, double cy);
+                double fy, double cx, double cy, double focal);
 
   PinholeCamera(const Parameters &params);
 
@@ -134,6 +137,9 @@ private:
       inv_K23_; // 用于计算[u,v] -> camera point
   bool no_distortion_;
 };
+
+typedef std::shared_ptr<PinholeCamera> PinholeCameraPtr;
+typedef std::shared_ptr<const PinholeCamera> PinholeCameraConstPtr;
 
 } // namespace sensor_lab
 
