@@ -34,12 +34,13 @@ just for fun
 - Ubuntu 20.04 (virtual machine); ROS noetic
 - C++14; OpenCV 4.2.0; Eigen 3.3.7; PCL 1.10.0
 - Sophus, commit SHA `a621ff` [local build](./task/local_build_sophus.md), support SO(3) and SE(3) operator
-- glog; gflags; gtest build gtest and `sudo cp libgtest*.a /usr/local/lib`
-- Ceres 1.12.0, deal with complicated non-linear optimization problems like Bundle Adjustment
-- G2O, like Ceres
+- glog(release version); gflags; gtest build gtest and `sudo cp libgtest*.a /usr/local/lib`
+- Ceres v2.2.0, deal with complicated non-linear optimization problems like Bundle Adjustment
+- G2O `checkout ff647bd`, like Ceres
 - DBoW3, images loop closure
 - gtsam 4.2.0, optimize library
-- Pangolin, installed but rarely used
+- Pangolin `branch:v0.9` installed but rarely used
+- octomap a 3D occupancy grid mapping approach
 - Python 3.8.10. I use the features of `matplotlibcpp` and run some python scripts
 - yaml-cpp use .yaml
 
