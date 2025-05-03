@@ -30,6 +30,12 @@
 ### 运行环境与依赖
 
 - Ubuntu 20.04 (virtual machine); ROS noetic
+- add below ros messages library and don't forget `source source /opt/ros/noetic/setup.bash`
+
+```bash
+sudo apt install ros-noetic-cv-bridge ros-noetic-image-transport ros-noetic-roscpp ros-noetic-rospy ros-noetic-rosbag ros-noetic-std-msgs ros-noetic-sensor-msgs ros-noetic-pcl-ros ros-noetic-pcl-conversions ros-noetic-geometry-msgs
+```
+
 - C++14; OpenCV 4.2.0; Eigen 3.3.7; PCL 1.10.0
 - Sophus, commit SHA `a621ff` [local build](./task/local_build_sophus.md), support SO(3) and SE(3) operator
 - glog(release version); gflags; gtest build gtest and `sudo cp libgtest*.a /usr/local/lib`
