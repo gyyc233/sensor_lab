@@ -95,7 +95,7 @@ int recoverPose(InputArray E, InputArray _points1, InputArray _points2,
   P4(Range::all(), Range(0, 3)) = R2 * 1.0;
   P4.col(3) = -t * 1.0;
 
-  // Do the cheirality check.
+  // Do the cheirality check. 手性检查
   // Notice here a threshold dist is used to filter
   // out far away points (i.e. infinite points) since
   // there depth may vary between postive and negtive.
