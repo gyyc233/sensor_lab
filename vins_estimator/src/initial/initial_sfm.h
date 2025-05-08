@@ -76,7 +76,7 @@ public:
   GlobalSFM();
   ~GlobalSFM();
 
-  /// @brief 在初始化阶段完成 运动恢复结构的任务
+  /// @brief 在初始化阶段完成 运动恢复结构 SFM 任务
   /// @note
   /// 从滑动窗口中的多个图像帧及其特征点观测中，联合估计相机位姿和稀疏三维地图点
   /// @param frame_num 当前滑动窗口中的帧数
