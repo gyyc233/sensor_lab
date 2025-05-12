@@ -1,11 +1,15 @@
 #ifndef VINS_ESTIMATOR_PARAMETERS
 #define VINS_ESTIMATOR_PARAMETERS
 
+#ifndef ROS_CATKIN
+#define ROS_CATKIN
+
 #include "utility/utility.h"
 #include <eigen3/Eigen/Dense>
 #include <fstream>
 #include <opencv2/core/eigen.hpp>
 #include <opencv2/opencv.hpp>
+#include <ros/ros.h>
 #include <vector>
 
 namespace sensor_lab {
@@ -72,4 +76,5 @@ enum NoiseOrder {
 
 } // namespace sensor_lab
 
+#endif
 #endif
