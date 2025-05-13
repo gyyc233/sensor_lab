@@ -5,7 +5,7 @@
             "name": "(gdb) Launch",
             "type": "cppdbg",
             "request": "launch",
-            "program": "${workspaceFolder}/build/lidar_3d/icp_3d_test",
+            "program": "${workspaceFolder}/build/feature_tracker/check_rosbag_images",
             "args": [],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}/build",

@@ -47,6 +47,9 @@ void FeatureTracker::readImage(const cv::Mat &_img, double _cur_time) {
     reduceVector(track_cnt, status);
   }
 
+  for (auto &n : track_cnt)
+    n++;
+
   rejectWithF();
   setMask();
   int n_max_cnt = max_corners_count_ - static_cast<int>(forw_pts.size());
