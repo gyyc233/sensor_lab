@@ -87,26 +87,30 @@ int main(int argc, char **argv) {
               feature_tracker_ptr->readImage(ptr->image,
                                              img_msg->header.stamp.toSec());
 
-              // vis
+              for (unsigned int i = 0;; i++) {
+                bool completed = false;
+                for (int j = 0; j < num_of_camera; j++)
+                  completed |= feature_tracker_ptr->updateID(
+                      i); // |= 按位或运算并进行赋值
+
+                if (!completed)
+                  break;
+              }
+
+              ptr =
+                  cv_bridge::cvtColor(ptr, sensor_msgs::image_encodings::BGR8);
+              cv::Mat show_img = ptr->image;
+              for (unsigned int j = 0; j < feature_tracker_ptr->cur_pts.size();
+                   j++) {
+                cv::circle(show_img, feature_tracker_ptr->cur_pts[j], 2,
+                           cv::Scalar(255, 0, 255), 2);
+              }
               if (cv_vis) {
-                ptr = cv_bridge::cvtColor(ptr,
-                                          sensor_msgs::image_encodings::BGR8);
-                cv::Mat show_img = ptr->image;
-                for (unsigned int j = 0;
-                     j < feature_tracker_ptr->cur_pts.size(); j++) {
-                  cv::circle(show_img, feature_tracker_ptr->cur_pts[j], 2,
-                             cv::Scalar(255, 0, 255), 2);
-                }
                 cv::imshow("vis", show_img);
                 cv::waitKey(5);
               }
 
 #ifdef ROS_CATKIN
-
-              ptr =
-                  cv_bridge::cvtColor(ptr, sensor_msgs::image_encodings::BGR8);
-              pub_match.publish(ptr->toImageMsg());
-
               sensor_msgs::PointCloudPtr feature_points(
                   new sensor_msgs::PointCloud);
               sensor_msgs::ChannelFloat32 id_of_point;
@@ -140,6 +144,16 @@ int main(int argc, char **argv) {
                   v_of_point.values.push_back(cur_pts[j].y);
                   velocity_x_of_point.values.push_back(pts_velocity[j].x);
                   velocity_y_of_point.values.push_back(pts_velocity[j].y);
+
+                  std::cout << "p: " << p << std::endl;
+                  std::cout << "p_id * num_of_camera + 0: "
+                            << p_id * num_of_camera + 0 << std::endl;
+                  std::cout << "u_of_point: " << cur_pts[j].x << std::endl;
+                  std::cout << "u_of_point: " << cur_pts[j].y << std::endl;
+                  std::cout << "velocity_x_of_point: " << pts_velocity[j].x
+                            << std::endl;
+                  std::cout << "velocity_x_of_point: " << pts_velocity[j].y
+                            << std::endl;
                 }
               }
 
@@ -148,13 +162,13 @@ int main(int argc, char **argv) {
               feature_points->channels.push_back(v_of_point);
               feature_points->channels.push_back(velocity_x_of_point);
               feature_points->channels.push_back(velocity_y_of_point);
-              std::cout << "publish: " << feature_points->header.stamp.toSec()
-                        << "at: " << ros::Time::now().toSec() << std::endl;
 
               if (!init_pub) {
                 init_pub = 1;
               } else
                 pub_img.publish(feature_points);
+
+              pub_match.publish(ptr->toImageMsg());
 
 #endif
             }

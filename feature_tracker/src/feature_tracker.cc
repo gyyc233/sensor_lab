@@ -5,6 +5,8 @@ namespace sensor_lab {
 using namespace std;
 using namespace Eigen;
 
+int FeatureTracker::n_id = 0;
+
 FeatureTracker::FeatureTracker() { max_corners_count_ = 200; }
 
 FeatureTracker::~FeatureTracker() {}
@@ -231,6 +233,15 @@ void FeatureTracker::setCamera(sensor_lab::PinholeCameraPtr camera_ptr) {
   camera_ptr_ = camera_ptr;
   image_rows = camera_ptr_->imageHeight();
   image_cols = camera_ptr_->imageWidth();
+}
+
+bool FeatureTracker::updateID(unsigned int i) {
+  if (i < ids.size()) {
+    if (ids[i] == -1)
+      ids[i] = n_id++;
+    return true;
+  } else
+    return false;
 }
 
 } // namespace sensor_lab

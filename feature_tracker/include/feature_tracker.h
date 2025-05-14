@@ -49,6 +49,11 @@ public:
 
   void setCamera(sensor_lab::PinholeCameraPtr camera_ptr);
 
+  /// @brief 为特征点分配唯一的 ID
+  /// @param i 当前要处理的特征点在其对应的特征列表中的索引
+  /// @return
+  bool updateID(unsigned int i);
+
   vector<cv::Point2f> n_pts;
   vector<cv::Point2f> prev_pts, cur_pts, forw_pts; // 像素坐标
   vector<cv::Point2f> prev_un_pts, cur_un_pts;     // 去畸变归一化坐标
@@ -71,6 +76,8 @@ public:
   int max_corners_count_;
 
   sensor_lab::PinholeCameraPtr camera_ptr_;
+
+  static int n_id; // 生成特征点id
 };
 
 } // namespace sensor_lab
