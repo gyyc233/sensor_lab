@@ -7,6 +7,8 @@
 #include <opencv2/opencv.hpp>
 
 #ifdef ROS_CATKIN
+#include <geometry_msgs/Quaternion.h>
+#include <geometry_msgs/Vector3.h>
 #include <message_filters/subscriber.h>
 #include <ros/ros.h>
 #include <sensor_msgs/Image.h>
@@ -20,7 +22,8 @@
 
 int main(int argc, char **argv) {
   std::string bag_path = "./data/feature_tracker/V2_01_easy.bag";
-  std::string topic = "/cam0/image_raw";
+  std::string image_topic = "/cam0/image_raw";
+  std::string imu_topic = "/imu";
   std::string dataset_type = "IMAGES";
 
   sad::RosbagIO rosbag_io(bag_path, sad::Str2DatasetType(dataset_type));
@@ -33,7 +36,7 @@ int main(int argc, char **argv) {
                                            -1.578e-04};
 
   sensor_lab::PinholeCamera::Parameters camera_params(
-      topic, 752, 480, distortion_params[0], distortion_params[1],
+      image_topic, 752, 480, distortion_params[0], distortion_params[1],
       distortion_params[3], distortion_params[4], camera_intrinsics[0],
       camera_intrinsics[1], camera_intrinsics[2], camera_intrinsics[3],
       camera_intrinsics[4]);
@@ -52,6 +55,7 @@ int main(int argc, char **argv) {
 
 #ifdef ROS_CATKIN
   ros::Publisher pub_img, pub_match;
+  ros::Publisher pub_imu;
   ros::Publisher pub_restart;
   bool init_pub = 0;
 
@@ -61,11 +65,33 @@ int main(int argc, char **argv) {
                                  ros::console::levels::Info);
   pub_img = n.advertise<sensor_msgs::PointCloud>("feature", 1000);
   pub_match = n.advertise<sensor_msgs::Image>("feature_img", 1000);
+  pub_imu = n.advertise<sensor_msgs::Imu>("imu0", 1000);
 #endif
 
   rosbag_io
+      .AddImuHandle([&](IMUPtr imu_msg) -> bool {
+        sensor_msgs::Imu imu_data_frame;
+        imu_data_frame.header.stamp = ros::Time::now();
+        imu_data_frame.header.frame_id = "imu4";
+
+        imu_data_frame.orientation.w = 1.0;
+        imu_data_frame.orientation.x = 0.0;
+        imu_data_frame.orientation.y = 0.0;
+        imu_data_frame.orientation.z = 0.0;
+
+        imu_data_frame.angular_velocity.x = imu_msg->gyro_.x();
+        imu_data_frame.angular_velocity.y = imu_msg->gyro_.y();
+        imu_data_frame.angular_velocity.z = imu_msg->gyro_.z();
+
+        imu_data_frame.linear_acceleration.x = imu_msg->acce_.x();
+        imu_data_frame.linear_acceleration.y = imu_msg->acce_.y();
+        imu_data_frame.linear_acceleration.z = imu_msg->acce_.z();
+
+        pub_imu.publish(imu_data_frame);
+        return true;
+      })
       .AddImageHandle(
-          topic,
+          image_topic,
           [&](const sensor_msgs::Image::Ptr &img_msg) -> bool {
             if (img_msg != nullptr) {
               cv_bridge::CvImageConstPtr ptr;
@@ -119,7 +145,7 @@ int main(int argc, char **argv) {
               sensor_msgs::ChannelFloat32 velocity_x_of_point;
               sensor_msgs::ChannelFloat32 velocity_y_of_point;
 
-              feature_points->header = img_msg->header;
+              feature_points->header.stamp = ros::Time::now();
               feature_points->header.frame_id = "world";
 
               std::vector<std::set<int>> hash_ids(num_of_camera);

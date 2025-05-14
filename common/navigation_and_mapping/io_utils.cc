@@ -120,6 +120,9 @@ std::string RosbagIO::GetIMUTopicName() const {
     return wxb_imu_topic;
   } else if (dataset_type_ == DatasetType::AVIA) {
     return avia_imu_topic;
+  } else if (dataset_type_ == DatasetType::VINS_MONO ||
+             dataset_type_ == DatasetType::IMAGES) {
+    return vins_mono_imu_topic;
   } else {
     LOG(ERROR) << "cannot load imu topic name of dataset "
                << int(dataset_type_);

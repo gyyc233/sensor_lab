@@ -18,6 +18,7 @@ enum class DatasetType {
   AVIA = 5,   // https://epan-utbm.github.io/utbm_robocar_dataset/
   WXB_3D = 6, // 3d wxb
   IMAGES = 7,
+  VINS_MONO = 8, // 使用vins-mono相同rosbag
 };
 
 inline DatasetType Str2DatasetType(const std::string &name) {
@@ -42,6 +43,9 @@ inline DatasetType Str2DatasetType(const std::string &name) {
   if (name == "IMAGES") {
     return DatasetType::IMAGES;
   }
+  if (name == "VINS_MONO") {
+    return DatasetType::VINS_MONO;
+  }
 
   return DatasetType::UNKNOWN;
 }
@@ -59,6 +63,7 @@ const std::string utbm_imu_topic = "/imu/data";
 const std::string nclt_imu_topic = "imu_raw";
 const std::string wxb_imu_topic = "/ivsensorimu";
 const std::string avia_imu_topic = "/livox/imu";
+const std::string vins_mono_imu_topic = "/imu0";
 // const std::string wxb_lidar_topic = "/velodyne_packets_1";
 // const std::string utbm_lidar_topic = "/velodyne_points";
 
