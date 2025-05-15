@@ -105,7 +105,7 @@ public:
 
   ///@param x 根据输入的向量 x 更新特征点的深度值。这个输入向量 x
   ///通常来自于后端优化器的结果，其中包含了每个有效特征点的逆深度值（inverse
-  ///depth）
+  /// depth）
   void setDepth(const Eigen::VectorXd &x);
 
   // 移除深度求解失败的点
@@ -122,11 +122,19 @@ public:
   void triangulate(Eigen::Vector3d Ps[], Eigen::Vector3d tic[],
                    Eigen::Matrix3d ric[]);
 
-  // 滑动窗口：移除旧帧并调整深度
+  /// @brief 滑动窗口：移除旧帧，将3D点转到新参考帧下
+  /// @note 滑动窗口机制限制了历史帧数量,
+  /// 边缘化会把最老帧的状态从优化问题中移除,
+  /// 但某些特征点可能还存在于后续帧中，不能直接丢弃,
+  /// 将这些点更新到新参考帧下，避免重复三角化
+  /// @param marg_R 被边缘化的旧参考帧在world下的的旋转矩阵
+  /// @param marg_P 被边缘化的旧参考帧在world下的的平移向量
+  /// @param new_R 新参考帧的旋转矩阵
+  /// @param new_P 新参考帧的平移向量
   void removeBackShiftDepth(Eigen::Matrix3d marg_R, Eigen::Vector3d marg_P,
                             Eigen::Matrix3d new_R, Eigen::Vector3d new_P);
 
-  // 滑动窗口：仅移除旧帧
+  /// @brief 从滑动窗口中移除最老一帧对特征点的所有观测信息
   void removeBack();
 
   // 移除指定帧之前的观测
@@ -139,7 +147,10 @@ public:
   int last_track_num;              // 上一帧追踪到的特征点数量
 
 private:
-  // 计算补偿后的视差平方，用于判断是否可用于优化
+  /// @brief 计算特征点在倒数第二帧和倒数第三帧之间的视差
+  /// @param it_per_id 某个特征点在整个滑动窗口中的观测历史
+  /// @param frame_count 当前处理的是第几帧（即当前窗口中最新的帧号）
+  /// @return
   double compensatedParallax2(const FeaturePerId &it_per_id, int frame_count);
 
   const Eigen::Matrix3d *Rs;       // 每一帧中 IMU 的旋转矩阵
