@@ -51,9 +51,11 @@ public:
       const std_msgs::Header &header);
 
   /// @brief 设置重定位帧与匹配点，用于闭环或漂移矫正
-  /// @param _frame_stamp
-  /// @param _frame_index
-  /// @param _match_points
+  /// @note
+  /// 设置重定位帧的信息，以便在系统发生故障或需要回环检测时，能够基于已知地图信息进行相对位姿估计和漂移校正
+  /// @param _frame_stamp 重定位帧时间戳
+  /// @param _frame_index 重定位帧索引
+  /// @param _match_points 当前帧与历史帧之间的特征点匹配
   /// @param _relo_t
   /// @param _relo_r
   void setReloFrame(double _frame_stamp, int _frame_index,
@@ -71,10 +73,11 @@ public:
   /// @return
   bool visualInitialAlign();
 
-  /// @brief 计算两帧之间的相对位姿，用于滑动窗口管理
+  /// @brief 在滑动窗口中寻找一个参考帧（记为
+  /// i），该帧与最新帧（WINDOW_SIZE）之间具有足够的特征点对应关系和视差（parallax）
   /// @param relative_R
   /// @param relative_T
-  /// @param l
+  /// @param l 参考帧索引
   /// @return
   bool relativePose(Eigen::Matrix3d &relative_R, Eigen::Vector3d &relative_T,
                     int &l);
@@ -102,7 +105,7 @@ public:
 
   SolverFlag solver_flag;                   // 是否完成初始化
   MarginalizationFlag marginalization_flag; // 边缘化方式
-  Eigen::Vector3d g;
+  Eigen::Vector3d g;                        // 估计的重力向量
   Eigen::MatrixXd Ap[2], backup_A;
   Eigen::VectorXd bp[2], backup_b;
 
@@ -110,7 +113,8 @@ public:
   Eigen::Matrix3d ric[NUM_OF_CAM];
   Eigen::Vector3d tic[NUM_OF_CAM];
 
-  // 系统状态变量，关键帧对应imu参数
+  // 滑动窗口对应变量包含 WINDOW_SIZE
+  // 系统状态变量，每个图像帧对应的imu位姿，初始值由imu预积分传播的来
   Eigen::Vector3d Ps[(WINDOW_SIZE + 1)];
   Eigen::Vector3d Vs[(WINDOW_SIZE + 1)];
   Eigen::Matrix3d Rs[(WINDOW_SIZE + 1)];
@@ -122,7 +126,8 @@ public:
   Eigen::Vector3d back_P0, last_P, last_P0;
   std_msgs::Header Headers[(WINDOW_SIZE + 1)];
 
-  IntegrationBase *pre_integrations[(WINDOW_SIZE + 1)]; // imu预积分
+  // 每个图像帧对应的imu预积分结果
+  IntegrationBase *pre_integrations[(WINDOW_SIZE + 1)];
   Eigen::Vector3d acc_0; // 上一时刻线加速度
   Eigen::Vector3d gyr_0; // 上一时刻角速度
 
@@ -133,7 +138,10 @@ public:
   int frame_count; // 帧计数器
   int sum_of_outlier, sum_of_back, sum_of_front, sum_of_invalid;
 
-  FeatureManager f_manager; // 维护所有特征点的生命周期
+  // 管理所有特征点的生命周期和观测信息
+  // 包括每个特征点在哪些帧中被观测到、深度估计、是否失效
+  // 在滑动窗口优化中参与视觉重投影误差的构建
+  FeatureManager f_manager;
   MotionEstimator m_estimator;
   InitialEXRotation initial_ex_rotation;
 
@@ -147,12 +155,13 @@ public:
   double initial_timestamp;
 
   // 优化参数块
-  double para_Pose[WINDOW_SIZE + 1][SIZE_POSE];
-  double para_SpeedBias[WINDOW_SIZE + 1]
-                       [SIZE_SPEEDBIAS]; // 速度 加计bias 陀螺仪bias
+  double para_Pose[WINDOW_SIZE + 1][SIZE_POSE]; // [x,y,z,qx,qy,qz,qw]
+  double para_SpeedBias
+      [WINDOW_SIZE + 1]
+      [SIZE_SPEEDBIAS]; // [v_x,v_y,v_z,b_a_x,b_a_y,b_a_z,b_g_x,b_g_y,b_g_z]
   double para_Feature[NUM_OF_F][SIZE_FEATURE]; // 特征点逆深度或真实深度
   double para_Ex_Pose[NUM_OF_CAM]
-                     [SIZE_POSE]; // camera-imu extrinsic translation
+                     [SIZE_POSE]; // camera-imu extrinsic translation [tic, ric]
   double para_Retrive_Pose[SIZE_POSE];
   double para_Td[1][1]; // imu-camera 时间同步偏差
   double para_Tr[1][1];
@@ -162,7 +171,10 @@ public:
   MarginalizationInfo *last_marginalization_info; // 上一次边缘化信息
   std::vector<double *> last_marginalization_parameter_blocks;
 
-  std::map<double, ImageFrame> all_image_frame; // 图像帧缓存
+  // 图像帧缓存 key为时间戳, value 为 ImageFrame
+  // ImageFrame 包含 a. 特征点信息；b. 对应imu预积分器；c. 是否是关键帧；d.
+  // 当前帧相对参考帧的RT; e. 图像时间戳等
+  std::map<double, ImageFrame> all_image_frame;
   IntegrationBase *tmp_pre_integration;
 
   // relocalization variable 重定位相关
@@ -180,7 +192,6 @@ public:
   Eigen::Vector3d relo_relative_t;
   Eigen::Quaterniond relo_relative_q;
   double relo_relative_yaw;
-};
 } // namespace sensor_lab
 
 #endif

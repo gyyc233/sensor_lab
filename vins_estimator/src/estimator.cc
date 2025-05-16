@@ -242,7 +242,8 @@ void Estimator::processImage(
 }
 bool Estimator::initialStructure() {
   TicToc t_sfm;
-  // check imu observibility
+  // 1. check imu observibility
+  // 计算滑动窗口所有帧imu加速度均值方差
   {
     std::map<double, ImageFrame>::iterator frame_it;
     // 计算所有图像帧对应的 IMU 加速度均值
@@ -276,6 +277,8 @@ bool Estimator::initialStructure() {
     }
   }
 
+  // 2. 构建SFM特征点数据
+
   // global sfm
   // 保存每一帧的旋转和平移
   Eigen::Quaterniond Q[frame_count + 1];
@@ -298,19 +301,24 @@ bool Estimator::initialStructure() {
     sfm_f.push_back(tmp_feature);
   }
 
+  // 3. 寻找参考帧并计算相对位姿
   Eigen::Matrix3d relative_R;
   Eigen::Vector3d relative_T;
-  int l;
+  int l; // 参考帧索引
   // relativePose 寻找一对具有足够视差的关键帧，计算相对位姿以及参考帧索引l
+  // 在滑动窗口中寻找一对具有足够视差的关键帧
   if (!relativePose(relative_R, relative_T, l)) {
     ROS_INFO("Not enough features or parallax; Move device around");
     return false;
   }
 
+  // 4. 全局SFM初始化，计算特征点世界坐标
+
   // GlobalSFM::construct 完成全局 SFM 初始化，计算特征点空间坐标
   // frame_count + 1：当前帧数；Q, T：输出的帧姿态；l：参考帧索引；
   // relative_R, relative_T：参考帧间的相对位姿
-  // sfm_f：特征点观测；sfm_tracked_points：输出的特征点空间坐标
+  // sfm_f：特征点观测； sfm_tracked_points ：输出的特征点空间坐标
+  // 所有特征点的 3D 坐标存入 sfm_tracked_points
   GlobalSFM sfm;
   if (!sfm.construct(frame_count + 1, Q, T, l, relative_R, relative_T, sfm_f,
                      sfm_tracked_points)) {
@@ -320,14 +328,21 @@ bool Estimator::initialStructure() {
   }
 
   // solve pnp for all frame
+  // 为每帧图像计算其在世界坐标系下的相机位姿
+  // 对于关键帧，直接使用 SFM 的结果；
+  // 对于非关键帧，通过 PnP 求解器结合 SFM 构建的 3D 点云来估计相机位姿
   std::map<double, ImageFrame>::iterator frame_it;
   std::map<int, Eigen::Vector3d>::iterator it;
+  // 所有帧的初始姿态 [R, T] 存入 all_image_frame
   frame_it = all_image_frame.begin();
   for (int i = 0; frame_it != all_image_frame.end(); frame_it++) {
     // provide initial guess
     cv::Mat r, rvec, t, D, tmp_r;
     if ((frame_it->first) == Headers[i].stamp.toSec()) {
+      // 只有关键帧参与了SFM构造
       frame_it->second.is_key_frame = true;
+      // Q[i], T[i] 是 SFM 得到的参考帧下第 i 帧的旋转和平移
+      // 再转换到相机坐标系
       frame_it->second.R = Q[i].toRotationMatrix() * RIC[0].transpose();
       frame_it->second.T = T[i];
       i++;
@@ -336,6 +351,8 @@ bool Estimator::initialStructure() {
     if ((frame_it->first) > Headers[i].stamp.toSec()) {
       i++;
     }
+
+    // 基于 SFM 得到的关键帧位姿 Q[i], T[i]，构造当前非关键帧的初始猜测
     Eigen::Matrix3d R_inital = (Q[i].inverse()).toRotationMatrix();
     Eigen::Vector3d P_inital = -R_inital * T[i];
     cv::eigen2cv(R_inital, tmp_r);
@@ -343,12 +360,13 @@ bool Estimator::initialStructure() {
     cv::eigen2cv(P_inital, t);
 
     frame_it->second.is_key_frame = false;
-    vector<cv::Point3f> pts_3_vector;
-    vector<cv::Point2f> pts_2_vector;
+    std::vector<cv::Point3f> pts_3_vector;
+    std::vector<cv::Point2f> pts_2_vector;
     for (auto &id_pts : frame_it->second.points) {
       int feature_id = id_pts.first;
       for (auto &i_p : id_pts.second) {
         it = sfm_tracked_points.find(feature_id);
+        // 收集当前帧中特征点的3d空间坐标和2d坐标
         if (it != sfm_tracked_points.end()) {
           Eigen::Vector3d world_pts = it->second;
           cv::Point3f pts_3(world_pts(0), world_pts(1), world_pts(2));
@@ -359,6 +377,14 @@ bool Estimator::initialStructure() {
         }
       }
     }
+
+    // 5. PnP 为每帧求解相机位姿
+    // 对于 SFM 关键帧：直接使用 SFM 解出的位姿
+    // 对于非关键帧，使用 SFM 提供的 3D 点云和当前帧的 2D 特征点，使用 OpenCV 的
+    // solvePnP 求解相机位姿
+
+    // PNP求解当前帧位姿
+    // 假设内参已经归一化
     cv::Mat K = (cv::Mat_<double>(3, 3) << 1, 0, 0, 0, 1, 0, 0, 0, 1);
     if (pts_3_vector.size() < 6) {
       cout << "pts_3_vector size " << pts_3_vector.size() << endl;
@@ -379,6 +405,9 @@ bool Estimator::initialStructure() {
     frame_it->second.R = R_pnp * RIC[0].transpose();
     frame_it->second.T = T_pnp;
   }
+
+  // 6. 视觉与 IMU 对齐
+  // 此时滑动窗口内的帧都有合理的初始位姿，可以进行visual-imu initialization
   if (visualInitialAlign())
     return true;
   else {
@@ -386,4 +415,366 @@ bool Estimator::initialStructure() {
     return false;
   }
 }
+
+bool Estimator::visualInitialAlign() {
+  TicToc t_g;
+  Eigen::VectorXd x;
+  // solve scale
+  // 1. visual-imu alignment 陀螺仪零偏+重力向量优化+尺度因子+对齐到世界坐标系
+  bool result = VisualIMUAlignment(all_image_frame, Bgs, g, x);
+  if (!result) {
+    ROS_DEBUG("solve g failed!");
+    return false;
+  }
+
+  // change state
+  // 2. 更新状态变量为SFM解出的值
+  for (int i = 0; i <= frame_count; i++) {
+    Eigen::Matrix3d Ri = all_image_frame[Headers[i].stamp.toSec()].R;
+    Eigen::Vector3d Pi = all_image_frame[Headers[i].stamp.toSec()].T;
+    Ps[i] = Pi;
+    Rs[i] = Ri;
+    all_image_frame[Headers[i].stamp.toSec()].is_key_frame =
+        true; // 所有帧都标为关键帧
+  }
+
+  // 3. 清除旧的特征点深度
+  Eigen::VectorXd dep = f_manager.getDepthVector();
+  for (int i = 0; i < dep.size(); i++)
+    dep[i] = -1;
+  f_manager.clearDepth(dep);
+
+  // triangulat on cam pose , no tic
+  // 4. 三角化特征点，估计特征点深度，仅使用相机位姿，不使用 imu-camera
+  // 外参平移向量
+  Eigen::Vector3d TIC_TMP[NUM_OF_CAM];
+  for (int i = 0; i < NUM_OF_CAM; i++)
+    TIC_TMP[i].setZero();
+
+  ric[0] = RIC[0];
+  f_manager.setRic(ric);
+  f_manager.triangulate(Ps, &(TIC_TMP[0]), &(RIC[0]));
+
+  // 5. 获取尺度因子并基于新的陀螺仪bias重新传播imu data
+  double s = (x.tail<1>())(0);
+  for (int i = 0; i <= WINDOW_SIZE; i++) {
+    // TODO:这里加速度使用0 bias
+    pre_integrations[i]->repropagate(Eigen::Vector3d::Zero(), Bgs[i]);
+  }
+
+  // 6. 应用尺度因子, 把 SFM 的无尺度位姿转换为真实物理空间中的长度单位
+  // 将所有帧的位置统一到imu坐标系下，以第一帧为参考原点
+  // Rs[i] * TIC[0] 相机到imu的平移
+  // 消除了相机与imu之间的刚体平移
+  for (int i = frame_count; i >= 0; i--) {
+    // Ps[i] 当前帧的相机位置, Rs[i] 当前帧的相机旋转矩阵, TIC[0] IMU
+    // 到相机的外参平移
+    Ps[i] = s * Ps[i] - Rs[i] * TIC[0] - (s * Ps[0] - Rs[0] * TIC[0]);
+  }
+
+  // 7. 从 x 中提取速度分量，乘以帧旋转矩阵后赋给 Vs[i]
+  // 将速度转换为全局坐标系下的表示
+  int kv = -1;
+  std::map<double, ImageFrame>::iterator frame_i;
+  for (frame_i = all_image_frame.begin(); frame_i != all_image_frame.end();
+       frame_i++) {
+    if (frame_i->second.is_key_frame) {
+      kv++;
+      Vs[kv] = frame_i->second.R * x.segment<3>(kv * 3);
+    }
+  }
+
+  // 8. 特征点深度乘以尺度因子 s，使其适应 IMU 坐标系
+  for (auto &it_per_id : f_manager.feature) {
+    it_per_id.used_num = it_per_id.feature_per_frame.size();
+    if (!(it_per_id.used_num >= 2 && it_per_id.start_frame < WINDOW_SIZE - 2))
+      continue;
+    it_per_id.estimated_depth *= s;
+  }
+
+  // 9. 正则化重力方向，yaw 校正
+  Eigen::Matrix3d R0 = Utility::g2R(g); // 重力向量转为旋转矩阵
+  // Rs[0] 是 SFM 初始化得到的第一帧相机旋转
+  // R0 * Rs[0] 将该旋转转换到新的世界坐标系下
+  double yaw = Utility::R2ypr(R0 * Rs[0]).x();
+  // 用反向yaw 与原 R0 相乘后，相当于对世界坐标系进行旋转，使第一帧的 yaw 变为
+  // 0；
+  R0 = Utility::ypr2R(Eigen::Vector3d{-yaw, 0, 0}) * R0;
+  g = R0 * g; // 新的 g 现在应该指向 [0, 0, -|g|] 方向，并且 yaw=0；
+
+  // 10. 将所有帧的位置、旋转、速度应用旋转校正 rot_diff = R0
+  // 确保整个滑动窗口的状态与重力方向一致，消除漂移
+  // Matrix3d rot_diff = R0 * Rs[0].transpose();
+  Eigen::Matrix3d rot_diff = R0;
+  for (int i = 0; i <= frame_count; i++) {
+    Ps[i] = rot_diff * Ps[i];
+    Rs[i] = rot_diff * Rs[i];
+    Vs[i] = rot_diff * Vs[i];
+  }
+  ROS_DEBUG_STREAM("g0     " << g.transpose());
+  ROS_DEBUG_STREAM("my R0  " << Utility::R2ypr(Rs[0]).transpose());
+
+  return true;
+}
+
+bool Estimator::relativePose(Eigen::Matrix3d &relative_R,
+                             Eigen::Vector3d &relative_T, int &l) {
+  // find previous frame which contians enough correspondance and parallex with
+  // newest frame 找到与最新帧具有足够对应关系和视差的先前帧
+  for (int i = 0; i < WINDOW_SIZE; i++) {
+    std::vector<std::pair<Eigen::Vector3d, Eigen::Vector3d>> corres;
+    // 从 FeatureManager 中提取帧 i 与最新帧之间的特征点对
+    corres = f_manager.getCorresponding(i, WINDOW_SIZE);
+    if (corres.size() > 20) {
+      double sum_parallax = 0;
+      double average_parallax;
+      // 估帧 i 与最新帧之间的平均视差
+      for (int j = 0; j < int(corres.size()); j++) {
+        // pts_0, pts_1 是同一特征点在两帧中的归一化图像坐标
+        Eigen::Vector2d pts_0(corres[j].first(0), corres[j].first(1));
+        Eigen::Vector2d pts_1(corres[j].second(0), corres[j].second(1));
+        double parallax = (pts_0 - pts_1).norm();
+        sum_parallax = sum_parallax + parallax;
+      }
+      average_parallax = 1.0 * sum_parallax / int(corres.size());
+
+      // 判断是否能作为参考帧
+      // 对极几何估计帧间RT
+      if (average_parallax * FOCAL_LENGTH > 30 &&
+          m_estimator.solveRelativeRT(corres, relative_R, relative_T)) {
+        l = i;
+        ROS_DEBUG("average_parallax %f choose l %d and newest frame to "
+                  "triangulate the whole structure",
+                  average_parallax * 460, l);
+        return true;
+      }
+    }
+  }
+  return false;
+}
+
+void Estimator::solveOdometry() {
+  if (frame_count < WINDOW_SIZE)
+    return;
+  if (solver_flag == NON_LINEAR) {
+    TicToc t_tri;
+    // 对f_manager的特征点作三角化，估计特征点深度
+    f_manager.triangulate(Ps, tic, ric);
+    ROS_DEBUG("triangulation costs %f", t_tri.toc());
+    optimization();
+  }
+}
+
+void Estimator::vector2double() {
+  for (int i = 0; i <= WINDOW_SIZE; i++) {
+    para_Pose[i][0] = Ps[i].x(); // Ps[i] 是 IMU 坐标系下的位置
+    para_Pose[i][1] = Ps[i].y();
+    para_Pose[i][2] = Ps[i].z();
+    Eigen::Quaterniond q{Rs[i]};
+    para_Pose[i][3] = q.x();
+    para_Pose[i][4] = q.y();
+    para_Pose[i][5] = q.z();
+    para_Pose[i][6] = q.w();
+
+    para_SpeedBias[i][0] = Vs[i].x();
+    para_SpeedBias[i][1] = Vs[i].y();
+    para_SpeedBias[i][2] = Vs[i].z();
+
+    para_SpeedBias[i][3] = Bas[i].x();
+    para_SpeedBias[i][4] = Bas[i].y();
+    para_SpeedBias[i][5] = Bas[i].z();
+
+    para_SpeedBias[i][6] = Bgs[i].x();
+    para_SpeedBias[i][7] = Bgs[i].y();
+    para_SpeedBias[i][8] = Bgs[i].z();
+  }
+  for (int i = 0; i < NUM_OF_CAM; i++) {
+    para_Ex_Pose[i][0] = tic[i].x();
+    para_Ex_Pose[i][1] = tic[i].y();
+    para_Ex_Pose[i][2] = tic[i].z();
+    Eigen::Quaterniond q{ric[i]};
+    para_Ex_Pose[i][3] = q.x();
+    para_Ex_Pose[i][4] = q.y();
+    para_Ex_Pose[i][5] = q.z();
+    para_Ex_Pose[i][6] = q.w();
+  }
+
+  // 当前所有特征点的深度估计值并写入 para_Feature[i][0]
+  Eigen::VectorXd dep = f_manager.getDepthVector();
+  for (int i = 0; i < f_manager.getFeatureCount(); i++)
+    para_Feature[i][0] = dep(i);
+  if (ESTIMATE_TD)
+    para_Td[0][0] = td;
+}
+
+void Estimator::double2vector() {
+  Eigen::Vector3d origin_R0 = Utility::R2ypr(Rs[0]);
+  Eigen::Vector3d origin_P0 = Ps[0];
+
+  if (failure_occur) {
+    origin_R0 = Utility::R2ypr(last_R0);
+    origin_P0 = last_P0;
+    failure_occur = 0;
+  }
+  Eigen::Vector3d origin_R00 =
+      Utility::R2ypr(Eigen::Quaterniond(para_Pose[0][6], para_Pose[0][3],
+                                        para_Pose[0][4], para_Pose[0][5])
+                         .toRotationMatrix());
+  double y_diff = origin_R0.x() - origin_R00.x();
+  // TODO
+  Eigen::Matrix3d rot_diff = Utility::ypr2R(Vector3d(y_diff, 0, 0));
+  // 处理欧拉角奇异点（pitch 接近 ±90° 的情况）
+  if (abs(abs(origin_R0.y()) - 90) < 1.0 ||
+      abs(abs(origin_R00.y()) - 90) < 1.0) {
+    ROS_DEBUG("euler singular point!");
+    rot_diff = Rs[0] * Eigen::Quaterniond(para_Pose[0][6], para_Pose[0][3],
+                                          para_Pose[0][4], para_Pose[0][5])
+                           .toRotationMatrix()
+                           .transpose();
+  }
+
+  for (int i = 0; i <= WINDOW_SIZE; i++) {
+
+    Rs[i] = rot_diff * Eigen::Quaterniond(para_Pose[i][6], para_Pose[i][3],
+                                          para_Pose[i][4], para_Pose[i][5])
+                           .normalized()
+                           .toRotationMatrix();
+
+    Ps[i] = rot_diff * Eigen::Vector3d(para_Pose[i][0] - para_Pose[0][0],
+                                       para_Pose[i][1] - para_Pose[0][1],
+                                       para_Pose[i][2] - para_Pose[0][2]) +
+            origin_P0;
+
+    Vs[i] =
+        rot_diff * Eigen::Vector3d(para_SpeedBias[i][0], para_SpeedBias[i][1],
+                                   para_SpeedBias[i][2]);
+
+    Bas[i] = Eigen::Vector3d(para_SpeedBias[i][3], para_SpeedBias[i][4],
+                             para_SpeedBias[i][5]);
+
+    Bgs[i] = Eigen::Vector3d(para_SpeedBias[i][6], para_SpeedBias[i][7],
+                             para_SpeedBias[i][8]);
+  }
+
+  for (int i = 0; i < NUM_OF_CAM; i++) {
+    tic[i] = Eigen::Vector3d(para_Ex_Pose[i][0], para_Ex_Pose[i][1],
+                             para_Ex_Pose[i][2]);
+    ric[i] = Eigen::Quaterniond(para_Ex_Pose[i][6], para_Ex_Pose[i][3],
+                                para_Ex_Pose[i][4], para_Ex_Pose[i][5])
+                 .toRotationMatrix();
+  }
+
+  Eigen::VectorXd dep = f_manager.getDepthVector();
+  for (int i = 0; i < f_manager.getFeatureCount(); i++)
+    dep(i) = para_Feature[i][0];
+  f_manager.setDepth(dep);
+  if (ESTIMATE_TD)
+    td = para_Td[0][0];
+
+  // relative info between two loop frame
+  // 回环状态更新
+  if (relocalization_info) {
+    Eigen::Matrix3d relo_r;
+    Eigen::Vector3d relo_t;
+    relo_r = rot_diff * Eigen::Quaterniond(relo_Pose[6], relo_Pose[3],
+                                           relo_Pose[4], relo_Pose[5])
+                            .normalized()
+                            .toRotationMatrix();
+    relo_t = rot_diff * Eigen::Vector3d(relo_Pose[0] - para_Pose[0][0],
+                                        relo_Pose[1] - para_Pose[0][1],
+                                        relo_Pose[2] - para_Pose[0][2]) +
+             origin_P0;
+    double drift_correct_yaw;
+    drift_correct_yaw =
+        Utility::R2ypr(prev_relo_r).x() - Utility::R2ypr(relo_r).x();
+    drift_correct_r = Utility::ypr2R(Eigen::Vector3d(drift_correct_yaw, 0, 0));
+    drift_correct_t = prev_relo_t - drift_correct_r * relo_t;
+    relo_relative_t =
+        relo_r.transpose() * (Ps[relo_frame_local_index] - relo_t);
+    relo_relative_q = relo_r.transpose() * Rs[relo_frame_local_index];
+    relo_relative_yaw =
+        Utility::normalizeAngle(Utility::R2ypr(Rs[relo_frame_local_index]).x() -
+                                Utility::R2ypr(relo_r).x());
+    // cout << "vins relo " << endl;
+    // cout << "vins relative_t " << relo_relative_t.transpose() << endl;
+    // cout << "vins relative_yaw " <<relo_relative_yaw << endl;
+    relocalization_info = 0;
+  }
+}
+
+bool Estimator::failureDetection() {
+  // 当前帧跟踪到的特征点数是否太少
+  if (f_manager.last_track_num < 2) {
+    ROS_INFO(" little feature %d", f_manager.last_track_num);
+    // return true;
+  }
+  // 最新帧的加计bias模长大小
+  if (Bas[WINDOW_SIZE].norm() > 2.5) {
+    ROS_INFO(" big IMU acc bias estimation %f", Bas[WINDOW_SIZE].norm());
+    return true;
+  }
+  if (Bgs[WINDOW_SIZE].norm() > 1.0) {
+    ROS_INFO(" big IMU gyr bias estimation %f", Bgs[WINDOW_SIZE].norm());
+    return true;
+  }
+  /*
+  if (tic(0) > 1)
+  {
+      ROS_INFO(" big extri param estimation %d", tic(0) > 1);
+      return true;
+  }
+  */
+  // 当前帧与上一帧位置差异
+  Eigen::Vector3d tmp_P = Ps[WINDOW_SIZE];
+  if ((tmp_P - last_P).norm() > 5) {
+    ROS_INFO(" big translation");
+    return true;
+  }
+  // 检查z轴平移过大
+  if (abs(tmp_P.z() - last_P.z()) > 1) {
+    ROS_INFO(" big z translation");
+    return true;
+  }
+
+  // 当前帧与上一帧之间的相对旋转角度
+  Eigen::Matrix3d tmp_R = Rs[WINDOW_SIZE];
+  // delta_R 表示两帧间的旋转
+  Eigen::Matrix3d delta_R = tmp_R.transpose() * last_R;
+  Eigen::Quaterniond delta_Q(delta_R);
+  double delta_angle;
+  delta_angle = acos(delta_Q.w()) * 2.0 / 3.14 * 180.0;
+  if (delta_angle > 50) {
+    ROS_INFO(" big delta_angle ");
+    // return true;
+  }
+  return false;
+}
+
+void Estimator::setReloFrame(double _frame_stamp, int _frame_index,
+                             std::vector<Eigen::Vector3d> &_match_points,
+                             Eigen::Vector3d _relo_t, Eigen::Matrix3d _relo_r) {
+  // 保存传入的重定位帧时间戳与索引
+  relo_frame_stamp = _frame_stamp;
+  relo_frame_index = _frame_index;
+
+  // 当前帧与历史帧之间的特征点匹配
+  // 用于重定位时构建视觉约束
+  match_points.clear();
+  match_points = _match_points;
+
+  // 保存上一次重定位帧位姿
+  prev_relo_t = _relo_t;
+  prev_relo_r = _relo_r;
+
+  // 遍历滑动窗口中的图像帧，查找与 _frame_stamp 对应的帧
+  for (int i = 0; i < WINDOW_SIZE; i++) {
+    if (relo_frame_stamp == Headers[i].stamp.toSec()) {
+      relo_frame_local_index = i;
+      relocalization_info = 1;
+      for (int j = 0; j < SIZE_POSE; j++)
+        relo_Pose[j] = para_Pose[i][j];
+    }
+  }
+}
+
 } // namespace sensor_lab
