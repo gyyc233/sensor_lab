@@ -84,7 +84,13 @@ public:
 
   // 滑动窗口更新
   void slideWindow();
+
+  /// @brief 将最新帧的信息合并到次新帧后，移除最新帧
+  /// @note 用于在 非关键帧（MARGIN_SECOND_NEW） 情况下更新特征管理器中的信息
   void slideWindowNew();
+
+  /// @brief 适用于当前帧为关键帧、视差足够大、需要保留最新帧并删除最老帧的情况
+  /// @note 如果系统处于非线性优化阶段, 则会进行深度值调整以保持一致性
   void slideWindowOld();
 
   // 非线性优化
@@ -101,7 +107,10 @@ public:
 
   enum SolverFlag { INITIAL, NON_LINEAR };
 
-  enum MarginalizationFlag { MARGIN_OLD = 0, MARGIN_SECOND_NEW = 1 };
+  enum MarginalizationFlag {
+    MARGIN_OLD = 0,       // 边缘化最旧帧
+    MARGIN_SECOND_NEW = 1 // 边缘化次新帧
+  };
 
   SolverFlag solver_flag;                   // 是否完成初始化
   MarginalizationFlag marginalization_flag; // 边缘化方式
@@ -136,7 +145,8 @@ public:
   std::vector<Eigen::Vector3d> angular_velocity_buf[(WINDOW_SIZE + 1)];
 
   int frame_count; // 帧计数器
-  int sum_of_outlier, sum_of_back, sum_of_front, sum_of_invalid;
+  int sum_of_outlier, sum_of_back, sum_of_front,
+      sum_of_invalid; // 用于统计边缘化等操作的次数
 
   // 管理所有特征点的生命周期和观测信息
   // 包括每个特征点在哪些帧中被观测到、深度估计、是否失效

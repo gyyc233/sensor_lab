@@ -53,7 +53,7 @@ void readParameters(ros::NodeHandle &n);
 /// @brief 状态参数化大小
 enum SIZE_PARAMETERIZATION {
   SIZE_POSE = 7,      // 位姿（位置+四元数旋转）
-  SIZE_SPEEDBIAS = 9, // sudu,加计与陀螺仪零偏
+  SIZE_SPEEDBIAS = 9, // 速度,加计与陀螺仪零偏
   SIZE_FEATURE = 1    // 特征点逆深度
 };
 
