@@ -1166,6 +1166,9 @@ void Estimator::optimization() {
   // 当前要边缘化掉滑动窗口中最旧帧
   // 将其对系统状态的影响通过边缘化的方式保留在优化问题中，从而防止信息丢失并维持估计一致性
   if (marginalization_flag == MARGIN_OLD) {
+    // 目的: 融合上一次边缘化的先验和最老帧间的 IMU 约束
+    // 边缘化目标：最老帧的状态（位姿 + 速度偏置）
+
     // marginalization_info 用于记录本次边缘化所需的信息（如残差块、参数块等）
     MarginalizationInfo *marginalization_info = new MarginalizationInfo();
     // 将状态变量从 Eigen 类型转换为数组形式，构建残差项
@@ -1202,18 +1205,23 @@ void Estimator::optimization() {
 
     {
       if (pre_integrations[1]->sum_dt < 10.0) {
+        // 创建一个 IMU 因子 IMUFactor，基于该帧的预积分数据，描述帧 0 和帧 1
+        // 之间的 IMU 测量约束
         IMUFactor *imu_factor = new IMUFactor(pre_integrations[1]);
+        // 构建残差块信息，帧0与帧1的位姿与加速度bias,要边缘化的参数索引是0和1，即帧
+        // 0 的 pose 和 speedbias
         ResidualBlockInfo *residual_block_info = new ResidualBlockInfo(
             imu_factor, NULL,
             std::vector<double *>{para_Pose[0], para_SpeedBias[0], para_Pose[1],
                                   para_SpeedBias[1]},
             std::vector<int>{0, 1});
+        // IMU 残差加入到当前边缘化信息中
         marginalization_info->addResidualBlockInfo(residual_block_info);
       }
     }
 
     {
-      int feature_index = -1;
+      int feature_index = -1; // 要处理的特征点索引
       for (auto &it_per_id : f_manager.feature) {
         it_per_id.used_num = it_per_id.feature_per_frame.size();
         if (!(it_per_id.used_num >= 2 &&
@@ -1222,10 +1230,16 @@ void Estimator::optimization() {
 
         ++feature_index;
 
-        int imu_i = it_per_id.start_frame, imu_j = imu_i - 1;
+        // 该特征点首次出现的帧索引 imu_i
+        int imu_i = it_per_id.start_frame;
+        // imu_i的上一帧
+        int imu_j = imu_i - 1;
+
+        // 只要求处理起始于最老帧的特征点
         if (imu_i != 0)
           continue;
 
+        // 该特征点在初始帧中的归一化相机坐标（3D 点）
         Eigen::Vector3d pts_i = it_per_id.feature_per_frame[0].point;
 
         for (auto &it_per_frame : it_per_id.feature_per_frame) {
@@ -1233,19 +1247,24 @@ void Estimator::optimization() {
           if (imu_i == imu_j)
             continue;
 
+          // 该特征点在后续帧中的归一化相机坐标 pts_j
           Eigen::Vector3d pts_j = it_per_frame.point;
           if (ESTIMATE_TD) {
+            // 构建一个考虑时间偏移的视觉重投影因子
             ProjectionTdFactor *f_td = new ProjectionTdFactor(
                 pts_i, pts_j, it_per_id.feature_per_frame[0].velocity,
                 it_per_frame.velocity, it_per_id.feature_per_frame[0].cur_td,
                 it_per_frame.cur_td, it_per_id.feature_per_frame[0].uv.y(),
                 it_per_frame.uv.y());
+
+            // 构建残差块信息：因子+损失函数+所有相关参数块（位姿，外参，特征点深度，时间偏移）+要被边缘化的参数索引（0：最老帧位姿；3：特征点深度）
             ResidualBlockInfo *residual_block_info = new ResidualBlockInfo(
                 f_td, loss_function,
                 std::vector<double *>{para_Pose[imu_i], para_Pose[imu_j],
                                       para_Ex_Pose[0],
                                       para_Feature[feature_index], para_Td[0]},
                 std::vector<int>{0, 3});
+            // 残差块加入边缘化中
             marginalization_info->addResidualBlockInfo(residual_block_info);
           } else {
             ProjectionFactor *f = new ProjectionFactor(pts_i, pts_j);
@@ -1261,35 +1280,45 @@ void Estimator::optimization() {
       }
     }
 
+    // 预边缘化操作: 计算残差与jacobian
     TicToc t_pre_margin;
     marginalization_info->preMarginalize();
     ROS_DEBUG("pre marginalization %f ms", t_pre_margin.toc());
 
+    // 正式边缘化: 使用 Schur 补将最老帧的状态（pose +
+    // speedbias）从优化问题中移除 将 drop_set
+    // 中指定的参数从优化问题中移除，并保留其对剩余参数的影响作为先验
     TicToc t_margin;
     marginalization_info->marginalize();
     ROS_DEBUG("marginalization %f ms", t_margin.toc());
 
+    // 构建地址映射表，记录哪些参数块在边缘化后被“移动”了位置（比如滑动窗口更新时帧索引变化）
     std::unordered_map<long, double *> addr_shift;
+    // 移除最老帧的位姿与 speedBias
     for (int i = 1; i <= WINDOW_SIZE; i++) {
       addr_shift[std::reinterpret_cast<long>(para_Pose[i])] = para_Pose[i - 1];
       addr_shift[std::reinterpret_cast<long>(para_SpeedBias[i])] =
           para_SpeedBias[i - 1];
     }
+    // 相机外参与延时保持不变
     for (int i = 0; i < NUM_OF_CAM; i++)
       addr_shift[std::reinterpret_cast<long>(para_Ex_Pose[i])] =
           para_Ex_Pose[i];
     if (ESTIMATE_TD) {
       addr_shift[std::reinterpret_cast<long>(para_Td[0])] = para_Td[0];
     }
+    // 根据 addr_shift 映射获取新的参数块列表
     std::vector<double *> parameter_blocks =
         marginalization_info->getParameterBlocks(addr_shift);
 
+    // 清理旧的边缘化信息
     if (last_marginalization_info)
       delete last_marginalization_info;
     last_marginalization_info = marginalization_info;
     last_marginalization_parameter_blocks = parameter_blocks;
 
   } else {
+    // 是否有上一次边缘化信息与次新帧位姿
     if (last_marginalization_info &&
         std::count(std::begin(last_marginalization_parameter_blocks),
                    std::end(last_marginalization_parameter_blocks),
@@ -1298,12 +1327,15 @@ void Estimator::optimization() {
       MarginalizationInfo *marginalization_info = new MarginalizationInfo();
       vector2double();
       if (last_marginalization_info) {
+        // 构造 drop_set，记录哪些参数块将被“边缘化”
         std::vector<int> drop_set;
         for (int i = 0;
              i < static_cast<int>(last_marginalization_parameter_blocks.size());
              i++) {
+          // 不会把当前帧的速度偏置加入 drop_set
           ROS_ASSERT(last_marginalization_parameter_blocks[i] !=
                      para_SpeedBias[WINDOW_SIZE - 1]);
+          // 找到次新帧位姿
           if (last_marginalization_parameter_blocks[i] ==
               para_Pose[WINDOW_SIZE - 1])
             drop_set.push_back(i);

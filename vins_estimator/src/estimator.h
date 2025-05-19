@@ -96,6 +96,8 @@ public:
   // 非线性优化
   /// @brief 求解里程计
   void solveOdometry();
+
+  /// @brief 构建先验残差+视觉残差+imu预积分残差，执行边缘化
   void optimization();
 
   // 将状态变量从 Eigen 向量转为 Ceres 可优化的 double 数组
