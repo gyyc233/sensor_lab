@@ -12,13 +12,19 @@ add_definitions(${PCL_DEFINITIONS})
 include_directories(${EIGEN3_INCLUDE_DIRS})
 include_directories(${OpenCV_INCLUDE_DIRS})
 
+set(Sophus_DIR /home/V01/uids0025/src/Sophus/build) # 改为自己的安装路径
+find_package(Sophus REQUIRED)
+include_directories(${Sophus_INCLUDE_DIRS})
+
 include_directories(${PROJECT_SOURCE_DIR}/pcl_test)
 include_directories(${PROJECT_SOURCE_DIR}/common)
 include_directories(${PROJECT_SOURCE_DIR}/third_party)
+include_directories(${PROJECT_SOURCE_DIR}/io)
 
 add_executable(point_cloud_test test/point_cloud_test.cc)
 add_executable(pcd_to_bird_eye_test test/pcd_to_bird_eye_test.cc)
 add_executable(scan_to_range_image test/scan_to_range_image.cc)
+add_executable(pcl_transform_tool test/pcl_transform_tool.cc)
 
 add_library(nearest_neighbour_search STATIC 
   src/brute_force_nearest_neighbour.cc
@@ -30,6 +36,7 @@ target_link_libraries(nearest_neighbour_search  ${PCL_LIBRARIES} ${OpenCV_LIBS} 
 target_link_libraries(point_cloud_test ${PCL_LIBRARIES})
 target_link_libraries(pcd_to_bird_eye_test ${PCL_LIBRARIES} ${OpenCV_LIBS} pthread glog::glog gflags)
 target_link_libraries(scan_to_range_image ${PCL_LIBRARIES} ${OpenCV_LIBS} pthread glog::glog gflags)
+target_link_libraries(pcl_transform_tool ${PCL_LIBRARIES} ${OpenCV_LIBS} ${Sophus_LIBRARIES} pthread glog::glog gflags)
 
 add_executable(nearest_neighbour_search_test test/nearest_neighbour_search_test.cc)
 target_link_libraries(nearest_neighbour_search_test nearest_neighbour_search gtest)
