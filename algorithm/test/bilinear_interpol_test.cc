@@ -3,6 +3,7 @@
 #include <vector>
 
 // reference https://zhuanlan.zhihu.com/p/513569382
+// https://github.com/jodyngo/Bilinear-Interpolation
 
 void bilinearInterpol(cv::Mat src_image, double scale_x, double scale_y,
                       cv::Mat &dst_image) {
@@ -66,12 +67,12 @@ int main(int argc, char **argv) {
   bilinearInterpol(image, scale_x, scale_y, result_im);
   cv::Mat check_im;
   /// Create Windows
-  namedWindow("Original Image", cv::WINDOW_AUTOSIZE);
-  namedWindow("result Image", cv::WINDOW_AUTOSIZE);
+  cv::namedWindow("Original Image", cv::WINDOW_AUTOSIZE);
+  cv::namedWindow("result Image", cv::WINDOW_AUTOSIZE);
 
   /// Show stuff
-  imshow("Original Image", image);
-  imshow("result Image", result_im);
+  cv::imshow("Original Image", image);
+  cv::imshow("result Image", result_im);
   cv::waitKey(0);
 
   return 0;
