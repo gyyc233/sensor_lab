@@ -49,6 +49,8 @@ if(ROS_CATKIN)
 endif()
 # =============== add ROS =====================
 
+# set(EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/bin)
+
 # copy floder to install path
 set(build_data_include ${CMAKE_CURRENT_SOURCE_DIR}/build)
 execute_process( COMMAND ${CMAKE_COMMAND} -E copy_directory  ${CMAKE_CURRENT_SOURCE_DIR}/data ${build_data_include}/data)

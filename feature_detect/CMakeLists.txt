@@ -19,11 +19,13 @@ target_link_libraries(feature_detect ${OpenCV_LIBS} ${PCL_LIBRARIES})
 
 add_executable(orb_cv_test test/orb_cv_test.cc)
 add_executable(optical_flow_test test/optical_flow_test.cc)
+add_executable(inverse_compositional_test test/inverse_compositional_test.cc)
 
 target_link_libraries(orb_cv_test feature_detect)
 target_link_libraries(optical_flow_test feature_detect)
+target_link_libraries(inverse_compositional_test feature_detect)
 
 # INSTALL
 install(
-  TARGETS orb_cv_test optical_flow_test
+  TARGETS orb_cv_test optical_flow_test inverse_compositional_test
   ARCHIVE DESTINATION ${PROJECT_SOURCE_DIR}/build/install)
