@@ -242,11 +242,13 @@ void Align(cv::Mat &source, cv::Mat &target, int max_iterations,
       {      
         transformation = W;
         std::cout << "Terminated in " << iter << " iterations." <<std::endl;
+        std::cout<<"transformation:\n"<<transformation<<std::endl;
         return;
       }
   } // iteration
   std::cout << "Maximum iterations reached (" << iter << ")." <<std::endl;
   transformation = W;
+  std::cout<<"transformation:\n"<<transformation<<std::endl;
   return;
 
   // clang-format on
@@ -255,16 +257,12 @@ void Align(cv::Mat &source, cv::Mat &target, int max_iterations,
 int main(int argc, char **argv) {
   // image data copy for github.com:dcanelhas/sim2-alignment.git
   cv::Mat img_src_c =
-      cv::imread("./data/inverse_lk/cat_src.png"); // 加了仿射变换后的图
-  cv::Mat img_target_c = cv::imread("./data/inverse_lk/cat.png"); // 原图
+      cv::imread("./data/inverse_lk_flow/cat_src.png"); // 加了仿射变换后的图
+  cv::Mat img_trg_c = cv::imread("./data/inverse_lk_flow/cat.png"); // 原图
 
   // 为仿射变换提供x y轴偏移的初始猜测
-  float x_offset = 0;
-  float y_offset = 0;
-  if (argc == 5) {
-    x_offset = atof(argv[3]);
-    y_offset = atof(argv[4]);
-  }
+  float x_offset = 30;
+  float y_offset = 30;
 
   // convert images to float representation 图像转为浮点数表示
   cv::Mat img_src_f;
@@ -283,7 +281,7 @@ int main(int argc, char **argv) {
   // Create a scale-space pyramid(创建比例空间金字塔) by low-pass filtering and
   // downsampling all the way to quarter-size images(四分之一图像)
 
-  float sigma =
+  double sigma =
       0.95; // computed from filter size n=3 in [sigma = 0.3(n/2 - 1) + 0.8]
   cv::GaussianBlur(img_src_f, img_src_blur, cv::Size(3, 3), sigma);
   cv::GaussianBlur(img_trg_f, img_trg_blur, cv::Size(3, 3), sigma);
