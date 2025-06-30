@@ -11,6 +11,8 @@
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
 
+// git@github.com:dcanelhas/sim2-alignment.git
+
 #define EPS                                                                    \
   1e-4 // Threshold value on the change in parameters as a termination
        // criteria(中止标准).
@@ -261,8 +263,13 @@ int main(int argc, char **argv) {
   cv::Mat img_trg_c = cv::imread("./data/inverse_lk_flow/cat.png"); // 原图
 
   // 为仿射变换提供x y轴偏移的初始猜测
-  float x_offset = 30;
-  float y_offset = 30;
+
+  // lena_src.png lena.png 150 50
+  // cameraman_src.png cameraman.png
+  // cat_src.png cat.png 160 160
+
+  float x_offset = 160;
+  float y_offset = 160;
 
   // convert images to float representation 图像转为浮点数表示
   cv::Mat img_src_f;
