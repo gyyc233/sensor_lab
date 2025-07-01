@@ -49,6 +49,14 @@ if(ROS_CATKIN)
 endif()
 # =============== add ROS =====================
 
+# =============== cuda =====================
+option(CUDA_ENABLE "cuda enable" OFF)
+
+if(CUDA_ENABLE)
+  message(STATUS "cuda enable was ON")
+endif()
+# =============== cuda =====================
+
 # set(EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/bin)
 
 # copy floder to install path
