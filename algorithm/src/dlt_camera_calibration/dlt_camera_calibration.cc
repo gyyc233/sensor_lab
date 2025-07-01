@@ -97,6 +97,11 @@ int DltCameraCalibrationOperator::solve() {
 
   project_mat_ = std::move(p_mat);
   DLOG(INFO) << "project matrix:\n" << project_mat_;
+
+  Eigen::Matrix3d k_mat, r_mat;
+  Eigen::MatrixXd t_mat;
+  estimate(project_mat_, k_mat, r_mat, t_mat);
+
   return 0;
 }
 
@@ -135,11 +140,17 @@ void DltCameraCalibrationOperator::estimate(const cv::Mat &project_mat,
     Q = rotation_z_pi * Q;
   }
 
+  // 投影矩阵的第四列就是外参
+  t_mat = Eigen::MatrixXd::Zero(1, 4);
+  t_mat << project_mat.at<double>(0, 3), project_mat.at<double>(1, 3),
+      project_mat.at<double>(2, 3), project_mat.at<double>(3, 3);
+
   k_mat = std::move(R_inverse);
   r_mat = std::move(Q);
 
   LOG(INFO) << "intrinsics matrix K:\n" << k_mat;
   LOG(INFO) << "rotation matrix R:\n" << r_mat;
+  LOG(INFO) << "translation matrix T:\n" << t_mat;
 }
 
 }; // namespace Algorithm
