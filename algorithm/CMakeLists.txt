@@ -55,6 +55,7 @@ add_executable(mahalanobis_distance_test test/mahalanobis_distance_test.cc)
 add_executable(cv_gl_projection_test test/cv_gl_projection_test.cc)
 add_executable(tps_test test/tps_test.cc)
 add_executable(bilinear_interpol_test test/bilinear_interpol_test.cc)
+add_executable(non_maximun_suppression_test test/non_maximun_suppression_test.cc)
 
 target_link_libraries(cubic_spline_test algorithm glog::glog)
 target_link_libraries(dlt_camera_calibration_test algorithm glog::glog)
@@ -66,6 +67,7 @@ target_link_libraries(mahalanobis_distance_test algorithm glog::glog)
 target_link_libraries(cv_gl_projection_test algorithm)
 target_link_libraries(tps_test algorithm)
 target_link_libraries(bilinear_interpol_test algorithm glog::glog matplotlib_cpp)
+target_link_libraries(non_maximun_suppression_test ${OpenCV_LIBS})
 
 # INSTALL
 install(

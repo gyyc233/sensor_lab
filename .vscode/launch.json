@@ -5,7 +5,7 @@
             "name": "(gdb) Launch",
             "type": "cppdbg",
             "request": "launch",
-            "program": "${workspaceFolder}/build/feature_tracker/check_rosbag_images",
+            "program": "${workspaceFolder}/build/algorithm/non_maximun_suppression_test",
             "args": [],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}/build",
