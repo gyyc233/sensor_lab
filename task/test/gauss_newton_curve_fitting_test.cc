@@ -87,5 +87,22 @@ int main(int argc, char **argv) {
   std::cout << "estimated abc = " << ae << ", " << be << ", " << ce
             << std::endl;
 
+  // 比较理论jacobian与数值jacobian
+  double test = 2.5;
+  double epsilon = 1e-6;
+
+  double y1 = exp(ae * test * test + be * test + +ce);
+  double y2 =
+      exp((ae + epsilon) * test * test + (be + epsilon) * test + ce + epsilon);
+
+  double numeric_jacobian = y2 - y1;
+  std::cout << "numeric jacobian: " << numeric_jacobian << std::endl;
+
+  double theory_jacobian =
+      -1 * (-test * test * exp(ae * test * test + be * test + ce)) * epsilon +
+      (-1) * (-test * exp(ae * test * test + be * test + ce)) * epsilon +
+      (-1) * (-exp(ae * test * test + be * test + ce)) * epsilon;
+  std::cout << "theory_jacobian: " << theory_jacobian << std::endl;
+
   return 0;
 }
