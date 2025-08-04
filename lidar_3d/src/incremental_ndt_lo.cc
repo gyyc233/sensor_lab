@@ -22,11 +22,12 @@ void IncrementalNDTLO::addCloud(CloudPtr scan, SE3 &pose, bool use_guess) {
     ndt_.alignNdt(guess);
   } else {
     if (!use_guess) {
-      // 从最近两个pose来推断
+      // 从最近两个pose来提供初始的位姿变换猜测
       SE3 T1 = estimated_poses_[estimated_poses_.size() - 1];
       SE3 T2 = estimated_poses_[estimated_poses_.size() - 2];
       guess = T1 * (T2.inverse() * T1);
     } else {
+      // 不做猜测的话使用默认变换作为GN初值
       guess = pose;
     }
 

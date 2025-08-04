@@ -104,7 +104,11 @@ private:
   Options options_;
 
   using KeyAndData = std::pair<KeyType, VoxelData>; // 预定义
+
+  // LRU(least recently used 最少最近使用策略) 需要一个 hash map
+  // 与一个双向链表进行维护
   std::list<KeyAndData> data_; // 真实数据，会缓存，也会清理
+  // std::list 是双向链表容器
   std::unordered_map<KeyType, std::list<KeyAndData>::iterator, hash_vec<3>>
       grids_; // 栅格数据，存储真实数据的迭代器
   std::vector<KeyType> nearby_grids_; // 附近的栅格

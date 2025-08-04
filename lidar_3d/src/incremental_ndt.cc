@@ -43,16 +43,22 @@ void IncrementalNdt3D::addCloud(CloudPtr cloud_world) {
       data_.push_front({key, {pt}});
       grids_.insert({key, data_.begin()});
 
+      // LRU 删除使用频率最低的体素数据
       if (data_.size() >= options_.capacity_) {
         // 删除一个尾部数据
-        grids_.erase(data_.back().first); // 把该栅格内的所有点删除
-        data_.pop_back();
+        // 按顺序先删除 hash map,再删除list
+        grids_.erase(data_.back().first); // 删除hash对应访问频率最少的 voxel id
+        data_.pop_back();                 // 删除对应 voxel data
       }
     } else {
       // 栅格存在则将将点加入该栅格
       find_voxel_id->second->second.addPoint(pt);
 
       // 把data_中find_voxel_id->second所指的KeyAndData剪接到data_.begin()
+      // 将最近访问的体素移动到 data_ 首位
+      // splice
+      // 函数可进行链表拼接，将一个链表的部分或全部要素转移给另一个链表，转移过程中不会发生拷贝和移动,
+      // 被转移的链表最后会失效
       data_.splice(data_.begin(), data_,
                    find_voxel_id->second);   // 更新的那个放到最前
       find_voxel_id->second = data_.begin(); // grids时也指向最前
@@ -73,6 +79,7 @@ void IncrementalNdt3D::setSource(CloudPtr source) { source_ = source; }
 void IncrementalNdt3D::updateVoxel(VoxelData &v) {
   // 首帧点云
   if (flag_first_scan_) {
+    // 计算体素内的均值与协方差矩阵
     if (v.pts_.size() > 1) {
       math::ComputeMeanAndCov(v.pts_, v.mu_, v.sigma_,
                               [this](const Vec3d &p) { return p; });
@@ -88,11 +95,12 @@ void IncrementalNdt3D::updateVoxel(VoxelData &v) {
     return;
   }
 
-  // TODO: 为啥这里不处理
+  // 跳过处理过的体素
   if (v.ndt_estimated_ && v.num_pts_ > options_.max_pts_in_voxel_) {
     return;
   }
 
+  // 不是首帧点云了, 需要做增量点云体素更新
   if (!v.ndt_estimated_ && v.pts_.size() > options_.min_pts_in_voxel_) {
     // 新增的voxel
     math::ComputeMeanAndCov(v.pts_, v.mu_, v.sigma_,
@@ -115,7 +123,7 @@ void IncrementalNdt3D::updateVoxel(VoxelData &v) {
     v.num_pts_ += v.pts_.size();
     v.pts_.clear();
 
-    // check info
+    // check info matrix
     Eigen::JacobiSVD<Eigen::MatrixXd> svd(v.sigma_, Eigen::ComputeFullU |
                                                         Eigen::ComputeFullV);
     Vec3d lambda = svd.singularValues();

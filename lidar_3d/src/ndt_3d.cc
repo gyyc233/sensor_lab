@@ -74,7 +74,7 @@ void NDT_3D::buildVoxels() {
                 [&id](size_t &i) mutable { i = id++; });
 
   std::for_each(index.begin(), index.end(), [this](const size_t &idx) {
-    // TODO: 这里inv_voxel_size_的作用没明白
+    // 这里 inv_voxel_size_ 目的是计算点云对应体素id
     Vec3d pt = ToVec3d(target_->points[idx]) * options_.inv_voxel_size_;
     auto key = CastToInt(pt);
     if (grids_.find(key) == grids_.end()) {
@@ -155,6 +155,7 @@ bool NDT_3D::alignNewtonGaussianNdt(SE3 &init_pose) {
 
   int total_size = index.size() * num_residual_per_point;
 
+  // G-N ndt iteration
   for (int iter = 0; iter < options_.max_iteration_; ++iter) {
     std::vector<bool> effect_pts(total_size, false);
     std::vector<Eigen::Matrix<double, 3, 6>> jacobians(total_size);

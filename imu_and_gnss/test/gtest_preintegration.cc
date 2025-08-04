@@ -39,17 +39,21 @@ TEST(PREINTEGRATION_TEST, ROTATION_TEST) {
   for (int i = 1; i <= 100; ++i) {
     double time = imu_time_span * i;
     Vec3d acce = -gravity; // 加速度计应该测量到一个向上的力
+
+    // 对i到j-1区间的imu帧做预积分
     pre_integ.Integrate(sad::IMU(time, constant_omega, acce), imu_time_span);
 
+    // 对j帧状态进行预测
     sad::NavStated this_status = pre_integ.Predict(start_status, gravity);
 
     // 直接积分
+    // t 对应位置 p
     t = t + v * imu_time_span + 0.5 * gravity * imu_time_span * imu_time_span +
         0.5 * (R * acce) * imu_time_span * imu_time_span;
     v = v + gravity * imu_time_span + (R * acce) * imu_time_span;
     R = R * Sophus::SO3::exp(constant_omega * imu_time_span);
 
-    // 验证在简单情况下，直接积分和预积分结果相等
+    // 验证在简单情况下，直接积分和预积分结果相等(对比P,V,R)
     EXPECT_NEAR(t[0], this_status.p_[0], 1e-2);
     EXPECT_NEAR(t[1], this_status.p_[1], 1e-2);
     EXPECT_NEAR(t[2], this_status.p_[2], 1e-2);
