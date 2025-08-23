@@ -17,7 +17,7 @@ void IMUPreintegration::Integrate(const IMU &imu, double dt) {
   Vec3d acc = imu.acce_ - ba_; // 加计
 
   // 更新dv, dp, 见(4.13), (4.16)
-  // 1. 更新位置和速度的测量值
+  // 1. 更新位置和速度的测量值(也叫观测值)
   dp_ = dp_ + dv_ * dt + 0.5f * dR_.matrix() * acc * dt * dt;
   dv_ = dv_ + dR_ * acc * dt;
 
@@ -43,7 +43,7 @@ void IMUPreintegration::Integrate(const IMU &imu, double dt) {
   B.block<3, 3>(6, 3) = 0.5f * dR_.matrix() * dt2;
 
   // 更新各雅可比，见式(4.39)
-  // 3. 更新观测量对零偏的各jacobia
+  // 3. 更新观测量对零偏的各jacobian
   dP_dba_ = dP_dba_ + dV_dba_ * dt - 0.5f * dR_.matrix() * dt2; // (4.39d)
   dP_dbg_ = dP_dbg_ + dV_dbg_ * dt -
             0.5f * dR_.matrix() * dt2 * acc_hat * dR_dbg_;   // (4.39e)
@@ -73,14 +73,17 @@ void IMUPreintegration::Integrate(const IMU &imu, double dt) {
 }
 
 SO3 IMUPreintegration::GetDeltaRotation(const Vec3d &bg) {
+  // 零偏更新后，基于预积分与零偏线性化重新计算旋转
   return dR_ * SO3::exp(dR_dbg_ * (bg - bg_));
 }
 
 Vec3d IMUPreintegration::GetDeltaVelocity(const Vec3d &bg, const Vec3d &ba) {
+  // 零偏更新后，基于预积分与零偏线性化重新计算速度
   return dv_ + dV_dbg_ * (bg - bg_) + dV_dba_ * (ba - ba_);
 }
 
 Vec3d IMUPreintegration::GetDeltaPosition(const Vec3d &bg, const Vec3d &ba) {
+  // 零偏更新后，基于预积分与零偏线性化重新计算位移
   return dp_ + dP_dbg_ * (bg - bg_) + dP_dba_ * (ba - ba_);
 }
 

@@ -62,7 +62,7 @@ bool StaticIMUInit::TryInit() {
   LOG(INFO) << "estimate acce cov: " << cov_acce_.transpose();
   LOG(INFO) << "estimate gyro cov: " << cov_gyro_.transpose();
 
-  // 以acce均值为方向，取9.8长度为重力
+  // 以acce均值的反方向为方向，取9.8长度为重力方向
   // 2. get gravity
   gravity_ = -mean_acce / mean_acce.norm() * options_.gravity_norm;
   LOG(INFO) << "estimate gravity: " << gravity_.transpose();
