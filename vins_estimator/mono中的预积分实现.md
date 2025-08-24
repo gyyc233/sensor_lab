@@ -3,6 +3,10 @@
 
 [之前的imu预积分笔记](../imu_and_gnss/pre_integration_flow.md)
 
+[ESKF中IMU预积分代码实现逻辑](../imu_and_gnss/monmo_code_pre_integration_flow.md)
+
+[根据代码重新整理逻辑与ESKF版本对比](../imu_and_gnss/imu_preintegration_review.md)
+
 ## imu
 
 当imu静止时，加速度测量值为-g；当imu自由落体时，加速度测量值为0。
