@@ -20,7 +20,7 @@ public:
 private:
   const double patLen = 5.0f; // unit: mm  标定板每个格的宽度（金属标定板）
   double imgScale = 1.0; //图像缩放的比例因子
-  cv::Size patSize = Size(6, 4);
+  cv::Size pat_size = cv::Size(6, 4);
   cv::Size img_size;
 };
 } // namespace Algorithm

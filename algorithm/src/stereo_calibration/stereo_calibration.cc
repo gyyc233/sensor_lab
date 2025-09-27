@@ -1,16 +1,15 @@
-#include "stereo_calibration/stereo_calibration.h"
 #include <opencv2/opencv.hpp>
-#include <opencv2\calib3d\calib3d.hpp>
-#include <opencv2\core\core.hpp>
-#include <opencv2\features2d\features2d.hpp>
-#include <opencv2\highgui\highgui.hpp>
-#include <opencv2\imgproc\imgproc.hpp>
-#include <opencv2\legacy\legacy.hpp>
-
-namespace Algorithm {
+#include <opencv2/calib3d/calib3d.hpp>
+#include <opencv2/calib3d.hpp>
+#include <opencv2/core/core.hpp>
+#include <opencv2/features2d/features2d.hpp>
+#include <opencv2/highgui/highgui.hpp>
+#include <opencv2/imgproc/imgproc.hpp>
+#include "stereo_calibration/stereo_calibration.h"
 
 using namespace std;
 using namespace cv;
+namespace Algorithm {
 
 void StereoCalib::initFileList(string dir, int first, int last) {
   fileList.clear();
@@ -109,8 +108,8 @@ int StereoCalib::stereoCalibrate(string intrinsic_filename,
       continue;
     }
     //截取左右相机图片
-    Rect leftRect(0, 0, imgSize.width, imgSize.height);
-    Rect rightRect(imgSize.width, 0, imgSize.width, imgSize.height);
+    Rect leftRect(0, 0, img_size.width, img_size.height);
+    Rect rightRect(img_size.width, 0, img_size.width, img_size.height);
 
     Mat leftRawImg = rawImg(leftRect);   //切分得到的左原始图像
     Mat rightRawImg = rawImg(rightRect); //切分得到的右原始图像
@@ -127,15 +126,15 @@ int StereoCalib::stereoCalibrate(string intrinsic_filename,
         rightMask;
     // BGT -> GRAY
     if (leftRawImg.type() == CV_8UC3)
-      cvtColor(leftRawImg, leftImg, CV_BGR2GRAY); //转为灰度图
+      cvtColor(leftRawImg, leftImg, COLOR_BGR2GRAY); //转为灰度图
     else
       leftImg = leftRawImg.clone();
     if (rightRawImg.type() == CV_8UC3)
-      cvtColor(rightRawImg, rightImg, CV_BGR2GRAY);
+      cvtColor(rightRawImg, rightImg, COLOR_BGR2GRAY);
     else
       rightImg = rightRawImg.clone();
 
-    imgSize = leftImg.size();
+    img_size = leftImg.size();
 
     //图像滤波预处理
     resize(leftImg, leftMask,
@@ -144,13 +143,13 @@ int StereoCalib::stereoCalibrate(string intrinsic_filename,
     resize(rightImg, rightMask, Size(200, 200));
     GaussianBlur(leftMask, leftMask, Size(13, 13), 7);
     GaussianBlur(rightMask, rightMask, Size(13, 13), 7);
-    resize(leftMask, leftMask, imgSize);
-    resize(rightMask, rightMask, imgSize);
+    resize(leftMask, leftMask, img_size);
+    resize(rightMask, rightMask, img_size);
     medianBlur(leftMask, leftMask, 9); //中值滤波
     medianBlur(rightMask, rightMask, 9);
 
-    for (int v = 0; v < imgSize.height; v++) {
-      for (int u = 0; u < imgSize.width; u++) {
+    for (int v = 0; v < img_size.height; v++) {
+      for (int u = 0; u < img_size.width; u++) {
         int leftX =
             ((int)leftImg.at<uchar>(v, u) - (int)leftMask.at<uchar>(v, u)) * 2 +
             128;
@@ -167,24 +166,24 @@ int StereoCalib::stereoCalibrate(string intrinsic_filename,
     resize(leftImg, leftSimg, Size(), imgScale, imgScale); //图像以0.5的比例缩放
     resize(rightImg, rightSimg, Size(), imgScale, imgScale);
     cvtColor(leftSimg, leftCimg,
-             CV_GRAY2BGR); //转为BGR图像，cimg和simg是800*600的图像
-    cvtColor(rightSimg, rightCimg, CV_GRAY2BGR);
+      COLOR_BGR2GRAY); //转为BGR图像，cimg和simg是800*600的图像
+    cvtColor(rightSimg, rightCimg, COLOR_BGR2GRAY);
 
     //寻找棋盘角点
-    bool leftFound = findChessboardCorners(leftCimg, patSize, leftPts,
-                                           CV_CALIB_CB_ADAPTIVE_THRESH |
-                                               CV_CALIB_CB_FILTER_QUADS);
-    bool rightFound = findChessboardCorners(rightCimg, patSize, rightPts,
-                                            CV_CALIB_CB_ADAPTIVE_THRESH |
-                                                CV_CALIB_CB_FILTER_QUADS);
+    bool leftFound = findChessboardCorners(leftCimg, pat_size, leftPts,
+                                           cv::CALIB_CB_ADAPTIVE_THRESH |
+                                               cv::CALIB_CB_FILTER_QUADS);
+    bool rightFound = findChessboardCorners(rightCimg, pat_size, rightPts,
+                                            cv::CALIB_CB_ADAPTIVE_THRESH |
+                                                cv::CALIB_CB_FILTER_QUADS);
 
     if (leftFound)
       cornerSubPix(leftSimg, leftPts, Size(11, 11), Size(-1, -1),
-                   TermCriteria(CV_TERMCRIT_ITER + CV_TERMCRIT_EPS, 300, 0.01));
+                   TermCriteria(TermCriteria::COUNT + TermCriteria::EPS, 300, 0.01));
     if (rightFound)
       cornerSubPix(
           rightSimg, rightPts, Size(11, 11), Size(-1, -1),
-          TermCriteria(CV_TERMCRIT_ITER + CV_TERMCRIT_EPS, 300, 0.01)); //亚像素
+          TermCriteria(TermCriteria::COUNT + TermCriteria::EPS, 300, 0.01)); //亚像素
 
     //放大为原来的尺度
     for (uint j = 0; j < leftPts.size();
@@ -200,13 +199,13 @@ int StereoCalib::stereoCalibrate(string intrinsic_filename,
     Mat leftPtsTmp = Mat(leftPts) * imgScale; //再次乘以 imgScale
     Mat rightPtsTmp = Mat(rightPts) * imgScale;
 
-    drawChessboardCorners(leftCimg, patSize, leftPtsTmp,
+    drawChessboardCorners(leftCimg, pat_size, leftPtsTmp,
                           leftFound); //绘制角点坐标并显示
     imshow(leftWindowName, leftCimg);
     imwrite("output/DrawChessBoard/" + to_string(i) + "_left.jpg", leftCimg);
     waitKey(200);
 
-    drawChessboardCorners(rightCimg, patSize, rightPtsTmp,
+    drawChessboardCorners(rightCimg, pat_size, rightPtsTmp,
                           rightFound); //绘制角点坐标并显示
     imshow(rightWindowName, rightCimg);
     imwrite("output/DrawChessBoard/" + to_string(i) + "_right.jpg", rightCimg);
@@ -232,8 +231,8 @@ int StereoCalib::stereoCalibrate(string intrinsic_filename,
   //生成物点坐标
   vector<vector<Point3f>> objPts(
       idx.size()); // idx.size代表成功检测的图像的个数
-  for (int y = 0; y < patSize.height; y++) {
-    for (int x = 0; x < patSize.width; x++) {
+  for (int y = 0; y < pat_size.height; y++) {
+    for (int x = 0; x < pat_size.width; x++) {
       objPts[0].push_back(Point3f((float)x, (float)y, 0) * patLen);
     }
   }
@@ -249,11 +248,11 @@ int StereoCalib::stereoCalibrate(string intrinsic_filename,
   cameraMatrix[1] = Mat::eye(3, 3, CV_64F);
   Mat R, T, E, F;
 
-  cv::calibrateCamera(objPts, imagePoints[0], imgSize, cameraMatrix[0],
-                      distCoeffs[0], rvecs[0], tvecs[0], CV_CALIB_FIX_K3);
+  cv::calibrateCamera(objPts, imagePoints[0], img_size, cameraMatrix[0],
+                      distCoeffs[0], rvecs[0], tvecs[0]);
 
-  cv::calibrateCamera(objPts, imagePoints[1], imgSize, cameraMatrix[1],
-                      distCoeffs[1], rvecs[1], tvecs[1], CV_CALIB_FIX_K3);
+  cv::calibrateCamera(objPts, imagePoints[1], img_size, cameraMatrix[1],
+                      distCoeffs[1], rvecs[1], tvecs[1]);
 
   std::cout << endl
             << "Left Camera Matrix: " << endl
@@ -268,10 +267,9 @@ int StereoCalib::stereoCalibrate(string intrinsic_filename,
             << "Right Camera DistCoeffs: " << endl
             << distCoeffs[1] << endl;
 
-  double rms = stereoCalibrate(
+  double rms = cv::stereoCalibrate(
       objPts, imagePoints[0], imagePoints[1], cameraMatrix[0], distCoeffs[0],
-      cameraMatrix[1], distCoeffs[1], imgSize, R, T, E, F,
-      TermCriteria(CV_TERMCRIT_ITER + CV_TERMCRIT_EPS, 100, 1e-5));
+      cameraMatrix[1], distCoeffs[1], img_size, R, T, E, F);
   // CV_CALIB_USE_INTRINSIC_GUESS);
 
   std::cout << endl
@@ -322,7 +320,7 @@ int StereoCalib::stereoCalibrate(string intrinsic_filename,
             << endl; // 平均误差
 
   // 相机内参数和畸变系数写入文件
-  FileStorage fs(intrinsic_filename, CV_STORAGE_WRITE);
+  FileStorage fs(intrinsic_filename, FileStorage::WRITE);
   if (fs.isOpened()) {
     fs << "M1" << cameraMatrix[0] << "D1" << distCoeffs[0] << "M2"
        << cameraMatrix[1] << "D2" << distCoeffs[1];
@@ -335,11 +333,11 @@ int StereoCalib::stereoCalibrate(string intrinsic_filename,
   Rect validRoi[2];
 
   cv::stereoRectify(cameraMatrix[0], distCoeffs[0], cameraMatrix[1],
-                    distCoeffs[1], imgSize, R, T, R1, R2, P1, P2, Q,
-                    CALIB_ZERO_DISPARITY, 1, imgSize, &validRoi[0],
+                    distCoeffs[1], img_size, R, T, R1, R2, P1, P2, Q,
+                    CALIB_ZERO_DISPARITY, 1, img_size, &validRoi[0],
                     &validRoi[1]);
 
-  fs.open(extrinsic_filename, CV_STORAGE_WRITE);
+  fs.open(extrinsic_filename, FileStorage::WRITE);
   if (fs.isOpened()) {
     fs << "R" << R << "T" << T << "R1" << R1 << "R2" << R2 << "P1" << P1 << "P2"
        << P2 << "Q" << Q;
@@ -363,8 +361,8 @@ int StereoCalib::stereoMatch(int picNum, string intrinsic_filename,
     return 0;
   }
   //截取
-  Rect leftRect(0, 0, imgSize.width, imgSize.height);
-  Rect rightRect(imgSize.width, 0, imgSize.width, imgSize.height);
+  Rect leftRect(0, 0, img_size.width, img_size.height);
+  Rect rightRect(img_size.width, 0, img_size.width, img_size.height);
   Mat img1 = rawImg(leftRect);  //切分得到的左原始图像
   Mat img2 = rawImg(rightRect); //切分得到的右原始图像
                                 //图像根据比例缩放
@@ -382,7 +380,7 @@ int StereoCalib::stereoMatch(int picNum, string intrinsic_filename,
   Size img_size = img1.size();
 
   // reading intrinsic parameters
-  FileStorage fs(intrinsic_filename, CV_STORAGE_READ);
+  FileStorage fs(intrinsic_filename, FileStorage::READ);
   if (!fs.isOpened()) {
     std::cout << "Failed to open file " << intrinsic_filename << endl;
     return -1;
@@ -397,7 +395,7 @@ int StereoCalib::stereoMatch(int picNum, string intrinsic_filename,
   M2 *= imgScale;
 
   // 读取双目相机的立体矫正参数
-  fs.open(extrinsic_filename, CV_STORAGE_READ);
+  fs.open(extrinsic_filename, FileStorage::READ);
   if (!fs.isOpened()) {
     std::cout << "Failed to open file  " << extrinsic_filename << endl;
     return -1;
@@ -427,39 +425,52 @@ int StereoCalib::stereoMatch(int picNum, string intrinsic_filename,
   img2 = img2r;
 
   // 初始化 stereoBMstate 结构体
-  StereoBM bm;
+  cv::Ptr<cv::StereoBM> bm = cv::StereoBM::create(16,9);
 
-  int unitDisparity = 15; // 40
-  int numberOfDisparities = unitDisparity * 16;
-  bm.state->roi1 = roi1;
-  bm.state->roi2 = roi2;
-  bm.state->preFilterCap = 13;
-  bm.state->SADWindowSize = 19; // 窗口大小
-  bm.state->minDisparity = 0; // 确定匹配搜索从哪里开始  默认值是0
-  bm.state->numberOfDisparities =
-      numberOfDisparities; // 在该数值确定的视差范围内进行搜索
-  bm.state->textureThreshold =
-      1000; // 10                                  // 保证有足够的纹理以克服噪声
-  bm.state->uniquenessRatio =
-      1; // 10                               // !!使用匹配功能模式
-  bm.state->speckleWindowSize =
-      200; // 13                             //
-           // 检查视差连通区域变化度的窗口大小, 值为 0 时取消 speckle 检查
-  bm.state->speckleRange =
-      32; // 32                                  //
-          // 视差变化阈值，当窗口内视差变化大于阈值时，该窗口内的视差清零，int
-          // 型
-  bm.state->disp12MaxDiff = -1;
+  // bm->setPreFilterType(CV_STEREO_BM_NORMALIZED_RESPONSE);
+  bm->setPreFilterSize(9);
+  bm->setPreFilterCap(31);
+  bm->setBlockSize(21);
+  bm->setMinDisparity(-16);
+  bm->setNumDisparities(64);
+  bm->setTextureThreshold(10);
+  bm->setUniquenessRatio(5);
+  bm->setSpeckleWindowSize(100);
+  bm->setSpeckleRange(32);
+  bm->setROI1(roi1);
+  bm->setROI2(roi2);
+
+  // int unitDisparity = 15; // 40
+  // int numberOfDisparities = unitDisparity * 16;
+  // bm.state->roi1 = roi1;
+  // bm.state->roi2 = roi2;
+  // bm.state->preFilterCap = 13;
+  // bm.state->SADWindowSize = 19; // 窗口大小
+  // bm.state->minDisparity = 0; // 确定匹配搜索从哪里开始  默认值是0
+  // bm.state->numberOfDisparities =
+  //     numberOfDisparities; // 在该数值确定的视差范围内进行搜索
+  // bm.state->textureThreshold =
+  //     1000; // 10                                  // 保证有足够的纹理以克服噪声
+  // bm.state->uniquenessRatio =
+  //     1; // 10                               // !!使用匹配功能模式
+  // bm.state->speckleWindowSize =
+  //     200; // 13                             //
+  //          // 检查视差连通区域变化度的窗口大小, 值为 0 时取消 speckle 检查
+  // bm.state->speckleRange =
+  //     32; // 32                                  //
+  //         // 视差变化阈值，当窗口内视差变化大于阈值时，该窗口内的视差清零，int
+  //         // 型
+  // bm.state->disp12MaxDiff = -1;
 
   // 计算
   Mat disp, disp8;
   int64 t = getTickCount();
-  bm(img1, img2, disp);
+  bm->compute(img1, img2, disp);
   t = getTickCount() - t;
   printf("立体匹配耗时: %fms\n", t * 1000 / getTickFrequency());
 
   // 将16位符号整形的视差矩阵转换为8位无符号整形矩阵
-  disp.convertTo(disp8, CV_8U, 255 / (numberOfDisparities * 16.));
+  disp.convertTo(disp8, CV_8U, 255 / (15 * 16.));
 
   // 视差图转为彩色图
   Mat vdispRGB = disp8;

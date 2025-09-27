@@ -6,6 +6,7 @@
 #include <list>
 #include <string>
 #include <vector>
+#include <opencv2/opencv.hpp>
 
 namespace Algorithm {
 using namespace std;
@@ -43,8 +44,8 @@ private:
 
   Mat F_mergeImg(Mat img1, Mat disp8);
 
-  Size imgSize(1280, 720);
-  Size patSize(14, 12); //每张棋盘寻找的角点个数是14*12个
+  cv::Size img_size;
+  cv::Size pat_size; //每张棋盘寻找的角点个数是14*12个
   const double patLen = 5.0f; // unit: mm  标定板每个格的宽度（金属标定板）
   double imgScale = 1.0; //图像缩放的比例因子
   //将要读取的图片路径存储在fileList中

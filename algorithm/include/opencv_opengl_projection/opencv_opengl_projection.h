@@ -7,13 +7,6 @@
 
 namespace Algorithm {
 
-#include <Eigen/Dense>
-#include <cmath>
-#include <memory>
-#include <opencv2/opencv.hpp>
-#include <string>
-#include <vector>
-
 struct VirtualPinholeCameraParams {
   double c_x = 0;
   double c_y = 0;
