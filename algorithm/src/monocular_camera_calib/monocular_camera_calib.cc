@@ -36,7 +36,8 @@ void MonocularCameraCalib::SingleCalibrate(std::string intrinsic_filename,
                                        cv::CALIB_CB_ADAPTIVE_THRESH +
                                            cv::CALIB_CB_NORMALIZE_IMAGE +
                                            cv::CALIB_CB_FAST_CHECK)) {
-      std::cout << "can not find chessboard corners!\n"; //找不到角点
+      std::cout << "can not find chessboard corners!"
+                << ", name: " << fileList[i] << std::endl; //找不到角点
       exit(1);
     } else {
       cv::Mat view_gray;
@@ -144,7 +145,7 @@ void MonocularCameraCalib::SingleCalibrate(std::string intrinsic_filename,
     //另一种不需要转换矩阵的方式
     // undistort(imageSource,newimage,cameraMatrix,distCoeffs);
     cv::remap(imageSource, newimage, mapx, mapy, cv::INTER_LINEAR);
-    cv::imwrite("./left_remap_" + std::to_string(i) + ".jpg", newimage);
+    cv::imwrite(fileList[i], newimage);
   }
   return;
 }

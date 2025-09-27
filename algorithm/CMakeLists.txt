@@ -4,6 +4,11 @@ find_package(glog 0.6.0 REQUIRED)
 
 find_package(Eigen3 REQUIRED)
 find_package(OpenCV REQUIRED)
+find_package(PCL 1.10 REQUIRED)
+
+include_directories(${PCL_INCLUDE_DIRS})
+link_directories(${PCL_LIBRARY_DIRS})
+add_definitions(${PCL_DEFINITIONS})
 
 include_directories(${EIGEN3_INCLUDE_DIRS})
 include_directories(${OpenCV_INCLUDE_DIRS})
@@ -12,7 +17,7 @@ add_library(algorithm STATIC ${srcs})
 
 # PUBLIC 共享algorithm/include 这个头文件路径
 target_include_directories(algorithm PUBLIC include)
-target_link_libraries(algorithm ${OpenCV_LIBS} glog::glog)
+target_link_libraries(algorithm ${OpenCV_LIBS} ${PCL_LIBRARIES} glog::glog)
 
 include_directories(${PROJECT_SOURCE_DIR}/common)
 include_directories(${PROJECT_SOURCE_DIR}/io)

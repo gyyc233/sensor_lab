@@ -7,8 +7,16 @@
 #include <opencv2/imgproc/imgproc.hpp>
 #include <opencv2/opencv.hpp>
 
+#include "eigen_type/eigen_types.h"
+#include <pcl/io/pcd_io.h>
+#include <pcl/io/ply_io.h>
+#include <pcl/point_cloud.h>
+#include <pcl/point_types.h>
+
 using namespace std;
 using namespace cv;
+using namespace pcl;
+
 namespace Algorithm {
 
 void StereoCalib::initFileList(string dir, int first, int last) {
@@ -17,6 +25,33 @@ void StereoCalib::initFileList(string dir, int first, int last) {
     string str_file = dir + "/" + to_string(cur) + ".jpg";
     fileList.push_back(str_file);
   }
+  std::cout << "image files num: " << fileList.size() << std::endl;
+}
+
+void StereoCalib::cvMatToPcl(cv::Mat &mat) {
+  const double max_z = 1.0e4;
+  pcl::PointCloud<pcl::PointXYZ>::Ptr cloud(new pcl::PointCloud<pcl::PointXYZ>);
+  for (int ki = 0; ki < mat.rows; ki++) {
+    for (int kj = 0; kj < mat.cols; kj++) {
+      pcl::PointXYZ pointXYZ;
+      cv::Vec3f point = mat.at<cv::Vec3f>(ki, kj);
+      if (fabs(point[2] - max_z) < FLT_EPSILON || fabs(point[2]) > max_z)
+        continue;
+
+      pointXYZ.x = point[0];
+      pointXYZ.y = point[1];
+      pointXYZ.z = point[2];
+
+      if (pointXYZ.z <= 0)
+        continue;
+      cloud->points.push_back(pointXYZ);
+    }
+  }
+  int num_points = cloud->points.size();
+  cloud->height = 1;
+  cloud->width = num_points;
+  pcl::io::savePLYFileASCII("./stereo.ply", *cloud);
+  return;
 }
 
 void StereoCalib::saveXYZ(string filename, const Mat &mat) {
@@ -30,7 +65,7 @@ void StereoCalib::saveXYZ(string filename, const Mat &mat) {
   //遍历写入
   for (int y = 0; y < mat.rows; y++) {
     for (int x = 0; x < mat.cols; x++) {
-      Vec3f point = mat.at<Vec3f>(y, x); //三通道浮点型
+      cv::Vec3f point = mat.at<cv::Vec3f>(y, x); //三通道浮点型
       if (fabs(point[2] - max_z) < FLT_EPSILON || fabs(point[2]) > max_z)
         continue;
       fp << point[0] << " " << point[1] << " " << point[2] << endl;
@@ -96,6 +131,8 @@ Mat StereoCalib::F_mergeImg(Mat img1, Mat disp8) {
 
 int StereoCalib::stereoCalibrate(string intrinsic_filename,
                                  string extrinsic_filename) {
+  img_size = cv::Size(640, 480);
+  pat_size = cv::Size(7, 6); //每张棋盘寻找的角点个数是7*6个
   vector<int> idx;
   //左侧相机的角点坐标和右侧相机的角点坐标
   vector<vector<Point2f>> imagePoints[2];
@@ -114,14 +151,6 @@ int StereoCalib::stereoCalibrate(string intrinsic_filename,
     Mat leftRawImg = rawImg(leftRect);   //切分得到的左原始图像
     Mat rightRawImg = rawImg(rightRect); //切分得到的右原始图像
 
-    // imwrite("left.jpg", leftRawImg);
-    // imwrite("right.jpg", rightRawImg);
-    // std::cout<<"左侧图像：  宽度"<<leftRawImg.size().width<<"
-    // 高度"<<rightRawImg.size().height<<endl; std::cout<<"右侧图像：
-    // 宽度"<<rightRawImg.size().width<<"
-    // 高度"<<rightRawImg.size().height<<endl;
-    // //
-
     Mat leftImg, rightImg, leftSimg, rightSimg, leftCimg, rightCimg, leftMask,
         rightMask;
     // BGT -> GRAY
@@ -136,59 +165,31 @@ int StereoCalib::stereoCalibrate(string intrinsic_filename,
 
     img_size = leftImg.size();
 
-    //图像滤波预处理
-    resize(leftImg, leftMask,
-           Size(200,
-                200)); // resize对原图像img重新调整大小生成mask图像大小为200*200
-    resize(rightImg, rightMask, Size(200, 200));
-    GaussianBlur(leftMask, leftMask, Size(13, 13), 7);
-    GaussianBlur(rightMask, rightMask, Size(13, 13), 7);
-    resize(leftMask, leftMask, img_size);
-    resize(rightMask, rightMask, img_size);
-    medianBlur(leftMask, leftMask, 9); //中值滤波
-    medianBlur(rightMask, rightMask, 9);
-
-    for (int v = 0; v < img_size.height; v++) {
-      for (int u = 0; u < img_size.width; u++) {
-        int leftX =
-            ((int)leftImg.at<uchar>(v, u) - (int)leftMask.at<uchar>(v, u)) * 2 +
-            128;
-        int rightX =
-            ((int)rightImg.at<uchar>(v, u) - (int)rightMask.at<uchar>(v, u)) *
-                2 +
-            128;
-        leftImg.at<uchar>(v, u) = max(min(leftX, 255), 0);
-        rightImg.at<uchar>(v, u) = max(min(rightX, 255), 0);
-      }
-    }
-
-    //寻找角点， 图像缩放
-    resize(leftImg, leftSimg, Size(), imgScale, imgScale); //图像以0.5的比例缩放
-    resize(rightImg, rightSimg, Size(), imgScale, imgScale);
-    cvtColor(leftSimg, leftCimg,
-             COLOR_BGR2GRAY); //转为BGR图像，cimg和simg是800*600的图像
-    cvtColor(rightSimg, rightCimg, COLOR_BGR2GRAY);
+    leftCimg = leftImg.clone();
+    rightCimg = rightImg.clone();
 
     //寻找棋盘角点
-    bool leftFound = findChessboardCorners(leftCimg, pat_size, leftPts,
+    bool leftFound = findChessboardCorners(leftImg, pat_size, leftPts,
                                            cv::CALIB_CB_ADAPTIVE_THRESH |
                                                cv::CALIB_CB_FILTER_QUADS);
-    bool rightFound = findChessboardCorners(rightCimg, pat_size, rightPts,
+    bool rightFound = findChessboardCorners(rightImg, pat_size, rightPts,
                                             cv::CALIB_CB_ADAPTIVE_THRESH |
                                                 cv::CALIB_CB_FILTER_QUADS);
 
+    if (!(leftFound && rightFound))
+      continue;
+
     if (leftFound)
       cornerSubPix(
-          leftSimg, leftPts, Size(11, 11), Size(-1, -1),
+          leftImg, leftPts, Size(11, 11), Size(-1, -1),
           TermCriteria(TermCriteria::COUNT + TermCriteria::EPS, 300, 0.01));
     if (rightFound)
-      cornerSubPix(rightSimg, rightPts, Size(11, 11), Size(-1, -1),
+      cornerSubPix(rightImg, rightPts, Size(11, 11), Size(-1, -1),
                    TermCriteria(TermCriteria::COUNT + TermCriteria::EPS, 300,
                                 0.01)); //亚像素
 
     //放大为原来的尺度
-    for (uint j = 0; j < leftPts.size();
-         j++) //该幅图像共132个角点，坐标乘以2，还原角点位置
+    for (uint j = 0; j < leftPts.size(); j++)
       leftPts[j] *= 1. / imgScale;
     for (uint j = 0; j < rightPts.size(); j++)
       rightPts[j] *= 1. / imgScale;
@@ -203,13 +204,13 @@ int StereoCalib::stereoCalibrate(string intrinsic_filename,
     drawChessboardCorners(leftCimg, pat_size, leftPtsTmp,
                           leftFound); //绘制角点坐标并显示
     imshow(leftWindowName, leftCimg);
-    imwrite("output/DrawChessBoard/" + to_string(i) + "_left.jpg", leftCimg);
+    imwrite("./lll_" + to_string(i) + "_left.jpg", leftCimg);
     waitKey(200);
 
     drawChessboardCorners(rightCimg, pat_size, rightPtsTmp,
                           rightFound); //绘制角点坐标并显示
     imshow(rightWindowName, rightCimg);
-    imwrite("output/DrawChessBoard/" + to_string(i) + "_right.jpg", rightCimg);
+    imwrite("./rrr" + to_string(i) + "_right.jpg", rightCimg);
     waitKey(200);
 
     cv::destroyAllWindows();
@@ -297,7 +298,7 @@ int StereoCalib::stereoCalibrate(string intrinsic_filename,
   std::cout << endl << " 极线计算...  误差计算... ";
   double err = 0;
   int npoints = 0;
-  vector<Vec3f> lines[2];
+  vector<cv::Vec3f> lines[2];
   for (unsigned int i = 0; i < idx.size(); i++) {
     int npt = (int)imagePoints[0][i].size(); //角点个数
     Mat imgpt[2];
@@ -332,7 +333,9 @@ int StereoCalib::stereoCalibrate(string intrinsic_filename,
   // 立体矫正  BOUGUET'S METHOD
   Mat R1, R2, P1, P2, Q;
   Rect validRoi[2];
-
+  // 立体矫正函数
+  // R1 第一个相机的矫正变换矩阵（旋转）P1 第一个摄像机在新坐标系下的投影矩阵
+  // Q 深度差异映射矩阵
   cv::stereoRectify(cameraMatrix[0], distCoeffs[0], cameraMatrix[1],
                     distCoeffs[1], img_size, R, T, R1, R2, P1, P2, Q,
                     CALIB_ZERO_DISPARITY, 1, img_size, &validRoi[0],
@@ -375,8 +378,8 @@ int StereoCalib::stereoMatch(int picNum, string intrinsic_filename,
     resize(img2, temp2, Size(), imgScale, imgScale, method);
     img2 = temp2;
   }
-  imwrite("输出/原始左图像.jpg", img1);
-  imwrite("输出/原始右图像.jpg", img2);
+  imwrite("./stereo_Match_origin_left.jpg", img1);
+  imwrite("./stereo_Match_origin_right.jpg", img2);
 
   Size img_size = img1.size();
 
@@ -507,6 +510,7 @@ int StereoCalib::stereoMatch(int picNum, string intrinsic_filename,
   cv::destroyAllWindows();
   cout << endl << "保存点云坐标... " << endl;
   saveXYZ(point_cloud_filename, xyz);
+  cvMatToPcl(xyz);
 
   cout << endl << endl << "结束" << endl << "Press any key to end... ";
 

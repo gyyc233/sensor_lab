@@ -5,7 +5,7 @@
             "name": "(gdb) Launch",
             "type": "cppdbg",
             "request": "launch",
-            "program": "${workspaceFolder}/build/algorithm/non_maximun_suppression_test",
+            "program": "${workspaceFolder}/build/algorithm/camera_calibration_test",
             "args": [],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}/build",
