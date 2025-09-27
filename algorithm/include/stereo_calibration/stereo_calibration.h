@@ -29,6 +29,8 @@ public:
                   string extrinsic_filename, bool no_display,
                   string point_cloud_filename);
 
+  void stereoDemo(string left_img_dir, string right_img_dir);
+
 private:
   /// @brief 生成点云后保存
   /// @param filename

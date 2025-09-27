@@ -518,6 +518,63 @@ int StereoCalib::stereoMatch(int picNum, string intrinsic_filename,
   return 0;
 }
 
+void StereoCalib::stereoDemo(string left_img_dir, string right_img_dir) {
+  // 内参
+  double fx = 718.856, fy = 718.856, cx = 607.1928, cy = 185.2157;
+  // 基线
+  double b = 0.573;
+
+  // 读取图像
+  cv::Mat left = cv::imread(left_img_dir, 0);
+  cv::Mat right = cv::imread(right_img_dir, 0);
+  cv::Ptr<cv::StereoSGBM> sgbm = cv::StereoSGBM::create(
+      0, 96, 9, 8 * 9 * 9, 32 * 9 * 9, 1, 63, 10, 100, 32); // 神奇的参数
+  cv::Mat disparity_sgbm, disparity;
+  sgbm->compute(left, right, disparity_sgbm);
+  disparity_sgbm.convertTo(disparity, CV_32F, 1.0 / 16.0f);
+
+  std::vector<Eigen::Vector4d, Eigen::aligned_allocator<Eigen::Vector4d>>
+      pointcloud;
+  pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud(
+      new pcl::PointCloud<pcl::PointXYZRGB>);
+
+  for (int v = 0; v < left.rows; v++) {
+    for (int u = 0; u < left.cols; u++) {
+      if (disparity.at<float>(v, u) <= 0.0 || disparity.at<float>(v, u) >= 96.0)
+        continue;
+
+      Eigen::Vector4d point(
+          0, 0, 0, left.at<uchar>(v, u) / 255.0); // 前三维为xyz,第四维为颜色
+      pcl::PointXYZRGB pointXYZRGB;
+      // 根据双目模型计算 point 的位置
+      double x = (u - cx) / fx;
+      double y = (v - cy) / fy;
+      double depth = fx * b / (disparity.at<float>(v, u));
+      point[0] = x * depth;
+      point[1] = y * depth;
+      point[2] = depth;
+
+      pointXYZRGB.x = static_cast<float>(point[0]);
+      pointXYZRGB.y = static_cast<float>(point[1]);
+      pointXYZRGB.z = static_cast<float>(point[2]);
+      pointXYZRGB.r = static_cast<float>(point[3]);
+      pointXYZRGB.g = static_cast<float>(point[3]);
+      pointXYZRGB.b = static_cast<float>(point[3]);
+
+      pointcloud.push_back(point);
+      cloud->push_back(pointXYZRGB);
+    }
+  }
+
+  int num_points = cloud->points.size();
+  cloud->height = 1;
+  cloud->width = num_points;
+  pcl::io::savePLYFileASCII("./stereo_demo.ply", *cloud);
+
+  cv::imshow("disparity", disparity / 96.0);
+  cv::waitKey(0);
+}
+
 // string intrinsic_filename = "intrinsics.yml";
 // string extrinsic_filename = "extrinsics.yml";
 // string point_cloud_filename = "输出/point3D.txt";

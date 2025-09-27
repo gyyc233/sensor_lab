@@ -22,15 +22,21 @@ int main() {
 
   std::shared_ptr<StereoCalib> stereo_camera_calib_operator =
       std::make_shared<StereoCalib>();
-  stereo_camera_calib_operator->initFileList("./data/camera_data_mix/mix", 1,
-                                             8);
-  stereo_camera_calib_operator->stereoCalibrate(intrinsic_filename,
-                                                extrinsic_filename);
 
-  stereo_camera_calib_operator->initFileList("./data/camera_data_mix/mix", 1,
-                                             2);
-  stereo_camera_calib_operator->stereoMatch(
-      0, intrinsic_filename, extrinsic_filename, false, point_cloud_filename);
+  // slambook14 stereo demo
+  // stereo_camera_calib_operator->stereoDemo("./data/stereo/left.png",
+  //                                       "./data/stereo/right.png");
+
+  // stereo_camera_calib_operator->initFileList("./data/camera_data_mix/mix", 1,
+  //                                            8);
+  // stereo_camera_calib_operator->stereoCalibrate(intrinsic_filename,
+  //                                               extrinsic_filename);
+
+  // stereo_camera_calib_operator->initFileList("./data/camera_data_mix/mix", 1,
+  //                                            2);
+  // stereo_camera_calib_operator->stereoMatch(
+  //     0, intrinsic_filename, extrinsic_filename, false,
+  //     point_cloud_filename);
 
   // 相应原始图像水平拼接
   // cv::Mat image_left;
