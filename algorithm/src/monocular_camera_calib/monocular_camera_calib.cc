@@ -1,22 +1,19 @@
 #include "monocular_camera_calib/monocular_camera_calib.h"
+#include <dirent.h>
 #include <iostream>
 #include <sys/types.h>
-#include <dirent.h>
 
 namespace Algorithm {
 
 void MonocularCameraCalib::SingleCalibrate(std::string intrinsic_filename,
-  std::string pics_path) {
-  // ifstream fin("calibdata.txt"); /* 标定所用图像文件的路径 */
-  // ofstream fout("caliberation_result.txt");  /* 保存标定结果的文件 */
-  std::ofstream fout(intrinsic_filename); /* 保存标定结果的文件 */
+                                           std::string pics_path) {
   //读取每一幅图像，从中提取出角点，然后对角点进行亚像素精确化
-  std::cout << "开始提取角点………………";
   int image_count = 0;                  /* 图像数量 */
   cv::Size image_size;                  /* 图像的尺寸 */
-  cv::Size board_size = cv::Size(4, 6); /* 标定板上每行、列的角点数 */
+  cv::Size board_size = cv::Size(7, 6); /* 标定板上每行、列的角点数 */
   std::vector<cv::Point2f> image_points_buf; /* 缓存每幅图像上检测到的角点 */
-  std::vector<std::vector<cv::Point2f>> image_points_seq; /* 保存检测到的所有角点 */
+  std::vector<std::vector<cv::Point2f>>
+      image_points_seq; /* 保存检测到的所有角点 */
   std::string filename;
   int count = -1; //用于存储角点个数。
   //获得相机标定图像
@@ -26,10 +23,6 @@ void MonocularCameraCalib::SingleCalibrate(std::string intrinsic_filename,
   for (int i = 0; i < fileList.size(); ++i) {
     filename = fileList[i];
     image_count++;
-    // 用于观察检验输出
-    std::cout << "image_count = " << image_count << std::endl;
-    /* 输出检验*/
-    std::cout << "-->count = " << count;
     cv::Mat imageInput = cv::imread(filename);
     if (image_count == 1) //读入第一张图片时获取图像宽高信息
     {
@@ -39,62 +32,40 @@ void MonocularCameraCalib::SingleCalibrate(std::string intrinsic_filename,
       std::cout << "image_size.height = " << image_size.height << std::endl;
     }
 
-    /* 提取角点 */
-    if (0 ==
-        cv::findChessboardCorners(imageInput, board_size, image_points_buf)) {
+    if (0 == cv::findChessboardCorners(imageInput, board_size, image_points_buf,
+                                       cv::CALIB_CB_ADAPTIVE_THRESH +
+                                           cv::CALIB_CB_NORMALIZE_IMAGE +
+                                           cv::CALIB_CB_FAST_CHECK)) {
       std::cout << "can not find chessboard corners!\n"; //找不到角点
       exit(1);
     } else {
       cv::Mat view_gray;
       cv::cvtColor(imageInput, view_gray, cv::COLOR_RGB2GRAY);
-      /* 亚像素精确化 */
-      cv::find4QuadCornerSubpix(view_gray, image_points_buf,
-                                cv::Size(5, 5)); //对粗提取的角点进行精确化
-      // cornerSubPix(view_gray,image_points_buf,Size(5,5),Size(-1,-1),TermCriteria(CV_TERMCRIT_EPS+CV_TERMCRIT_ITER,30,0.1));
-      image_points_seq.push_back(image_points_buf); //保存亚像素角点
-      /* 在图像上显示角点位置 */
-      cv::drawChessboardCorners(view_gray, board_size, image_points_buf,
-                                false); //用于在图片中标记角点
-      cv::imwrite("输出/SingleClib/point/" + std::to_string(i) + ".jpg",
+      cornerSubPix(
+          view_gray, image_points_buf, cv::Size(5, 5), cv::Size(-1, -1),
+          cv::TermCriteria(cv::TermCriteria::EPS + cv::TermCriteria::COUNT, 30,
+                           0.1));
+      image_points_seq.push_back(image_points_buf);
+      cv::drawChessboardCorners(view_gray, board_size, image_points_buf, false);
+      cv::imwrite("./output/SingleClib/point/" + std::to_string(i) + ".jpg",
                   view_gray);
-      // imshow("Camera Calibration", view_gray);//显示图片
-      // waitKey(500);//暂停0.5S
+      imshow("Camera Calibration", view_gray);
+      cv::waitKey(500);
     }
   }
-  int total = image_points_seq.size();
-  std::cout << "total = " << total << std::endl;
-  int CornerNum = board_size.width * board_size.height; //每张图片上总的角点数
-  for (int ii = 0; ii < total; ii++) {
-    if (0 == ii % CornerNum) // 24 是每幅图片的角点个数。此判断语句是为了输出
-                             // 图片号，便于控制台观看
-    {
-      int i = -1;
-      i = ii / CornerNum;
-      int j = i + 1;
-      std::cout << "--> 第 " << j << "图片的数据 --> : " << std::endl;
-    }
-    if (0 == ii % 3) // 此判断语句，格式化输出，便于控制台查看
-    {
-      std::cout << std::endl;
-    } else {
-      std::cout.width(10);
-    }
-    //输出所有的角点
-    std::cout << " -->" << image_points_seq[ii][0].x;
-    std::cout << " -->" << image_points_seq[ii][0].y;
-  }
-  std::cout << "角点提取完成！\n";
 
-  //以下是摄像机标定
-  std::cout << "开始标定………………";
-  /*棋盘三维信息*/
+  int total = image_points_seq.size();
+  std::cout << "image total = " << total << std::endl;
+
+  std::cout << "single camera calibration";
   cv::Size square_size =
       cv::Size(10, 10); /* 实际测量得到的标定板上每个棋盘格的大小 */
-  std::vector<std::vector<cv::Point3f>> object_points; /* 保存标定板上角点的三维坐标 */
+  std::vector<std::vector<cv::Point3f>>
+      object_points; /* 保存标定板上角点的三维坐标 */
   /*内外参数*/
   cv::Mat cameraMatrix =
       cv::Mat(3, 3, CV_32FC1, cv::Scalar::all(0)); /* 摄像机内参数矩阵 */
-  std::vector<int> point_counts;               // 每幅图像中角点的数量
+  std::vector<int> point_counts; // 每幅图像中角点的数量
   cv::Mat distCoeffs =
       cv::Mat(1, 5, CV_32FC1,
               cv::Scalar::all(0)); /* 摄像机的5个畸变系数：k1,k2,p1,p2,k3 */
@@ -123,14 +94,15 @@ void MonocularCameraCalib::SingleCalibrate(std::string intrinsic_filename,
   /* 开始标定 */
   cv::calibrateCamera(object_points, image_points_seq, image_size, cameraMatrix,
                       distCoeffs, rvecsMat, tvecsMat, 0);
-  std::cout << "标定完成！\n";
+  std::cout << "finish camera calibration\n";
+  std::cout << "cameraMatrix:\n" << cameraMatrix << std::endl;
+  std::cout << "distCoeffs:\n" << distCoeffs << std::endl;
   //对标定结果进行评价
-  std::cout << "开始评价标定结果………………\n";
+  std::cout << "eval calib result………………\n";
   double total_err = 0.0; /* 所有图像的平均误差的总和 */
   double err = 0.0;       /* 每幅图像的平均误差 */
   std::vector<cv::Point2f> image_points2; /* 保存重新计算得到的投影点 */
-  std::cout << "\t每幅图像的标定误差: \n";
-  std::cout << "每幅图像的标定误差：\n";
+
   for (i = 0; i < image_count; i++) {
     std::vector<cv::Point3f> tempPointSet = object_points[i];
     /* 通过得到的摄像机内外参数，对空间的三维点进行重新投影计算，得到新的投影点
@@ -149,36 +121,10 @@ void MonocularCameraCalib::SingleCalibrate(std::string intrinsic_filename,
     }
     err = cv::norm(image_points2Mat, tempImagePointMat, cv::NORM_L2);
     total_err += err /= point_counts[i];
-    std::cout << "第" << i + 1 << "幅图像的平均误差：" << err << "像素"
-              << std::endl;
-    std::cout << "第" << i + 1 << "幅图像的平均误差：" << err << "像素"
-              << std::endl;
   }
   std::cout << "总体平均误差：" << total_err / image_count << "像素"
             << std::endl;
-  fout << "总体平均误差：" << total_err / image_count << "像素" << std::endl
-       << std::endl;
-  std::cout << "评价完成！" << std::endl;
-  //保存定标结果
-  std::cout << "开始保存定标结果………………" << std::endl;
-  cv::Mat rotation_matrix = cv::Mat(
-      3, 3, CV_32FC1, cv::Scalar::all(0)); /* 保存每幅图像的旋转矩阵 */
-  fout << "相机内参数矩阵：" << std::endl;
-  fout << cameraMatrix << std::endl << std::endl;
-  fout << "畸变系数：\n";
-  fout << distCoeffs << std::endl << std::endl << std::endl;
-  for (int i = 0; i < image_count; i++) {
-    fout << "第" << i + 1 << "幅图像的旋转向量：" << std::endl;
-    fout << tvecsMat[i] << std::endl;
-    /* 将旋转向量转换为相对应的旋转矩阵 */
-    cv::Rodrigues(tvecsMat[i], rotation_matrix);
-    fout << "第" << i + 1 << "幅图像的旋转矩阵：" << std::endl;
-    fout << rotation_matrix << std::endl;
-    fout << "第" << i + 1 << "幅图像的平移向量：" << std::endl;
-    fout << rvecsMat[i] << std::endl << std::endl;
-  }
-  std::cout << "完成保存" << std::endl;
-  fout << std::endl;
+
   /************************************************************************
   显示定标结果
   *************************************************************************/
@@ -189,41 +135,28 @@ void MonocularCameraCalib::SingleCalibrate(std::string intrinsic_filename,
   std::string imageFileName;
   std::stringstream StrStm;
   for (int i = 0; i != image_count; i++) {
-    std::cout << "Frame #" << i + 1 << "..." << std::endl;
     cv::initUndistortRectifyMap(cameraMatrix, distCoeffs, R, cameraMatrix,
                                 image_size, CV_32FC1, mapx, mapy);
     StrStm.clear();
-    // imageFileName.clear();
-    // string filePath = "chess";
-    // StrStm << i + 1;
-    // StrStm >> imageFileName;
-    // filePath += imageFileName;
-    // filePath += ".bmp";
-    // cv::Mat imageSource = cv::imread(filePath);
+
     cv::Mat imageSource = cv::imread(fileList[i]);
     cv::Mat newimage = imageSource.clone();
     //另一种不需要转换矩阵的方式
     // undistort(imageSource,newimage,cameraMatrix,distCoeffs);
     cv::remap(imageSource, newimage, mapx, mapy, cv::INTER_LINEAR);
-    // StrStm.clear();
-    // filePath.clear();
-    // StrStm << i + 1;
-    // StrStm >> imageFileName;
-    // imageFileName += "_d.jpg";
-    cv::imwrite("输出/SingleClib/correct/" + std::to_string(i) + ".jpg", newimage);
-    // imwrite(imageFileName, newimage);
+    cv::imwrite("./left_remap_" + std::to_string(i) + ".jpg", newimage);
   }
-  std::cout << "保存结束" << std::endl;
   return;
 }
 
-void MonocularCameraCalib::InitFileList(std::string path, std::vector<std::string> &files) {
+void MonocularCameraCalib::InitFileList(std::string path,
+                                        std::vector<std::string> &files) {
   DIR *pDir;
-  struct dirent* ptr;
-  if(!(pDir = opendir(path.c_str())))
-      return;
-  while((ptr = readdir(pDir))!=0) {
-      if (strcmp(ptr->d_name, ".") != 0 && strcmp(ptr->d_name, "..") != 0)
+  struct dirent *ptr;
+  if (!(pDir = opendir(path.c_str())))
+    return;
+  while ((ptr = readdir(pDir)) != 0) {
+    if (strcmp(ptr->d_name, ".") != 0 && strcmp(ptr->d_name, "..") != 0)
       files.push_back(path + "/" + ptr->d_name);
   }
   closedir(pDir);

@@ -1,11 +1,11 @@
-#include <opencv2/opencv.hpp>
-#include <opencv2/calib3d/calib3d.hpp>
+#include "stereo_calibration/stereo_calibration.h"
 #include <opencv2/calib3d.hpp>
+#include <opencv2/calib3d/calib3d.hpp>
 #include <opencv2/core/core.hpp>
 #include <opencv2/features2d/features2d.hpp>
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
-#include "stereo_calibration/stereo_calibration.h"
+#include <opencv2/opencv.hpp>
 
 using namespace std;
 using namespace cv;
@@ -166,7 +166,7 @@ int StereoCalib::stereoCalibrate(string intrinsic_filename,
     resize(leftImg, leftSimg, Size(), imgScale, imgScale); //图像以0.5的比例缩放
     resize(rightImg, rightSimg, Size(), imgScale, imgScale);
     cvtColor(leftSimg, leftCimg,
-      COLOR_BGR2GRAY); //转为BGR图像，cimg和simg是800*600的图像
+             COLOR_BGR2GRAY); //转为BGR图像，cimg和simg是800*600的图像
     cvtColor(rightSimg, rightCimg, COLOR_BGR2GRAY);
 
     //寻找棋盘角点
@@ -178,12 +178,13 @@ int StereoCalib::stereoCalibrate(string intrinsic_filename,
                                                 cv::CALIB_CB_FILTER_QUADS);
 
     if (leftFound)
-      cornerSubPix(leftSimg, leftPts, Size(11, 11), Size(-1, -1),
-                   TermCriteria(TermCriteria::COUNT + TermCriteria::EPS, 300, 0.01));
-    if (rightFound)
       cornerSubPix(
-          rightSimg, rightPts, Size(11, 11), Size(-1, -1),
-          TermCriteria(TermCriteria::COUNT + TermCriteria::EPS, 300, 0.01)); //亚像素
+          leftSimg, leftPts, Size(11, 11), Size(-1, -1),
+          TermCriteria(TermCriteria::COUNT + TermCriteria::EPS, 300, 0.01));
+    if (rightFound)
+      cornerSubPix(rightSimg, rightPts, Size(11, 11), Size(-1, -1),
+                   TermCriteria(TermCriteria::COUNT + TermCriteria::EPS, 300,
+                                0.01)); //亚像素
 
     //放大为原来的尺度
     for (uint j = 0; j < leftPts.size();
@@ -425,7 +426,7 @@ int StereoCalib::stereoMatch(int picNum, string intrinsic_filename,
   img2 = img2r;
 
   // 初始化 stereoBMstate 结构体
-  cv::Ptr<cv::StereoBM> bm = cv::StereoBM::create(16,9);
+  cv::Ptr<cv::StereoBM> bm = cv::StereoBM::create(16, 9);
 
   // bm->setPreFilterType(CV_STEREO_BM_NORMALIZED_RESPONSE);
   bm->setPreFilterSize(9);
@@ -450,7 +451,8 @@ int StereoCalib::stereoMatch(int picNum, string intrinsic_filename,
   // bm.state->numberOfDisparities =
   //     numberOfDisparities; // 在该数值确定的视差范围内进行搜索
   // bm.state->textureThreshold =
-  //     1000; // 10                                  // 保证有足够的纹理以克服噪声
+  //     1000; // 10                                  //
+  //     保证有足够的纹理以克服噪声
   // bm.state->uniquenessRatio =
   //     1; // 10                               // !!使用匹配功能模式
   // bm.state->speckleWindowSize =
@@ -458,7 +460,8 @@ int StereoCalib::stereoMatch(int picNum, string intrinsic_filename,
   //          // 检查视差连通区域变化度的窗口大小, 值为 0 时取消 speckle 检查
   // bm.state->speckleRange =
   //     32; // 32                                  //
-  //         // 视差变化阈值，当窗口内视差变化大于阈值时，该窗口内的视差清零，int
+  //         //
+  //         视差变化阈值，当窗口内视差变化大于阈值时，该窗口内的视差清零，int
   //         // 型
   // bm.state->disp12MaxDiff = -1;
 

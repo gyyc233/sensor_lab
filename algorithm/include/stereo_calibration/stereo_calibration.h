@@ -4,9 +4,9 @@
 #include <iostream>
 #include <iterator>
 #include <list>
+#include <opencv2/opencv.hpp>
 #include <string>
 #include <vector>
-#include <opencv2/opencv.hpp>
 
 namespace Algorithm {
 using namespace std;
