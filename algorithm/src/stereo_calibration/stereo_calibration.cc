@@ -554,6 +554,7 @@ void StereoCalib::stereoDemo(string left_img_dir, string right_img_dir) {
       point[1] = y * depth;
       point[2] = depth;
 
+      // 视差图不能直接用到点云上，至少要转为深度图，再转点云
       pointXYZRGB.x = static_cast<float>(point[0]);
       pointXYZRGB.y = static_cast<float>(point[1]);
       pointXYZRGB.z = static_cast<float>(point[2]);
