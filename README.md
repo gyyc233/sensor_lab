@@ -70,8 +70,9 @@ this module summarizes some methods for tradition image process and curve fit
 - least square polynomial curve fit and move least square
 - cubic spline interpolation curve fit
 - thin plate spline
+- stereo match and 3D point cloud reconstruction
 
-**image undistortion result**
+**stereo match and 3D reconstruction**
 
 ![](./support_files/image/algorithm/img1.png)
 

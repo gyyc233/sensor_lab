@@ -68,8 +68,9 @@ sudo apt install ros-noetic-cv-bridge ros-noetic-image-transport ros-noetic-rosc
 - 最小二乘多项式曲线拟合与移动最小二乘拟合
 - 三次样条曲线插值
 - 薄板样条插值
+- 双目相机标定与视差图转点云
 
-**图像去畸变**
+**双目相机标定与视差图转点云，要求要有足够的纹理**
 
 ![](./support_files/image/algorithm/img1.png)
 
