@@ -25,11 +25,9 @@ public:
   /// @param no_display
   /// @param point_cloud_filename
   /// @return
-  int stereoMatch(int picNum, string intrinsic_filename,
+  int stereoMatch(string left_right_images, string intrinsic_filename,
                   string extrinsic_filename, bool no_display,
                   string point_cloud_filename);
-
-  void stereoDemo(string left_img_dir, string right_img_dir);
 
 private:
   /// @brief 生成点云后保存
@@ -49,8 +47,8 @@ private:
   void cvMatToPcl(cv::Mat &mat);
 
   cv::Size img_size;
-  cv::Size pat_size; //每张棋盘寻找的角点个数是7*6个
-  const double patLen = 30.0f; // unit: mm  标定板每个格的宽度（金属标定板）
+  cv::Size pat_size; //每张棋盘寻找的角点个数是7*10个
+  const double patLen = 20.0f; // unit: mm  标定板每个格的宽度（金属标定板）
   double imgScale = 1.0; //图像缩放的比例因子
   //将要读取的图片路径存储在fileList中
   vector<string> fileList;

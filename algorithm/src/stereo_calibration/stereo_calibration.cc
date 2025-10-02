@@ -9,7 +9,6 @@
 
 #include "eigen_type/eigen_types.h"
 #include <pcl/io/pcd_io.h>
-#include <pcl/io/ply_io.h>
 #include <pcl/point_cloud.h>
 #include <pcl/point_types.h>
 
@@ -22,7 +21,7 @@ namespace Algorithm {
 void StereoCalib::initFileList(string dir, int first, int last) {
   fileList.clear();
   for (int cur = first; cur <= last; cur++) {
-    string str_file = dir + "/" + to_string(cur) + ".jpg";
+    string str_file = dir + "/" + "IMG_000" + to_string(cur) + ".jpg";
     fileList.push_back(str_file);
   }
   std::cout << "image files num: " << fileList.size() << std::endl;
@@ -50,7 +49,7 @@ void StereoCalib::cvMatToPcl(cv::Mat &mat) {
   int num_points = cloud->points.size();
   cloud->height = 1;
   cloud->width = num_points;
-  pcl::io::savePLYFileASCII("./stereo.ply", *cloud);
+  pcl::io::savePCDFileASCII("./stereo.pcd", *cloud);
   return;
 }
 
@@ -90,7 +89,6 @@ void StereoCalib::saveDisp(const string filename, const Mat &mat) {
 
 void StereoCalib::F_Gray2Color(Mat gray_mat, Mat &color_mat) {
   color_mat = Mat::zeros(gray_mat.size(), CV_8UC3);
-  int rows = color_mat.rows, cols = color_mat.cols;
 
   Mat red = Mat(gray_mat.rows, gray_mat.cols, CV_8U);
   Mat green = Mat(gray_mat.rows, gray_mat.cols, CV_8U);
@@ -132,15 +130,15 @@ Mat StereoCalib::F_mergeImg(Mat img1, Mat disp8) {
 int StereoCalib::stereoCalibrate(string intrinsic_filename,
                                  string extrinsic_filename) {
   img_size = cv::Size(640, 480);
-  pat_size = cv::Size(7, 6); //每张棋盘寻找的角点个数是7*6个
+  pat_size = cv::Size(7, 10); //每张棋盘寻找的角点个数是7*6个
   vector<int> idx;
   //左侧相机的角点坐标和右侧相机的角点坐标
   vector<vector<Point2f>> imagePoints[2];
 
   for (uint i = 0; i < fileList.size(); ++i) {
     vector<Point2f> leftPts, rightPts; // 存储左右相机的角点位置
-    Mat rawImg = imread(fileList[i]);  //原始图像
-    if (rawImg.empty()) {
+    Mat raw_img = imread(fileList[i]); //原始图像
+    if (raw_img.empty()) {
       std::cout << "the Image is empty..." << fileList[i] << endl;
       continue;
     }
@@ -148,12 +146,12 @@ int StereoCalib::stereoCalibrate(string intrinsic_filename,
     Rect leftRect(0, 0, img_size.width, img_size.height);
     Rect rightRect(img_size.width, 0, img_size.width, img_size.height);
 
-    Mat leftRawImg = rawImg(leftRect);   //切分得到的左原始图像
-    Mat rightRawImg = rawImg(rightRect); //切分得到的右原始图像
+    Mat leftRawImg = raw_img(leftRect);   //切分得到的左原始图像
+    Mat rightRawImg = raw_img(rightRect); //切分得到的右原始图像
 
     Mat leftImg, rightImg, leftSimg, rightSimg, leftCimg, rightCimg, leftMask,
         rightMask;
-    // BGT -> GRAY
+    // BGR -> GRAY
     if (leftRawImg.type() == CV_8UC3)
       cvtColor(leftRawImg, leftImg, COLOR_BGR2GRAY); //转为灰度图
     else
@@ -181,10 +179,10 @@ int StereoCalib::stereoCalibrate(string intrinsic_filename,
 
     if (leftFound)
       cornerSubPix(
-          leftImg, leftPts, Size(11, 11), Size(-1, -1),
+          leftImg, leftPts, Size(3, 3), Size(-1, -1),
           TermCriteria(TermCriteria::COUNT + TermCriteria::EPS, 300, 0.01));
     if (rightFound)
-      cornerSubPix(rightImg, rightPts, Size(11, 11), Size(-1, -1),
+      cornerSubPix(rightImg, rightPts, Size(3, 3), Size(-1, -1),
                    TermCriteria(TermCriteria::COUNT + TermCriteria::EPS, 300,
                                 0.01)); //亚像素
 
@@ -291,6 +289,17 @@ int StereoCalib::stereoCalibrate(string intrinsic_filename,
             << "Right Camera DistCoeffs: " << endl
             << distCoeffs[1] << endl;
 
+  std::cout << endl << "cameras rotation Matrix: " << endl << R << endl;
+  std::cout << endl << "cameras translation Matrix: " << endl << T << endl;
+
+  std::cout << "base line: " << endl;
+  std::cout << sqrt(pow(T.at<float>(0, 0), 2) + pow(T.at<float>(1, 0), 2) +
+                    pow(T.at<float>(2, 0), 2))
+            << std::endl;
+
+  std::cout << endl << "E: " << endl << E << endl;
+  std::cout << endl << "F" << endl << F << endl;
+
   // 标定精度检测
   // 通过检查图像上点与另一幅图像的极线的距离来评价标定的精度。为了实现这个目的，使用
   // undistortPoints 来对原始点做去畸变的处理 随后使用 computeCorrespondEpilines
@@ -354,22 +363,33 @@ int StereoCalib::stereoCalibrate(string intrinsic_filename,
   return 0;
 }
 
-int StereoCalib::stereoMatch(int picNum, string intrinsic_filename,
+int StereoCalib::stereoMatch(string left_right_images,
+                             string intrinsic_filename,
                              string extrinsic_filename, bool no_display,
                              string point_cloud_filename) {
   //获取待处理的左右相机图像
-  int color_mode = 0;
-  Mat rawImg = imread(fileList[picNum], color_mode); //待处理图像  grayScale
-  if (rawImg.empty()) {
+  Mat raw_img_rgb = imread(left_right_images);
+  if (raw_img_rgb.empty()) {
     std::cout << "In Function stereoMatch, the Image is empty..." << endl;
     return 0;
   }
+  img_size.width = raw_img_rgb.cols / 2;
+  img_size.height = raw_img_rgb.rows;
+  Rect bgr_leftRect(0, 0, img_size.width, img_size.height);
+  Mat img_left_bgr = raw_img_rgb(bgr_leftRect);
+
+  Mat raw_img;
+  if (raw_img_rgb.type() == CV_8UC3)
+    cvtColor(raw_img_rgb, raw_img, COLOR_BGR2GRAY); //转为灰度图
+  else
+    raw_img = raw_img_rgb.clone();
+
   //截取
   Rect leftRect(0, 0, img_size.width, img_size.height);
   Rect rightRect(img_size.width, 0, img_size.width, img_size.height);
-  Mat img1 = rawImg(leftRect);  //切分得到的左原始图像
-  Mat img2 = rawImg(rightRect); //切分得到的右原始图像
-                                //图像根据比例缩放
+  Mat img1 = raw_img(leftRect);  //切分得到的左原始图像
+  Mat img2 = raw_img(rightRect); //切分得到的右原始图像
+                                 //图像根据比例缩放
   if (imgScale != 1.f) {
     Mat temp1, temp2;
     int method = imgScale < 1 ? INTER_AREA : INTER_CUBIC;
@@ -378,8 +398,8 @@ int StereoCalib::stereoMatch(int picNum, string intrinsic_filename,
     resize(img2, temp2, Size(), imgScale, imgScale, method);
     img2 = temp2;
   }
-  imwrite("./stereo_Match_origin_left.jpg", img1);
-  imwrite("./stereo_Match_origin_right.jpg", img2);
+  // imwrite("./stereo_Match_origin_left.jpg", img1);
+  // imwrite("./stereo_Match_origin_right.jpg", img2);
 
   Size img_size = img1.size();
 
@@ -409,7 +429,7 @@ int StereoCalib::stereoMatch(int picNum, string intrinsic_filename,
   Rect roi1, roi2;
   Mat Q;
   Mat R, T, R1, P1, R2, P2;
-  fs["R"] >> R;
+  fs["R"] >> R; // 左右相继的旋转与平移矩阵
   fs["T"] >> T;
 
   // Alpha取值为-1时，OpenCV自动进行缩放和平移
@@ -425,6 +445,19 @@ int StereoCalib::stereoMatch(int picNum, string intrinsic_filename,
   Mat img1r, img2r;
   remap(img1, img1r, map11, map12, INTER_LINEAR);
   remap(img2, img2r, map21, map22, INTER_LINEAR);
+  Mat img_left_bgr_r;
+  remap(img_left_bgr, img_left_bgr_r, map11, map12, INTER_LINEAR);
+
+  //比较校正前后图像
+  cv::Mat res, ori;
+  cv::hconcat(img1r, img2r, res);
+  cv::hconcat(img1, img2, ori);
+
+  for (int i = 0; i < 38; ++i) {
+    cv::line(res, cv::Point(0, 30 * i), cv::Point(1280, 30 * i), cv::Scalar(0));
+    cv::line(ori, cv::Point(0, 30 * i), cv::Point(1280, 30 * i), cv::Scalar(0));
+  }
+
   img1 = img1r;
   img2 = img2r;
 
@@ -435,158 +468,68 @@ int StereoCalib::stereoMatch(int picNum, string intrinsic_filename,
   bm->setPreFilterSize(9);
   bm->setPreFilterCap(31);
   bm->setBlockSize(21);
-  bm->setMinDisparity(-16);
+  bm->setMinDisparity(-8);
   bm->setNumDisparities(64);
-  bm->setTextureThreshold(10);
+  bm->setTextureThreshold(5);
   bm->setUniquenessRatio(5);
   bm->setSpeckleWindowSize(100);
   bm->setSpeckleRange(32);
   bm->setROI1(roi1);
   bm->setROI2(roi2);
 
-  // int unitDisparity = 15; // 40
-  // int numberOfDisparities = unitDisparity * 16;
-  // bm.state->roi1 = roi1;
-  // bm.state->roi2 = roi2;
-  // bm.state->preFilterCap = 13;
-  // bm.state->SADWindowSize = 19; // 窗口大小
-  // bm.state->minDisparity = 0; // 确定匹配搜索从哪里开始  默认值是0
-  // bm.state->numberOfDisparities =
-  //     numberOfDisparities; // 在该数值确定的视差范围内进行搜索
-  // bm.state->textureThreshold =
-  //     1000; // 10                                  //
-  //     保证有足够的纹理以克服噪声
-  // bm.state->uniquenessRatio =
-  //     1; // 10                               // !!使用匹配功能模式
-  // bm.state->speckleWindowSize =
-  //     200; // 13                             //
-  //          // 检查视差连通区域变化度的窗口大小, 值为 0 时取消 speckle 检查
-  // bm.state->speckleRange =
-  //     32; // 32                                  //
-  //         //
-  //         视差变化阈值，当窗口内视差变化大于阈值时，该窗口内的视差清零，int
-  //         // 型
-  // bm.state->disp12MaxDiff = -1;
-
-  // 计算
-  Mat disp, disp8;
+  // 计算视差
+  Mat disp, disparity;
   int64 t = getTickCount();
   bm->compute(img1, img2, disp);
   t = getTickCount() - t;
-  printf("立体匹配耗时: %fms\n", t * 1000 / getTickFrequency());
+  printf("stereo match cost: %fms\n", t * 1000 / getTickFrequency());
 
-  // 将16位符号整形的视差矩阵转换为8位无符号整形矩阵
-  disp.convertTo(disp8, CV_8U, 255 / (15 * 16.));
+  // 将16位符号整形的视差矩阵转换为32
+  disp.convertTo(disparity, CV_32F, 1.0 / 16.0f);
 
-  // 视差图转为彩色图
-  Mat vdispRGB = disp8;
-  F_Gray2Color(disp8, vdispRGB);
-  // 将左侧矫正图像与视差图融合
-  Mat merge_mat = F_mergeImg(img1, disp8);
-
-  saveDisp("输出/视差数据.txt", disp);
-
-  //显示
-  if (!no_display) {
-    imshow("左侧矫正图像", img1);
-    imwrite("输出/left_undistortRectify.jpg", img1);
-    imshow("右侧矫正图像", img2);
-    imwrite("输出/right_undistortRectify.jpg", img2);
-    imshow("视差图", disp8);
-    imwrite("输出/视差图.jpg", disp8);
-    imshow("视差图_彩色.jpg", vdispRGB);
-    imwrite("输出/视差图_彩色.jpg", vdispRGB);
-    imshow("左矫正图像与视差图合并图像", merge_mat);
-    imwrite("输出/左矫正图像与视差图合并图像.jpg", merge_mat);
-    cv::waitKey();
-    std::cout << endl;
-  }
-  cv::destroyAllWindows();
-
-  // 视差图转为深度图
-  cout << endl << "计算深度映射... " << endl;
-  Mat xyz;
-  reprojectImageTo3D(disp, xyz, Q, true); //获得深度图  disp: 720*1280
-  cv::destroyAllWindows();
-  cout << endl << "保存点云坐标... " << endl;
-  saveXYZ(point_cloud_filename, xyz);
-  cvMatToPcl(xyz);
-
-  cout << endl << endl << "结束" << endl << "Press any key to end... ";
-
-  getchar();
-  return 0;
-}
-
-void StereoCalib::stereoDemo(string left_img_dir, string right_img_dir) {
-  // 内参
-  double fx = 718.856, fy = 718.856, cx = 607.1928, cy = 185.2157;
-  // 基线
-  double b = 0.573;
-
-  // 读取图像
-  cv::Mat left = cv::imread(left_img_dir, 0);
-  cv::Mat right = cv::imread(right_img_dir, 0);
-  cv::Ptr<cv::StereoSGBM> sgbm = cv::StereoSGBM::create(
-      0, 96, 9, 8 * 9 * 9, 32 * 9 * 9, 1, 63, 10, 100, 32); // 神奇的参数
-  cv::Mat disparity_sgbm, disparity;
-  sgbm->compute(left, right, disparity_sgbm);
-  disparity_sgbm.convertTo(disparity, CV_32F, 1.0 / 16.0f);
-
-  std::vector<Eigen::Vector4d, Eigen::aligned_allocator<Eigen::Vector4d>>
-      pointcloud;
+  cout << endl << "save point cloud... " << endl;
   pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud(
       new pcl::PointCloud<pcl::PointXYZRGB>);
 
-  for (int v = 0; v < left.rows; v++) {
-    for (int u = 0; u < left.cols; u++) {
-      if (disparity.at<float>(v, u) <= 0.0 || disparity.at<float>(v, u) >= 96.0)
+  for (int v = 0; v < img1.rows; v++) {
+    for (int u = 0; u < img1.cols; u++) {
+      if (disparity.at<float>(v, u) <= 0.0 ||
+          disparity.at<float>(v, u) >= 100.0)
         continue;
 
-      Eigen::Vector4d point(
-          0, 0, 0, left.at<uchar>(v, u) / 255.0); // 前三维为xyz,第四维为颜色
+      Eigen::Vector3d point(0, 0, 0);
       pcl::PointXYZRGB pointXYZRGB;
       // 根据双目模型计算 point 的位置
-      double x = (u - cx) / fx;
-      double y = (v - cy) / fy;
-      double depth = fx * b / (disparity.at<float>(v, u));
-      point[0] = x * depth;
-      point[1] = y * depth;
-      point[2] = depth;
+      double x = (u - M1.at<double>(0, 2)) / M1.at<double>(0, 0);
+      double y = (v - M1.at<double>(1, 2)) / M1.at<double>(1, 1);
+      double depth = M1.at<double>(0, 0) * 59.78 /
+                     (disparity.at<float>(v, u)); // 视差与深度的关系
+      point[0] = x * depth * 0.001;
+      point[1] = y * depth * 0.001;
+      point[2] = depth * 0.001;
 
-      // 视差图不能直接用到点云上，至少要转为深度图，再转点云
+      if (point[2] > 1.2)
+        continue;
+
       pointXYZRGB.x = static_cast<float>(point[0]);
       pointXYZRGB.y = static_cast<float>(point[1]);
       pointXYZRGB.z = static_cast<float>(point[2]);
-      pointXYZRGB.r = static_cast<float>(point[3]);
-      pointXYZRGB.g = static_cast<float>(point[3]);
-      pointXYZRGB.b = static_cast<float>(point[3]);
+      pointXYZRGB.b = img_left_bgr_r.at<cv::Vec3b>(v, u)[0];
+      pointXYZRGB.g = img_left_bgr_r.at<cv::Vec3b>(v, u)[1];
+      pointXYZRGB.r = img_left_bgr_r.at<cv::Vec3b>(v, u)[2];
 
-      pointcloud.push_back(point);
       cloud->push_back(pointXYZRGB);
     }
   }
 
+  // remove outliers
+  // voxel filtering
+
   int num_points = cloud->points.size();
   cloud->height = 1;
   cloud->width = num_points;
-  pcl::io::savePLYFileASCII("./stereo_demo.ply", *cloud);
+  pcl::io::savePCDFileASCII("./stereo_demo.pcd", *cloud);
 
-  cv::imshow("disparity", disparity / 96.0);
-  cv::waitKey(0);
+  return 0;
 }
-
-// string intrinsic_filename = "intrinsics.yml";
-// string extrinsic_filename = "extrinsics.yml";
-// string point_cloud_filename = "输出/point3D.txt";
-
-// /* 立体标定 运行一次即可 */
-// initFileList("calib_pic", 1, 26);
-// stereoCalibrate(intrinsic_filename, extrinsic_filename);
-
-// /* 立体匹配 */
-// initFileList("test_pic", 1, 2);
-// stereoMatch(0, intrinsic_filename, extrinsic_filename, false,
-// point_cloud_filename);
-
 } // namespace Algorithm
