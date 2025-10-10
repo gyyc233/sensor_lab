@@ -401,7 +401,7 @@ int StereoCalib::stereoMatch(string left_right_images,
   // imwrite("./stereo_Match_origin_left.jpg", img1);
   // imwrite("./stereo_Match_origin_right.jpg", img2);
 
-  Size img_size = img1.size();
+  img_size = img1.size();
 
   // reading intrinsic parameters
   FileStorage fs(intrinsic_filename, FileStorage::READ);
