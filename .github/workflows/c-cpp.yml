@@ -28,5 +28,5 @@ jobs:
       run: make -j8
       working-directory: ./build/
     - name: execution 1
-      run: ./algorithm/least_square_polynomial_curve_fit_test
+      run: ./cpp_test/bind_function_test
       working-directory: ./build/
